@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, nextTick, PropType, ref, unref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, PropType, ref, unref, watch } from 'vue'
 import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import { cloneDeep } from 'lodash-es'
 import { propTypes } from '@/utils/propTypes'
@@ -35,7 +35,8 @@ const props = defineProps({
   disabledText: propTypes.string.def('')
 })
 
-const emit = defineEmits(['done', 'click', 'disabled-click'])
+// error：编码失败、logo 加载失败或 canvas 无法导出时触发
+const emit = defineEmits(['done', 'click', 'disabled-click', 'error'])
 
 const { getPrefixCls } = useDesign()
 
@@ -56,44 +57,98 @@ const wrapStyle = computed(() => {
   }
 })
 
-const initQrcode = async () => {
-  await nextTick()
-  const options = cloneDeep(props.options || {})
-  if (props.tag === 'canvas') {
-    // 容错率，默认对内容少的二维码采用高容错率，内容多的二维码采用低容错率
-    options.errorCorrectionLevel =
-      options.errorCorrectionLevel || getErrorCorrectionLevel(unref(renderText))
-    const _width: number = await getOriginWidth(unref(renderText), options)
-    options.scale = props.width === 0 ? undefined : (props.width / _width) * 4
-    const canvasRef: HTMLCanvasElement | any = await toCanvas(
-      unref(wrapRef) as HTMLCanvasElement,
-      unref(renderText),
-      options
-    )
-    if (props.logo) {
-      const url = await createLogoCode(canvasRef)
-      emit('done', url)
-      loading.value = false
-    } else {
-      emit('done', canvasRef.toDataURL())
-      loading.value = false
-    }
+// 渲染代次：内容或配置快速变化时，只有最新一次渲染可提交画面、触发 done / error 并结束 loading
+let renderId = 0
+let isUnmounted = false
+// 取消加载中的 logo（解绑图片回调）
+let cancelLogo: (() => void) | undefined
+
+// 将离屏 canvas 的画面与尺寸提交到页面 canvas
+const commitCanvas = (source: HTMLCanvasElement, target: HTMLCanvasElement) => {
+  target.width = source.width
+  target.height = source.height
+  target.style.width = source.style.width
+  target.style.height = source.style.height
+  target.getContext('2d')?.drawImage(source, 0, 0)
+}
+
+// 清空已显示的二维码（canvas 画面、img 地址）
+const clearQrcode = () => {
+  const target = unref(wrapRef)
+  if (!target) return
+  if (target instanceof HTMLCanvasElement) {
+    target.getContext('2d')?.clearRect(0, 0, target.width, target.height)
   } else {
-    const url = await toDataURL(renderText.value, {
-      errorCorrectionLevel: 'H',
-      width: props.width,
-      ...options
-    })
-    ;(unref(wrapRef) as HTMLImageElement).src = url
-    emit('done', url)
-    loading.value = false
+    target.removeAttribute('src')
   }
 }
 
+const initQrcode = async () => {
+  const id = ++renderId
+  cancelLogo?.()
+  const isStale = () => isUnmounted || id !== renderId
+  // 空文本：同样作废之前的渲染与加载中的 logo，结束 loading 并清空旧画面，不触发 done
+  if (!renderText.value) {
+    loading.value = false
+    await nextTick()
+    if (!isStale()) clearQrcode()
+    return
+  }
+  loading.value = true
+  try {
+    await nextTick()
+    if (isStale()) return
+    const options = cloneDeep(props.options || {})
+    if (props.tag === 'canvas') {
+      // 容错率，默认对内容少的二维码采用高容错率，内容多的二维码采用低容错率
+      options.errorCorrectionLevel =
+        options.errorCorrectionLevel || getErrorCorrectionLevel(unref(renderText))
+      const _width: number = await getOriginWidth(unref(renderText), options)
+      if (isStale()) return
+      options.scale = props.width === 0 ? undefined : (props.width / _width) * 4
+      // 先绘制到离屏 canvas，确认仍是最新一次渲染后再提交到页面，避免旧渲染覆盖新画面
+      let canvasRef = document.createElement('canvas')
+      await toCanvas(canvasRef, unref(renderText), options)
+      if (isStale()) return
+      if (props.logo) {
+        try {
+          canvasRef = await createLogoCode(canvasRef, isStale)
+        } catch (error) {
+          // logo 加载失败：提示错误，仍展示不带 logo 的二维码
+          if (isStale()) return
+          emit('error', error)
+        }
+        if (isStale()) return
+      }
+      const target = unref(wrapRef) as HTMLCanvasElement | null
+      if (!target) return
+      commitCanvas(canvasRef, target)
+      // 跨域 logo 污染 canvas 时 toDataURL 会抛出异常，由下方 catch 触发 error
+      emit('done', canvasRef.toDataURL())
+    } else {
+      const url = await toDataURL(renderText.value, {
+        errorCorrectionLevel: 'H',
+        width: props.width,
+        ...options
+      })
+      if (isStale()) return
+      const target = unref(wrapRef) as HTMLImageElement | null
+      if (!target) return
+      target.src = url
+      emit('done', url)
+    }
+  } catch (error) {
+    // 编码失败等：不触发 done
+    if (!isStale()) emit('error', error)
+  } finally {
+    if (!isStale()) loading.value = false
+  }
+}
+
+// 内容、宽度、配置、logo、标签变化时重新绘制
 watch(
-  () => renderText.value,
-  (val) => {
-    if (!val) return
+  () => [renderText.value, props.width, props.options, props.logo, props.tag],
+  () => {
     initQrcode()
   },
   {
@@ -102,7 +157,22 @@ watch(
   }
 )
 
-const createLogoCode = (canvasRef: HTMLCanvasElement) => {
+onBeforeUnmount(() => {
+  isUnmounted = true
+  renderId++
+  cancelLogo?.()
+})
+
+// 在二维码副本上绘制 logo：logo 加载失败时，调用方仍可使用不带 logo 的二维码
+const createLogoCode = (
+  qrCanvas: HTMLCanvasElement,
+  isStale: () => boolean
+): Promise<HTMLCanvasElement> => {
+  const canvasRef = document.createElement('canvas')
+  canvasRef.width = qrCanvas.width
+  canvasRef.height = qrCanvas.height
+  canvasRef.style.width = qrCanvas.style.width
+  canvasRef.style.height = qrCanvas.style.height
   const canvasWidth = canvasRef.width
   const logoOptions: QrcodeLogo = Object.assign(
     {
@@ -130,7 +200,8 @@ const createLogoCode = (canvasRef: HTMLCanvasElement) => {
   const logoBgXY = (canvasWidth * (1 - logoSize - borderSize)) / 2
 
   const ctx = canvasRef.getContext('2d')
-  if (!ctx) return
+  if (!ctx) return Promise.resolve(qrCanvas)
+  ctx.drawImage(qrCanvas, 0, 0)
 
   // logo 底色
   canvasRoundRect(ctx)(logoBgXY, logoBgXY, logoBgWidth, logoBgWidth, borderRadius)
@@ -139,10 +210,6 @@ const createLogoCode = (canvasRef: HTMLCanvasElement) => {
 
   // logo
   const image = new Image()
-  if (crossOrigin || logoRadius) {
-    image.setAttribute('crossOrigin', crossOrigin)
-  }
-  ;(image as any).src = logoSrc
 
   // 使用image绘制可以避免某些跨域情况
   const drawLogoWithImage = (image: HTMLImageElement) => {
@@ -167,12 +234,36 @@ const createLogoCode = (canvasRef: HTMLCanvasElement) => {
     }
   }
 
-  // 将 logo绘制到 canvas上
-  return new Promise((resolve: any) => {
-    image.onload = () => {
-      logoRadius ? drawLogoWithCanvas(image) : drawLogoWithImage(image)
-      resolve(canvasRef.toDataURL())
+  // 将 logo 绘制到 canvas 上：先绑定回调再设置 src；被新的渲染取消或卸载时解绑回调
+  return new Promise<HTMLCanvasElement>((resolve, reject) => {
+    const detach = () => {
+      image.onload = null
+      image.onerror = null
+      if (cancelLogo === cancel) cancelLogo = undefined
     }
+    const cancel = () => {
+      detach()
+      resolve(qrCanvas)
+    }
+    cancelLogo = cancel
+    image.onload = () => {
+      detach()
+      if (isStale()) return resolve(qrCanvas)
+      try {
+        logoRadius ? drawLogoWithCanvas(image) : drawLogoWithImage(image)
+        resolve(canvasRef)
+      } catch (error) {
+        reject(error)
+      }
+    }
+    image.onerror = () => {
+      detach()
+      reject(new Error(`Qrcode logo load failed: ${logoSrc}`))
+    }
+    if (crossOrigin || logoRadius) {
+      image.setAttribute('crossOrigin', crossOrigin)
+    }
+    ;(image as any).src = logoSrc
   })
 }
 

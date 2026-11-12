@@ -30,14 +30,14 @@ export const useForm = (props?: FormProps) => {
     return form
   }
 
-  // 一些内置的方法
+  // 一些内置的方法（参考上游 09fe3467f：setter 均为 async，类型如实标注 Promise<void>）
   const methods: {
-    setProps: (props: Recordable) => void
-    setValues: (data: Recordable) => void
+    setProps: (props: Recordable) => Promise<void>
+    setValues: (data: Recordable) => Promise<void>
     getFormData: <T = Recordable | undefined>(filterEmptyVal?: boolean) => Promise<T>
-    setSchema: (schemaProps: FormSetPropsType[]) => void
-    addSchema: (formSchema: FormSchema, index?: number) => void
-    delSchema: (field: string) => void
+    setSchema: (schemaProps: FormSetPropsType[]) => Promise<void>
+    addSchema: (formSchema: FormSchema, index?: number) => Promise<void>
+    delSchema: (field: string) => Promise<void>
     getComponentExpose: <T = any>(field: string) => Promise<T | undefined>
     getFormItemExpose: (field: string) => Promise<ComponentRef<typeof ElFormItem> | undefined>
     getElFormExpose: () => Promise<ComponentRef<typeof ElForm> | undefined>
@@ -141,6 +141,8 @@ export const useForm = (props?: FormProps) => {
   return {
     register,
     elFormRef,
+    // 与上游一致的 ElForm 实例别名（参考上游 09fe3467f），与 elFormRef 为同一 ref
+    formRef: elFormRef,
     methods
   }
 }

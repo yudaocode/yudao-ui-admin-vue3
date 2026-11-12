@@ -1,0 +1,22 @@
+diff --git a/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js b/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js
+index 6a1c31704b34873d08b2bfed6dbc76a2fca7b096..285aa9ce2746d4de9abdfc5767275263d7c4a641 100644
+--- a/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js
++++ b/esm/vs/editor/contrib/wordHighlighter/browser/wordHighlighter.js
+@@ -181,7 +181,7 @@ let WordHighlighter = class WordHighlighter {
+                 // Leave some form of early exit check here if you wish to continue being a cursor position change listener ;)
+                 return;
+             }
+-            this.runDelayer.trigger(() => { this._onPositionChanged(e); });
++            this.runDelayer.trigger(() => { this._onPositionChanged(e); }).catch(onUnexpectedError);
+         }));
+         this.toUnhook.add(editor.onDidFocusEditorText((e) => {
+             if (this.occurrencesHighlight === 'off') {
+@@ -189,7 +189,7 @@ let WordHighlighter = class WordHighlighter {
+                 return;
+             }
+             if (!this.workerRequest) {
+-                this.runDelayer.trigger(() => { this._run(); });
++                this.runDelayer.trigger(() => { this._run(); }).catch(onUnexpectedError);
+             }
+         }));
+         this.toUnhook.add(editor.onDidChangeModelContent((e) => {

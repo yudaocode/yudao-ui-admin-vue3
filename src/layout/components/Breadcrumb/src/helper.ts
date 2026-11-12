@@ -8,7 +8,8 @@ export const filterBreadcrumb = (
   const res: AppRouteRecordRaw[] = []
 
   for (const route of routes) {
-    const meta = route?.meta as RouteMeta
+    // 路由未配置 meta 时按空对象处理，避免读取属性报错
+    const meta = (route?.meta ?? {}) as RouteMeta
     if (meta.hidden && !meta.canTo) {
       continue
     }

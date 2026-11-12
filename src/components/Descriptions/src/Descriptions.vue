@@ -31,7 +31,13 @@ const props = defineProps({
     default: () => ({})
   },
   // 普通字段值为 null / undefined 时显示的占位文字（参考上游 83b09f09f）；默认空串，与原显示一致
-  emptyText: propTypes.string.def('')
+  emptyText: propTypes.string.def(''),
+  // 内容区内边距：上游 82245ee6d 直接删除了默认内边距，芋道保留默认 20px，改为按需传入实现同样的紧凑显示
+  // 本属性为芋道适配（非上游新增）：0 表示无内边距，数字按 px，字符串原样；未传保持默认 p-20px
+  contentPadding: {
+    type: [Number, String] as PropType<number | string>,
+    default: undefined
+  }
 })
 
 const { getPrefixCls } = useDesign()
@@ -39,7 +45,16 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('descriptions')
 
 const getBindValue = computed(() => {
-  const delArr: string[] = ['title', 'message', 'collapse', 'schema', 'data', 'class', 'emptyText']
+  const delArr: string[] = [
+    'title',
+    'message',
+    'collapse',
+    'schema',
+    'data',
+    'class',
+    'emptyText',
+    'contentPadding'
+  ]
   const obj = { ...attrs, ...props }
   for (const key in obj) {
     if (delArr.indexOf(key) !== -1) {
@@ -47,6 +62,14 @@ const getBindValue = computed(() => {
     }
   }
   return obj
+})
+
+// 仅显式传入 contentPadding 时设置内联内边距，否则沿用 p-20px 类
+const hasContentPadding = computed(() => props.contentPadding != null)
+const contentStyle = computed(() => {
+  if (!unref(hasContentPadding)) return undefined
+  const padding = props.contentPadding as number | string
+  return { padding: typeof padding === 'number' ? `${padding}px` : padding }
 })
 
 // 渲染 schema 中的 slots 渲染函数（返回 VNode / 文本 / null）
@@ -121,7 +144,11 @@ const toggleClick = () => {
     </div>
 
     <ElCollapseTransition>
-      <div v-show="show" :class="[`${prefixCls}-content`, 'p-20px']">
+      <div
+        v-show="show"
+        :class="[`${prefixCls}-content`, { 'p-20px': !hasContentPadding }]"
+        :style="contentStyle"
+      >
         <ElDescriptions
           :column="props.columns"
           :direction="mobile ? 'vertical' : 'horizontal'"

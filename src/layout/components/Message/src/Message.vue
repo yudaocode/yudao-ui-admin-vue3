@@ -10,6 +10,7 @@ defineProps({
   color: propTypes.string.def('')
 })
 
+const { t } = useI18n()
 const { push } = useRouter()
 const userStore = useUserStoreWithOut()
 const activeName = ref('notice')
@@ -64,11 +65,15 @@ onBeforeUnmount(() => {
 </script>
 <template>
   <div class="message">
-    <ElPopover :width="400" placement="bottom" trigger="click">
+    <!-- 弹层开始打开（before-enter）时刷新列表：鼠标点击与键盘 Enter / Space 打开均只请求一次 -->
+    <ElPopover :width="400" placement="bottom" trigger="click" @before-enter="getList">
       <template #reference>
-        <ElBadge :is-dot="unreadCount > 0" class="item">
-          <Icon :size="18" class="cursor-pointer" icon="ep:bell" :color="color" @click="getList" />
-        </ElBadge>
+        <!-- 原生 button 作为触发器，可键盘聚焦并带可访问名称 -->
+        <button :aria-label="t('layout.message')" class="message-trigger" type="button">
+          <ElBadge :is-dot="unreadCount > 0" class="item">
+            <Icon :size="18" class="cursor-pointer" icon="ep:bell" :color="color" />
+          </ElBadge>
+        </button>
       </template>
       <ElTabs v-model="activeName">
         <ElTabPane label="我的站内信" name="notice">
@@ -113,6 +118,18 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
   }
+}
+
+// 触发器原生 button：重置默认样式并沿用 flex 居中，保留 focus outline
+:where(.message-trigger) {
+  display: flex;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  align-items: center;
 }
 
 .message-empty {

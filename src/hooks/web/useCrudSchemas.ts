@@ -61,11 +61,18 @@ interface AllSchemas {
   detailSchema: DescriptionsSchema[]
 }
 
+export type UseCrudSchemasOptions = {
+  // 为 true 时，search.hidden === true 的字段不生成查询项，也不请求其 search.api（参考上游 c77586c56）；
+  // 默认 false：保持 isSearch / search.show 的原行为，search.hidden 原样透传给查询表单
+  excludeHiddenSearchFields?: boolean
+}
+
 const { t } = useI18n()
 
 // 过滤所有结构
 export const useCrudSchemas = (
-  crudSchema: CrudSchema[]
+  crudSchema: CrudSchema[],
+  options: UseCrudSchemasOptions = {}
 ): {
   allSchemas: AllSchemas
 } => {
@@ -77,7 +84,7 @@ export const useCrudSchemas = (
     detailSchema: []
   })
 
-  const searchSchema = filterSearchSchema(crudSchema, allSchemas)
+  const searchSchema = filterSearchSchema(crudSchema, allSchemas, options)
   allSchemas.searchSchema = searchSchema || []
 
   const tableColumns = filterTableSchema(crudSchema)
@@ -95,12 +102,20 @@ export const useCrudSchemas = (
 }
 
 // 过滤 Search 结构
-const filterSearchSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): FormSchema[] => {
+const filterSearchSchema = (
+  crudSchema: CrudSchema[],
+  allSchemas: AllSchemas,
+  options: UseCrudSchemasOptions = {}
+): FormSchema[] => {
   const searchSchema: FormSchema[] = []
 
   // 获取字典列表队列
   const searchRequestTask: Array<() => Promise<void>> = []
   eachTree(crudSchema, (schemaItem: CrudSchema) => {
+    // 显式开启 excludeHiddenSearchFields 时，跳过 search.hidden 的字段
+    if (options.excludeHiddenSearchFields && schemaItem.search?.hidden === true) {
+      return
+    }
     // 判断是否显示
     if (schemaItem?.isSearch || schemaItem.search?.show) {
       let component = schemaItem?.search?.component || 'Input'

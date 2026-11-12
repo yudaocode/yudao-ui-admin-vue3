@@ -199,6 +199,7 @@ import { EChartsOption } from 'echarts'
 import { formatTime } from '@/utils'
 
 import { useUserStore } from '@/store/modules/user'
+import { useLocaleStore } from '@/store/modules/locale'
 // import { useWatermark } from '@/hooks/web/useWatermark'
 import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
 import { pieOptions, barOptions } from './echarts-data'
@@ -372,6 +373,9 @@ const getUserAccessSource = async () => {
     { value: 135, name: 'analysis.videoAdvertising' },
     { value: 1548, name: 'analysis.searchEngines' }
   ]
+  // 标题与系列名也按当前语言设置（echarts-data 中的取值在模块加载时已固定）
+  set(pieOptionsData, 'title.text', t('analysis.userAccessSource'))
+  set(pieOptionsData, 'series[0].name', t('analysis.userAccessSource'))
   set(
     pieOptionsData,
     'legend.data',
@@ -397,6 +401,7 @@ const getWeeklyUserActivity = async () => {
     { value: 1322, name: 'analysis.saturday' },
     { value: 1324, name: 'analysis.sunday' }
   ]
+  set(barOptionsData, 'title.text', t('analysis.weeklyUserActivity'))
   set(
     barOptionsData,
     'xAxis.data',
@@ -422,6 +427,16 @@ const getAllApi = async () => {
   ])
   loading.value = false
 }
+
+// 不刷新页面切换语言后，重新生成图表中的翻译文案
+const localeStore = useLocaleStore()
+watch(
+  () => localeStore.getCurrentLocale.lang,
+  () => {
+    getUserAccessSource()
+    getWeeklyUserActivity()
+  }
+)
 
 const handleProjectClick = (message: string) => {
   window.open(`https://${message}`, '_blank')

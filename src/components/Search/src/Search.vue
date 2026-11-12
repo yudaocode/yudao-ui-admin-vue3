@@ -59,11 +59,6 @@ const props = defineProps({
 
 const emit = defineEmits(['search', 'reset', 'validate', 'register'])
 
-// Search 为多根节点，监听不会自动透传，需显式转发 Form 的 validate 事件（保持原参数）
-const onFormValidate = (prop: FormItemProp, isValid: boolean, message: string) => {
-  emit('validate', prop, isValid, message)
-}
-
 // setProps 设置的临时属性，优先于组件传入的属性；原地增删属性，避免无关属性变化触发 schema 重置
 const mergeProps = reactive<SearchProps>({})
 
@@ -146,15 +141,42 @@ watch(
   { deep: true, flush: 'sync' }
 )
 
-const newSchema = computed(() => {
-  const { expandField, layout, labelPosition } = unref(getProps)
-  let schema: FormSchema[] = unref(schemaRef).slice()
-  if (unref(isExpand) && expandField && !unref(visible)) {
-    const index = findIndex(schema, (v: FormSchema) => v.field === expandField)
-    if (index > -1) {
-      schema = schema.slice(0, index + 1)
+// 生成收起状态下的 schema 副本：设置 hidden，由 Form 隐藏外层（form-item、栅格 el-col、Divider）并保持
+// 表单项实例、值与 optionApi，新挂载或切换栅格时同样生效；调用方原有 style 不变。收起期间清空该项校验规则，
+// 与原先截断时不参与校验一致，避免查询被看不见的校验错误阻断。只修改副本，调用方 schema 不受影响
+const collapseSchemaItem = (item: FormSchema): FormSchema => {
+  if (item.component === 'Divider') {
+    return { ...item, hidden: true }
+  }
+  return {
+    ...item,
+    hidden: true,
+    formItemProps: {
+      ...item.formItemProps,
+      rules: [],
+      required: undefined
     }
   }
+}
+
+// 收起时被隐藏的项：界限字段之后、调用方未设置 hidden / remove 的项。调用方 hidden 项由 Form 始终隐藏（保留值与校验），
+// remove 项由 Form 不渲染且不进入表单数据，展开 / 收起都不改变这两种设置
+const collapsedItems = computed<FormSchema[]>(() => {
+  const { expandField } = unref(getProps)
+  if (!unref(isExpand) || !expandField || unref(visible)) return []
+  const schema = unref(schemaRef)
+  const index = findIndex(schema, (v: FormSchema) => v.field === expandField)
+  return index > -1 ? schema.slice(index + 1).filter((item) => !item.hidden && !item.remove) : []
+})
+
+const newSchema = computed(() => {
+  const { layout, labelPosition } = unref(getProps)
+  // 收起时隐藏而不是截断 schema（参考上游 9a5c7bcb5）：保留收起前的编辑，表单项实例与 model 字段保持一致，
+  // 重置统一作用于已挂载的实例，也覆盖收起期间动态新增、从未展开挂载过的字段
+  const collapsed = new Set(unref(collapsedItems))
+  let schema: FormSchema[] = unref(schemaRef).map((item) =>
+    collapsed.has(item) ? collapseSchemaItem(item) : item
+  )
   if (layout === 'inline') {
     schema = schema.concat([
       {
@@ -174,6 +196,42 @@ const newSchema = computed(() => {
 const { register, elFormRef, methods } = useForm({
   model: props.model || {}
 })
+
+// 当前折叠的普通字段（排除 Divider 与调用方显式 error 的项）。Element Plus 对“仍为 error、但已无规则”的字段
+// 再次 validate 时会 resetField，需清除这些字段的校验状态，避免查询时把用户编辑值重置为初值。
+// 调用方显式 error 不会触发此重置，继续由调用方控制，不能清掉后导致展开时丢失提示。
+const collapsedFields = computed(() =>
+  unref(collapsedItems)
+    .filter((item) => item.component !== 'Divider' && !item.formItemProps?.error)
+    .map((item) => item.field)
+)
+
+// 折叠项临时移除规则前清除其旧校验状态；只清除新折叠项，已折叠项的状态由 onFormValidate 维护
+watch(
+  collapsedFields,
+  (fields, previous = []) => {
+    const newlyCollapsed = fields.filter((field) => !previous.includes(field))
+    if (newlyCollapsed.length) unref(elFormRef)?.clearValidate(newlyCollapsed)
+  },
+  { flush: 'pre' }
+)
+
+// 统一 FormItemProp（string | string[]）与 schema field 的路径写法，如 'a[0].b' 与 ['a', '0', 'b']
+const normalizePath = (path: FormItemProp) =>
+  JSON.stringify(Array.isArray(path) ? path.map(String) : toPath(path))
+
+// Search 为多根节点，监听不会自动透传，需显式转发 Form 的 validate 事件（保持原参数）。
+// 展开时发起的异步校验可能在收起后才失败，晚到的错误会重新把折叠项置为 error；转发后清除，
+// 避免下次查询时 Element Plus 把该字段 resetField。正常展开校验与调用方显式 error 不受影响
+const onFormValidate = (prop: FormItemProp, isValid: boolean, message: string) => {
+  emit('validate', prop, isValid, message)
+  if (isValid) return
+  const path = normalizePath(prop)
+  const field = unref(collapsedFields).find((field) => normalizePath(field) === path)
+  if (field !== undefined) {
+    unref(elFormRef)?.clearValidate(field)
+  }
+}
 
 // Form 实例：setSchema 时同时交给 Form 处理，使进行中的 optionApi 请求按手动修改失效
 let formExpose: (typeof FormComponent & FormExpose) | undefined
@@ -278,14 +336,16 @@ const bottonButtonStyle = computed(() => {
   }
 })
 
+// 展开 / 收起只切换显示，不重置已编辑的条件
 const setVisible = () => {
-  unref(elFormRef)?.resetFields()
   visible.value = !unref(visible)
 }
 
 const searchExpose: SearchExpose = {
   getFormData: methods.getFormData,
   getElFormExpose: methods.getElFormExpose,
+  getComponentExpose: methods.getComponentExpose,
+  getFormItemExpose: methods.getFormItemExpose,
   setValues: methods.setValues,
   setProps,
   setSchema,

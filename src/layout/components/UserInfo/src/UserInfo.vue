@@ -63,18 +63,19 @@ const toDocument = () => {
       </span>
     </div>
     <template #dropdown>
+      <!-- 点击整项（含图标、空白）及键盘 Enter 均触发，与退出项一致 -->
       <ElDropdownMenu>
-        <ElDropdownItem>
+        <ElDropdownItem @click="toProfile">
           <Icon icon="ep:tools" />
-          <div @click="toProfile">{{ t('common.profile') }}</div>
+          <div>{{ t('common.profile') }}</div>
         </ElDropdownItem>
-        <ElDropdownItem>
+        <ElDropdownItem @click="toDocument">
           <Icon icon="ep:menu" />
-          <div @click="toDocument">{{ t('common.document') }}</div>
+          <div>{{ t('common.document') }}</div>
         </ElDropdownItem>
-        <ElDropdownItem divided>
+        <ElDropdownItem divided @click="lockScreen">
           <Icon icon="ep:lock" />
-          <div @click="lockScreen">{{ t('lock.lockScreen') }}</div>
+          <div>{{ t('lock.lockScreen') }}</div>
         </ElDropdownItem>
         <ElDropdownItem divided @click="loginOut">
           <Icon icon="ep:switch-button" />

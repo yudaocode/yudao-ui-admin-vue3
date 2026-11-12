@@ -12,6 +12,7 @@ import {
   setToken
 } from '@/utils/auth'
 import errorCode from './errorCode'
+import { isCanceledByRequestCancellation, throwIfRequestCanceled } from './requestCancellation'
 
 import { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
@@ -118,6 +119,7 @@ service.interceptors.response.use(
   async (response: AxiosResponse<any>) => {
     let { data } = response
     const config = response.config
+    throwIfRequestCanceled(config)
     if (!data) {
       // 返回“[HTTP]请求没有返回值”;
       throw new Error()
@@ -150,6 +152,7 @@ service.interceptors.response.use(
         return response.data
       }
       data = await new Response(response.data).json()
+      throwIfRequestCanceled(config)
     }
     const code = data.code ?? result_code
     // 获取错误信息
@@ -196,6 +199,10 @@ service.interceptors.response.use(
         return new Promise((resolve) => {
           requestList.push(() => {
             config.headers!.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+            // 回放时请求体已是首次发送的密文，标记已加密，避免请求拦截器二次加密
+            if ((config!.headers || {}).isEncrypt) {
+              ;(config!.headers || {}).isEncrypted = true
+            }
             resolve(service(config))
           })
         })
@@ -231,6 +238,10 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
+    // request.cancelRequest / cancelAllRequest 主动取消的请求（含刷新令牌后的回放）不提示，原样拒绝；调用方自管 signal 的取消仍按原逻辑提示
+    if (isCanceledByRequestCancellation(error)) {
+      return Promise.reject(error)
+    }
     console.log('err' + error) // for debug
     let { message } = error
     const { t } = useI18n()

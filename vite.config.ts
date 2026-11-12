@@ -19,14 +19,16 @@ function getRelativeScssUsePath(filename: string, targetPath: string) {
 
 // https://vitejs.dev/config/
 export default ({command, mode}: ConfigEnv): UserConfig => {
-    let env = {} as any
     const isBuild = command === 'build'
-    if (!isBuild) {
-        env = loadEnv((process.argv[3] === '--mode' ? process.argv[4] : process.argv[3]), root)
-    } else {
-        env = loadEnv(mode, root)
-    }
+    // 统一使用 Vite 解析后的 mode（参考上游 61d7ef642 的环境模式选择），兼容 --mode=x、--host 在前等任意参数顺序
+    const env = loadEnv(mode, root) as any
     const variablesScssPath = pathResolve('src/styles/variables.scss')
+    // CSS 产物目标（参考上游 4b43c8794）：VITE_CSS_TARGET 为逗号分隔的目标（如 chrome87,safari14），设置时用于 CSS 转换与压缩，
+    // 避免 autoprefixer 加的前缀按默认现代目标被剔除；未设置保持 Vite 默认。只影响 CSS，不代表 JS 及依赖兼容这些浏览器；无效目标构建报错
+    const cssTarget = String(env.VITE_CSS_TARGET || '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
     return {
         base: env.VITE_BASE_PATH,
         root: root,
@@ -84,7 +86,11 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             minify: 'oxc',
             outDir: env.VITE_OUT_DIR || 'dist',
             reportCompressedSize: false,
-            sourcemap: env.VITE_SOURCEMAP === 'true' ? 'inline' : false,
+            // 参考上游 3a5db42c9：开启时生成独立的 .map 文件，不再内联进产物 JS
+            sourcemap: env.VITE_SOURCEMAP === 'true',
+            // CSS 分包开关（参考上游 b2cee10cc）：未配置时保持现有按 chunk 拆分 CSS，仅 VITE_USE_CSS_SPLIT=false 时合并为单个 CSS 文件
+            cssCodeSplit: env.VITE_USE_CSS_SPLIT !== 'false',
+            ...(cssTarget.length ? {cssTarget} : {}),
             rollupOptions: {
                 output: {
                     minify: {

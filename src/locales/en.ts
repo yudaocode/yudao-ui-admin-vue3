@@ -1,4 +1,15 @@
 export default {
+  layout: {
+    expandNavigation: 'Expand navigation',
+    collapseNavigation: 'Collapse navigation',
+    switchLanguage: 'Switch language',
+    toggleDarkMode: 'Toggle dark mode',
+    enterFullscreen: 'Enter fullscreen',
+    exitFullscreen: 'Exit fullscreen',
+    menuSearch: 'Search menu',
+    switchSize: 'Switch size',
+    message: 'Messages'
+  },
   common: {
     inputText: 'Please input',
     selectText: 'Please select',
@@ -6,7 +17,7 @@ export default {
     endTimeText: 'End time',
     login: 'Login',
     required: 'This is required',
-    loginOut: 'Login out',
+    loginOut: 'Log out',
     document: 'Document',
     profile: 'User Center',
     reminder: 'Reminder',
@@ -23,6 +34,9 @@ export default {
     closeTheRightTab: 'Close right',
     closeOther: 'Close other',
     closeAll: 'Close all',
+    scrollTagsLeft: 'Scroll tabs left',
+    scrollTagsRight: 'Scroll tabs right',
+    moreTabActions: 'More tab actions',
     prevLabel: 'Prev',
     nextLabel: 'Next',
     skipLabel: 'Jump',
@@ -194,7 +208,7 @@ export default {
     december: 'December',
     estimate: 'Estimate',
     actual: 'Actual',
-    directAccess: 'Airect access',
+    directAccess: 'Direct access',
     mailMarketing: 'Mail marketing',
     allianceAdvertising: 'Alliance advertising',
     videoAdvertising: 'Video advertising',
@@ -455,6 +469,7 @@ export default {
       oldPwdMsg: 'Please Enter Old Password',
       newPwdMsg: 'Please Enter New Password',
       cfPwdMsg: 'Please Enter Confirm Password',
+      pwdRules: 'Length must be between 4 and 16 characters',
       diffPwd: 'The Passwords Entered Twice No Match'
     }
   },
@@ -470,6 +485,7 @@ export default {
     btn_scale_y: 'Flip vertical',
     btn_zoom_in: 'Zoom in',
     btn_zoom_out: 'Zoom out',
-    preview: 'Preview'
+    preview: 'Preview',
+    imageTypeError: 'Please select an image file'
   }
 }

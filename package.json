@@ -68,6 +68,7 @@
     "markmap-view": "^0.18.12",
     "min-dash": "^5.0.0",
     "mitt": "^3.0.1",
+    "monaco-editor": "0.52.2",
     "nprogress": "^0.2.0",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
@@ -150,8 +151,9 @@
   },
   "homepage": "https://gitee.com/yudaocode/yudao-ui-admin-vue3",
   "web-types": "./web-types.json",
+  "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">= 20.19.0",
-    "pnpm": ">=8.6.0"
+    "pnpm": ">=10.28.0"
   }
 }

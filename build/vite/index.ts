@@ -11,9 +11,17 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons-ng'
 import UnoCSS from 'unocss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import type { PluginOption } from 'vite'
+import { createOfflineIconsPlugin } from './offlineIcons'
+import { createElementPlusStylePlugin, isAllElementPlusStyle } from './elementPlusStyle'
+import { createUrlCopyPlugin } from './urlCopy'
 
 export function createVitePlugins(isBuild = false, env: Record<string, string> = {}) {
   const root = process.cwd()
+  // Element Plus 全量样式模式（VITE_USE_ALL_ELEMENT_PLUS_STYLE=true）：样式由 virtual:element-plus-style 统一提供，
+  // 自动导入组件/API 时不再逐个引入样式；其它取值保持原有按需样式
+  const allElementPlusStyle = isAllElementPlusStyle(env)
+  const elementPlusResolver = () =>
+    allElementPlusStyle ? ElementPlusResolver({ importStyle: false }) : ElementPlusResolver()
   const compressTypes = (env.VITE_COMPRESS || '')
     .split(',')
     .map((item) => item.trim())
@@ -28,7 +36,9 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
     Vue(),
     VueJsx(),
     UnoCSS(),
-    ElementPlus({}),
+    // 为显式 import 的 Element Plus 组件注入按需样式；全量样式模式下不需要
+    !allElementPlusStyle && ElementPlus({}),
+    createElementPlusStylePlugin(env),
     AutoImport({
       include: [
         /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx
@@ -50,7 +60,7 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
         }
       ],
       dts: !isBuild && 'src/types/auto-imports.d.ts',
-      resolvers: [ElementPlusResolver()],
+      resolvers: [elementPlusResolver()],
       eslintrc: {
         enabled: false, // Default `false`
         filepath: './.eslintrc-auto-import.json', // Default `./.eslintrc-auto-import.json`
@@ -61,13 +71,17 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
       // 生成自定义 `auto-components.d.ts` 全局声明
       dts: !isBuild && 'src/types/auto-components.d.ts',
       // 自定义组件的解析器
-      resolvers: [ElementPlusResolver()],
+      resolvers: [elementPlusResolver()],
       globs: ['src/components/**/**.{vue, md}', '!src/components/DiyEditor/components/mobile/**']
     }),
     createSvgIconsPlugin({
       iconDirs: [pathResolve('src/assets/svgs')],
       symbolId: 'icon-[dir]-[name]'
     }),
+    // 离线图标子集：默认在线时只输出空模块，仅 VITE_USE_ONLINE_ICON=false 时生成
+    createOfflineIconsPlugin(env),
+    // dev 启动后复制服务地址：仅 dev 且 VITE_DEV_URL_COPY=local|network 时启用
+    !isBuild && createUrlCopyPlugin(env),
     isBuild &&
       compressTypes.includes('gzip') &&
       viteCompression({

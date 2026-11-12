@@ -38,10 +38,12 @@ const theme = computed(() => {
   return echartTheme
 })
 
+// 浅拷贝后再设置 darkMode，不原地修改父组件传入的 options
 const options = computed(() => {
-  return Object.assign(props.options, {
+  return {
+    ...props.options,
     darkMode: unref(theme)
-  })
+  } as EChartsOption
 })
 
 const elRef = ref<ElRef>()
@@ -49,6 +51,9 @@ const elRef = ref<ElRef>()
 let echartRef: Nullable<echarts.ECharts> = null
 
 const contentEl = ref<Element>()
+
+// 观察图表容器自身尺寸（参考上游 e66532cf9）
+let resizeObserver: ResizeObserver | undefined
 
 const styles = computed(() => {
   const width = isString(props.width) ? props.width : `${props.width}px`
@@ -153,6 +158,12 @@ onMounted(() => {
   contentEl.value = document.getElementsByClassName(`${variables.namespace}-layout-content`)[0]
   unref(contentEl) &&
     (unref(contentEl) as Element).addEventListener('transitionend', contentResizeHandler)
+
+  // 父容器宽高变化等非窗口触发的尺寸调整；不支持 ResizeObserver 时仍依赖上面的监听
+  if (typeof ResizeObserver !== 'undefined' && unref(elRef)) {
+    resizeObserver = new ResizeObserver(() => resizeHandler())
+    resizeObserver.observe(unref(elRef) as HTMLElement)
+  }
 })
 
 onBeforeUnmount(() => {
@@ -160,6 +171,8 @@ onBeforeUnmount(() => {
   // 作废等待词云扩展加载中的配置更新
   updateId++
   window.removeEventListener('resize', resizeHandler)
+  resizeObserver?.disconnect()
+  resizeObserver = undefined
   resizeHandler.cancel()
   unref(contentEl) &&
     (unref(contentEl) as Element).removeEventListener('transitionend', contentResizeHandler)

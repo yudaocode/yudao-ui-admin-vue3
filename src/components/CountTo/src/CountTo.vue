@@ -94,6 +94,7 @@ const start = () => {
   state.startTime = null
   state.localDuration = duration
   state.paused = false
+  pause()
   state.rAF = requestAnimationFrame(count)
 }
 
@@ -108,19 +109,21 @@ const pauseResume = () => {
 }
 
 const pause = () => {
-  cancelAnimationFrame(state.rAF)
+  if (state.rAF) cancelAnimationFrame(state.rAF)
+  state.rAF = null
 }
 
 const resume = () => {
   state.startTime = null
   state.localDuration = +(state.remaining as number)
   state.localStartVal = +(state.printVal as number)
-  requestAnimationFrame(count)
+  pause()
+  state.rAF = requestAnimationFrame(count)
 }
 
 const reset = () => {
   state.startTime = null
-  cancelAnimationFrame(state.rAF)
+  pause()
   state.displayValue = formatNumber(props.startVal)
 }
 
@@ -173,6 +176,8 @@ defineExpose({
   start,
   pause
 })
+
+onBeforeUnmount(pause)
 </script>
 
 <template>

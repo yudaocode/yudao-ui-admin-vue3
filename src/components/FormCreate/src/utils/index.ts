@@ -45,6 +45,7 @@ export const parseFormFields = (
       type,
       required
     }
+    // DONE 子表单 需要处理子表单字段
     // 子表单（表格表单、子表单）：解析其子字段，用于配置子字段权限
     if (isSubForm(rule)) {
       item.children = parseSubFormFields(rule)
