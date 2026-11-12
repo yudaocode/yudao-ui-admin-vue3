@@ -31,6 +31,7 @@
           <el-input
             v-model="loginData.loginForm.username"
             :placeholder="t('login.usernamePlaceholder')"
+            autocomplete="username"
             :prefix-icon="iconAvatar"
           />
         </el-form-item>
@@ -40,6 +41,7 @@
           <el-input
             v-model="loginData.loginForm.password"
             :placeholder="t('login.passwordPlaceholder')"
+            autocomplete="current-password"
             :prefix-icon="iconLock"
             show-password
             type="password"

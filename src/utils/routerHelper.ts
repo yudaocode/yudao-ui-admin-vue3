@@ -332,6 +332,10 @@ const isPlainRouteMeta = (meta?: RouteMeta) => {
   return !meta?.hidden && !meta?.query && !meta?.params && !meta?.hash
 }
 const generateRoutePath = (parentPath: string, path: string) => {
+  // 与 pathResolve 一致：以 / 开头的子路由由 vue-router 按绝对路径注册，默认跳转不拼接父路径
+  if (path.startsWith('/')) {
+    return path
+  }
   if (parentPath.endsWith('/')) {
     parentPath = parentPath.slice(0, -1) // 移除默认的 /
   }
@@ -343,8 +347,10 @@ const generateRoutePath = (parentPath: string, path: string) => {
 export const pathResolve = (parentPath: string, path: string) => {
   if (isUrl(path)) return path
   if (!path) return parentPath // 修复 path 为空时返回 parentPath，避免拼接出错 https://t.zsxq.com/QVr6b
-  const childPath = path.startsWith('/') ? path : `/${path}`
-  return `${parentPath}${childPath}`.replace(/\/+/g, '/')
+  // 以 / 开头的子路由由 vue-router 按绝对路径注册，不拼接父路径（参考上游 e66532cf9），菜单索引、面包屑等与注册路径一致；
+  // 不做 trim：注册路径保留原始空白，菜单侧单独 trim 会与注册路径不一致
+  if (path.startsWith('/')) return path.replace(/\/+/g, '/')
+  return `${parentPath}/${path}`.replace(/\/+/g, '/')
 }
 
 // 路由降级

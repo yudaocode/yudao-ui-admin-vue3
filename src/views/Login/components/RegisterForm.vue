@@ -32,6 +32,7 @@
           <el-input
             v-model="registerData.registerForm.username"
             :placeholder="t('login.username')"
+            autocomplete="username"
             size="large"
             :prefix-icon="iconAvatar"
           />
@@ -52,7 +53,7 @@
           <el-input
             v-model="registerData.registerForm.password"
             type="password"
-            auto-complete="off"
+            autocomplete="new-password"
             :placeholder="t('login.password')"
             size="large"
             :prefix-icon="iconLock"
@@ -66,7 +67,7 @@
             v-model="registerData.registerForm.confirmPassword"
             type="password"
             size="large"
-            auto-complete="off"
+            autocomplete="new-password"
             :placeholder="t('login.checkPassword')"
             :prefix-icon="iconLock"
             show-password

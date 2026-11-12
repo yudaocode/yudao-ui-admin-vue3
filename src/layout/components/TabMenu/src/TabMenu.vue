@@ -129,6 +129,33 @@ export default defineComponent({
 
     const getFullTabPath = (route: AppRouteRecordRaw) => pathResolve(getTabParentPath(), route.path)
 
+    const isPathInTab = (currentPath: string, route: AppRouteRecordRaw) => {
+      const tabPath = getFullTabPath(route)
+      return currentPath === tabPath || currentPath.startsWith(`${tabPath}/`)
+    }
+
+    // 以 / 开头的子路由由 vue-router 按绝对路径注册，完整路径不以所属一级菜单为前缀，前缀匹配无法命中；
+    // 非 header-mixed-nav（一级为顶层菜单）时，按菜单树定位其所属一级菜单作为兜底。
+    // 仅在没有任何一级菜单前缀命中、树中命中且当前路径不在该一级菜单路径之下时生效，前缀能命中的原有场景不受影响
+    const absoluteDescendantRootTab = computed((): AppRouteRecordRaw | undefined => {
+      if (unref(headerMixed)) {
+        return undefined
+      }
+      const currentPath = unref(currentMenuPath)
+      if (unref(tabRouters).some((route) => isPathInTab(currentPath, route))) {
+        return undefined
+      }
+      const rootInfo = getRootMenuRoute(unref(routers), currentPath)
+      if (
+        !rootInfo ||
+        currentPath === rootInfo.fullPath ||
+        currentPath.startsWith(`${rootInfo.fullPath}/`)
+      ) {
+        return undefined
+      }
+      return unref(tabRouters).find((route) => route === rootInfo.route)
+    })
+
     const getVisibleChildren = (route: AppRouteRecordRaw): AppRouteRecordRaw[] =>
       (route.children || []).filter((child) => !child.meta?.hidden)
 
@@ -188,10 +215,9 @@ export default defineComponent({
       }
 
       const currentPath = unref(currentMenuPath)
-      const activeTab = unref(tabRouters).find((route) => {
-        const tabPath = getFullTabPath(route)
-        return currentPath === tabPath || currentPath.startsWith(`${tabPath}/`)
-      })
+      const activeTab =
+        unref(tabRouters).find((route) => isPathInTab(currentPath, route)) ||
+        unref(absoluteDescendantRootTab)
 
       if (!activeTab || !shouldShowExtraMenu(activeTab)) {
         tabActive.value = activeTab ? getFullTabPath(activeTab) : ''
@@ -261,7 +287,8 @@ export default defineComponent({
       if (isCurrentRouteInTab(currentPath) || tabPathMap[currentPath]?.includes(path)) {
         return true
       }
-      return false
+      const rootTab = unref(absoluteDescendantRootTab)
+      return !!rootTab && getFullTabPath(rootTab) === currentPath
     }
 
     const mouseleave = () => {

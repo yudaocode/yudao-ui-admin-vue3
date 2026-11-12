@@ -25,9 +25,9 @@
   /* logo end */
 
   /* header start */
-  --top-header-bg-color: '#fff';
+  --top-header-bg-color: #fff;
 
-  --top-header-text-color: 'inherit';
+  --top-header-text-color: inherit;
 
   --top-header-hover-color: #f6f6f6;
 
@@ -48,7 +48,7 @@
 
   --app-content-padding: 20px;
 
-  --app-content-bg-color: #f5f7f9;
+  --app-content-bg-color: #f6f7fb;
 
   --app-footer-height: 50px;
 
@@ -63,7 +63,42 @@
 }
 
 .dark {
-  --app-content-bg-color: var(--el-bg-color);
+  --app-content-bg-color: #0b1120;
+}
+
+/*
+ * Element Plus 中性色（文字 / 边框 / 填充 / 背景），取值对齐上游 packages/styles/src/var.css（9047610a7）。
+ * 只覆盖中性 token：主题色及其深浅色阶由 appStore 管理，菜单 / Logo / 头部颜色仍走 appStore 主题缓存，均不在此处设置。
+ * html:root 的优先级高于 Element Plus 的 :root；html:root.dark 高于其 html.dark，与引入顺序无关。
+ */
+html:root {
+  --el-bg-color: #fff;
+  --el-bg-color-page: #f6f7fb;
+  --el-bg-color-overlay: #fff;
+  --el-fill-color-blank: #fff;
+  --el-fill-color-light: #f5f6fa;
+  --el-border-color: #dfe3ea;
+  --el-border-color-light: #e7eaf0;
+  --el-border-color-lighter: #edf0f5;
+  --el-text-color-primary: #273142;
+  --el-text-color-regular: #526077;
+  --el-text-color-secondary: #7a879c;
+}
+
+html:root.dark {
+  --el-bg-color: #151e30;
+  --el-bg-color-page: #0b1120;
+  --el-bg-color-overlay: #1b2538;
+  --el-fill-color-blank: #151e30;
+  --el-fill-color-light: #1c2638;
+  --el-fill-color: #1a2436;
+  --el-fill-color-dark: #0f1726;
+  --el-border-color: #344055;
+  --el-border-color-light: #2d394c;
+  --el-border-color-lighter: #273244;
+  --el-text-color-primary: #f1f5f9;
+  --el-text-color-regular: #cbd5e1;
+  --el-text-color-secondary: #94a3b8;
 }
 
 html,
