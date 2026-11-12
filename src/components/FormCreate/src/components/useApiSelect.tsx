@@ -97,7 +97,7 @@ const parseExpression = (data: any, template: string) => {
   }
   // 正则表达式匹配模板字符串中的 ${...}
   const pattern = /\$\{([^}]*)}/g
-  // 使用replace函数配合正则表达式和回调函数来进行替换
+  // 使用 replace 函数配合正则表达式和回调函数来进行替换
   return template.replace(pattern, (_, expr) => {
     // expr 是匹配到的 ${} 内的表达式（这里是属性名），从 data 中获取对应的值
     const result = data[expr.trim()] // 去除前后空白，以防用户输入带空格的属性名

@@ -364,6 +364,7 @@ export enum DICT_TYPE {
   AI_MODEL_TYPE = 'ai_model_type', // AI 模型类型
   AI_IMAGE_STATUS = 'ai_image_status', // AI 图片状态
   AI_MUSIC_STATUS = 'ai_music_status', // AI 音乐状态
+  AI_PPT_STATUS = 'ai_ppt_status', // AI PPT 状态
   AI_GENERATE_MODE = 'ai_generate_mode', // AI 生成模式
   AI_WRITE_TYPE = 'ai_write_type', // AI 写作类型
   AI_WRITE_LENGTH = 'ai_write_length', // AI 写作长度
