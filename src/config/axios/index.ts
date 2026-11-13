@@ -11,7 +11,8 @@ import {
 const { default_headers } = config
 
 const request = (option: any) => {
-  const { headersType, headers, ...otherOption } = option
+  // requestKey 只用于取消登记，不传给 axios（参考上游 c7f8db52d 发送前移除 requestKey）
+  const { headersType, headers, requestKey, ...otherOption } = option
   const send = (signal?: AbortSignal) =>
     service({
       ...otherOption,
@@ -21,8 +22,11 @@ const request = (option: any) => {
         ...headers
       }
     })
-  // 调用方自行传入 signal / cancelToken 时保持原样，不纳入 cancelRequest / cancelAllRequest 管理
-  return hasCallerCancellation(option) ? send() : runCancellableRequest(option.url, send)
+  // 调用方自行传入 signal / cancelToken 时保持原样，不纳入 cancelRequest / cancelAllRequest 管理；
+  // 取消键：传入 requestKey 时按它登记，同一 url 的不同业务请求可分别取消；未传时沿用 url（参考上游 c7f8db52d requestKey ?? url）
+  return hasCallerCancellation(option)
+    ? send()
+    : runCancellableRequest(requestKey ?? option.url, send)
 }
 export default {
   get: async <T = any>(option: any) => {
@@ -55,8 +59,9 @@ export default {
     return res as unknown as Promise<T>
   },
   /**
-   * 取消指定 url（与发起时传入的 url 完全一致，不含 baseURL / params）下所有进行中的请求，同一 url 并发的请求一并取消。
-   * 仅作用于通过本封装发起、且未自行传入 signal / cancelToken 的请求；空 url、已结束的请求忽略。
+   * 取消指定取消键下所有进行中的请求，同一取消键并发的请求一并取消：
+   * 发起时传了 requestKey 的请求按 requestKey 取消（不再按 url 匹配），未传的按 url（与发起时传入的 url 完全一致，不含 baseURL / params）取消。
+   * 仅作用于通过本封装发起、且未自行传入 signal / cancelToken 的请求；空键、已结束的请求忽略。
    * 被取消的请求以 axios CanceledError 拒绝（axios.isCancel 为 true），不弹出错误提示；
    * 处于 401 刷新令牌等待中的请求同样立即拒绝，刷新完成后不再重发
    */

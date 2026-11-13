@@ -1,4 +1,3 @@
-import type { RouteMeta } from 'vue-router'
 import { findPath } from '@/utils/tree'
 
 type OnlyOneChildType = AppRouteRecordRaw & { noShowingChildren?: boolean }
@@ -17,38 +16,27 @@ export const hasOneShowingChild = (
   children: AppRouteRecordRaw[] = [],
   parent: AppRouteRecordRaw
 ): HasOneShowingChild => {
-  const onlyOneChild = ref<OnlyOneChildType>()
-
-  const showingChildren = children.filter((v) => {
-    const meta = (v.meta ?? {}) as RouteMeta
-    if (meta.hidden) {
-      return false
-    } else {
-      // Temp set(will be used if only has one showing child)
-      onlyOneChild.value = v
-      return true
-    }
-  })
+  // 纯函数，不再为每个菜单节点创建 ref（参考上游 e66532cf9）；路由未配置 meta 时按未隐藏处理
+  const showingChildren = children.filter((v) => !v.meta?.hidden)
 
   // When there is only one child router, the child router is displayed by default
   if (showingChildren.length === 1) {
     return {
       oneShowingChild: true,
-      onlyOneChild: unref(onlyOneChild)
+      onlyOneChild: showingChildren[0]
     }
   }
 
   // Show parent if there are no child router to display
   if (!showingChildren.length) {
-    onlyOneChild.value = { ...parent, path: '', noShowingChildren: true }
     return {
       oneShowingChild: true,
-      onlyOneChild: unref(onlyOneChild)
+      onlyOneChild: { ...parent, path: '', noShowingChildren: true }
     }
   }
 
+  // 多个可见子级时不提供 onlyOneChild：调用方（Menu.vue isSubMenuRoute、useRenderMenuItem）只在 oneShowingChild 为 true 时使用它
   return {
-    oneShowingChild: false,
-    onlyOneChild: unref(onlyOneChild)
+    oneShowingChild: false
   }
 }

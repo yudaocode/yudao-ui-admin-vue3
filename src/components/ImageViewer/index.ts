@@ -1,7 +1,7 @@
 import ImageViewer from './src/ImageViewer.vue'
 import { isClient } from '@/utils/is'
 import { createVNode, render } from 'vue'
-import { ImageViewerProps } from './src/types'
+import type { ImageViewerProps } from './src/types'
 
 /**
  * 程序式打开图片预览：每次调用各自管理容器与 VNode，关闭时卸载并移除容器，多个实例互不影响

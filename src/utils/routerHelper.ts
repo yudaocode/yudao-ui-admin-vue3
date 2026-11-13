@@ -72,6 +72,25 @@ export const getRawRoute = (route: RouteLocationNormalized): RouteLocationNormal
   }
 }
 
+/**
+ * 查找后端菜单对应的视图组件：后端传了 component 时按 component 匹配，未传时按 path 匹配（模糊包含，规则同原逻辑）。
+ * 找不到时输出诊断（参考上游 generateRoutesByServer 的“未找到…请创建”），仍返回 undefined，不阻断路由注册与登录；
+ * 构建时去除 console（VITE_DROP_CONSOLE）的环境看不到该日志
+ */
+const findViewComponent = (route: AppCustomRouteRecordRaw, modulesRoutesKeys: string[]) => {
+  const index = route?.component
+    ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
+    : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
+  if (index < 0) {
+    const component = route.component || '未配置，按 path 匹配'
+    console.error(
+      `[菜单路由] 未找到菜单「${route.name}」的视图组件（path: ${route.path}，component: ${component}），` +
+        '请在 src/views 下创建对应的 .vue 或 .tsx 文件'
+    )
+  }
+  return modules[modulesRoutesKeys[index]]
+}
+
 // 后端控制路由生成
 export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecordRaw[] => {
   const res: AppRouteRecordRaw[] = []
@@ -150,10 +169,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         redirect: route.redirect,
         meta: meta
       }
-      const index = route?.component
-        ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
-        : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-      childrenData.component = modules[modulesRoutesKeys[index]]
+      childrenData.component = findViewComponent(route, modulesRoutesKeys)
       data.children = [childrenData]
     } else {
       // 目录
@@ -187,10 +203,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         // 菜单
       } else {
         // 对后端传component组件路径和不传做兼容（如果后端传component组件路径，那么path可以随便写，如果不传，component组件路径会根path保持一致）
-        const index = route?.component
-          ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
-          : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-        data.component = modules[modulesRoutesKeys[index]]
+        data.component = findViewComponent(route, modulesRoutesKeys)
       }
       if (route.children) {
         data.children = generateRoute(route.children)

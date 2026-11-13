@@ -327,12 +327,14 @@ export default defineComponent({
                 const item = getTabItem(v)
                 const active = isActive(fullTabPath)
                 // 原生 button（参考上游 PrimaryNav 一级导航），可键盘聚焦、Enter/Space 触发；
-                // 收起时只显示图标，以 aria-label 提供可访问名称；以完整路径作 key，重排时焦点不错位到其它路由
+                // 收起时只显示图标，以 aria-label 提供可访问名称，并以 title 悬停提示标题（参考上游 PrimaryNav title；
+                // 展开时标题已可见，不重复提示）；以完整路径作 key，重排时焦点不错位到其它路由
                 return (
                   <button
                     key={fullTabPath}
                     type="button"
                     aria-label={getRouteTitle(item.meta)}
+                    title={unref(showTitle) ? undefined : getRouteTitle(item.meta)}
                     aria-current={active ? 'true' : undefined}
                     class={[
                       `${prefixCls}__item`,

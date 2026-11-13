@@ -3,8 +3,7 @@
     "target": "esnext",
     "useDefineForClassFields": true,
     "module": "esnext",
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+    "moduleResolution": "bundler",
     "strict": true,
     "jsx": "preserve",
     "jsxImportSource": "vue",
@@ -12,7 +11,6 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
-    "baseUrl": "./",
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
@@ -22,8 +20,9 @@
     "experimentalDecorators": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
+    "noEmit": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "types": [
       // "@intlify/unplugin-vue-i18n/types",

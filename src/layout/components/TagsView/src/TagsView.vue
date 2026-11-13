@@ -408,9 +408,10 @@ watch(
     :class="prefixCls"
     class="relative w-full flex bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
-    <!-- 工具栏为原生按钮，可键盘聚焦并带可访问名称（参考上游 e66532cf9） -->
+    <!-- 工具栏为原生按钮，可键盘聚焦并带可访问名称（参考上游 e66532cf9）；图标按钮同时以 title 悬停提示（参考上游 8a68d60） -->
     <button
       :aria-label="t('common.scrollTagsLeft')"
+      :title="t('common.scrollTagsLeft')"
       :class="[
         tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`,
         `${prefixCls}__tool-button`
@@ -563,6 +564,7 @@ watch(
     </div>
     <button
       :aria-label="t('common.scrollTagsRight')"
+      :title="t('common.scrollTagsRight')"
       :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       type="button"
@@ -576,6 +578,7 @@ watch(
     </button>
     <button
       :aria-label="t('common.reload')"
+      :title="t('common.reload')"
       :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       type="button"
@@ -649,6 +652,7 @@ watch(
       <!-- ElDropdown 已为触发器提供 role=button / tabindex 及 Enter、Space 打开，这里补可访问名称 -->
       <span
         :aria-label="t('common.moreTabActions')"
+        :title="t('common.moreTabActions')"
         :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
         class="block h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       >

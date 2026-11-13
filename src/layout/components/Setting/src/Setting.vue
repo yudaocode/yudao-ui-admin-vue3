@@ -152,6 +152,7 @@ const clear = () => {
   wsCache.delete(CACHE_KEY.IS_DARK)
   wsCache.delete(CACHE_KEY.CURRENT_SIZE)
   wsCache.delete(CACHE_KEY.FIXED_MENU)
+  wsCache.delete(CACHE_KEY.COLLAPSE)
   window.location.reload()
 }
 </script>

@@ -12,7 +12,7 @@ import {
   setToken
 } from '@/utils/auth'
 import errorCode from './errorCode'
-import { isCanceledByRequestCancellation, throwIfRequestCanceled } from './requestCancellation'
+import { throwIfRequestCanceled } from './requestCancellation'
 
 import { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
@@ -238,8 +238,9 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
-    // request.cancelRequest / cancelAllRequest 主动取消的请求（含刷新令牌后的回放）不提示，原样拒绝；调用方自管 signal 的取消仍按原逻辑提示
-    if (isCanceledByRequestCancellation(error)) {
+    // 请求被取消（request.cancelRequest / cancelAllRequest，含刷新令牌后的回放；以及调用方自管 signal / cancelToken 的中止）时不提示，
+    // 原样拒绝，由调用方自行处理（参考上游 c7f8db52d：isCancel 的错误不弹提示）；网络错误、超时等仍按下方逻辑提示
+    if (axios.isCancel(error)) {
       return Promise.reject(error)
     }
     console.log('err' + error) // for debug
@@ -258,8 +259,13 @@ service.interceptors.response.use(
 )
 
 const refreshToken = async () => {
-  axios.defaults.headers.common['tenant-id'] = getTenantId()
-  return await axios.post(base_url + '/system/auth/refresh-token?refreshToken=' + getRefreshToken())
+  // tenant-id 只随本次刷新请求发送，不写入 axios.defaults：避免遗留到之后的裸 axios 请求和新建的 axios 实例
+  // （如 createRequest 创建的通用实例会按 Axios 标准继承全局 defaults）
+  return await axios.post(
+    base_url + '/system/auth/refresh-token?refreshToken=' + getRefreshToken(),
+    undefined,
+    { headers: { 'tenant-id': getTenantId() } }
+  )
 }
 const handleAuthorized = () => {
   const { t } = useI18n()

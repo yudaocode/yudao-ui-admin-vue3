@@ -1,5 +1,5 @@
 import Form from './src/Form.vue'
-import { ElForm, ElFormItem } from 'element-plus'
+import type { ElForm, ElFormItem } from 'element-plus'
 import type { FormSchema, FormSetPropsType } from './src/types'
 
 // 与上游一致的类型入口；类型定义在 ./src/types（参考上游 9eb87ad13 Form/src/types/index.ts）

@@ -1,10 +1,8 @@
 import { useTimeAgo as useTimeAgoCore, UseTimeAgoMessages } from '@vueuse/core'
 import { useLocaleStoreWithOut } from '@/store/modules/locale'
 
-const TIME_AGO_MESSAGE_MAP: {
-  'zh-CN': UseTimeAgoMessages
-  en: UseTimeAgoMessages
-} = {
+// 按语言注册表的全部语言配置词表：注册表新增语言而这里未补齐时，类型检查会报错
+const TIME_AGO_MESSAGE_MAP: Record<LocaleType, UseTimeAgoMessages> = {
   'zh-CN': {
     justNow: '刚刚',
     invalid: '无效时间',

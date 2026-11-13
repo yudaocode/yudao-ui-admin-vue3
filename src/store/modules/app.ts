@@ -152,7 +152,8 @@ export const useAppStore = defineStore('app', {
 
       breadcrumb: true, // 面包屑
       breadcrumbIcon: true, // 面包屑图标
-      collapse: false, // 折叠菜单
+      // 折叠菜单：刷新后恢复桌面端上次的折叠状态（参考上游 c7f8db52d 持久化 collapse），只认布尔 true
+      collapse: wsCache.get(CACHE_KEY.COLLAPSE) === true,
       uniqueOpened: false, // 是否只保持一个子菜单的展开（默认值对齐最新上游 config/app.ts）
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
@@ -341,6 +342,10 @@ export const useAppStore = defineStore('app', {
     },
     setCollapse(collapse: boolean) {
       this.collapse = collapse
+      // 移动端的自动收起、抽屉开合不写入缓存，避免回到桌面端刷新后沿用移动端状态
+      if (!this.mobile) {
+        wsCache.set(CACHE_KEY.COLLAPSE, collapse)
+      }
     },
     setUniqueOpened(uniqueOpened: boolean) {
       this.uniqueOpened = uniqueOpened

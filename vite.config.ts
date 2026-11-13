@@ -91,7 +91,8 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
             // CSS 分包开关（参考上游 b2cee10cc）：未配置时保持现有按 chunk 拆分 CSS，仅 VITE_USE_CSS_SPLIT=false 时合并为单个 CSS 文件
             cssCodeSplit: env.VITE_USE_CSS_SPLIT !== 'false',
             ...(cssTarget.length ? {cssTarget} : {}),
-            rollupOptions: {
+            // Vite 8 中 rollupOptions 是 rolldownOptions 的弃用别名，改用正式键名，内部配置不变（参考上游 28901407f）
+            rolldownOptions: {
                 output: {
                     minify: {
                         compress: {

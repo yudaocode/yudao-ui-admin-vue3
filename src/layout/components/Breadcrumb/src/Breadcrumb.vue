@@ -1,6 +1,6 @@
 <script lang="tsx">
 import { ElBreadcrumb, ElBreadcrumbItem } from 'element-plus'
-import { ref, watch, computed, unref, defineComponent, TransitionGroup } from 'vue'
+import { ref, watch, computed, unref, defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { filterBreadcrumb } from './helper'
@@ -118,11 +118,10 @@ export default defineComponent({
       }
     )
 
+    // 面包屑不再做切换动画，路由变化时直接显示（参考上游 eceb2fb0a）
     return () => (
       <ElBreadcrumb separator="/" class={`${prefixCls} flex items-center h-full ml-[10px]`}>
-        <TransitionGroup appear enter-active-class="animate__animated animate__fadeInRight">
-          {renderBreadcrumb()}
-        </TransitionGroup>
+        {renderBreadcrumb()}
       </ElBreadcrumb>
     )
   }

@@ -1,5 +1,5 @@
 import Table from './src/Table.vue'
-import { ElTable } from 'element-plus'
+import type { ElTable } from 'element-plus'
 import type { TableColumn, TableSetProps } from './src/types'
 import TableSelectForm from './src/TableSelectForm.vue'
 
