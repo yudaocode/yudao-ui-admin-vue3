@@ -45,7 +45,7 @@
       </div>
       <!-- 类型、公开标记：Seedream 与通用模型同为 AI 生图，按平台区分 -->
       <div class="absolute left-8px top-8px flex gap-4px">
-        <el-tag v-if="image.platform === AiImagePlatformEnum.DOU_BAO" size="small">Seedream</el-tag>
+        <el-tag v-if="image.platform === AiImagePlatformEnum.BYTEDANCE" size="small">Seedream</el-tag>
         <dict-tag v-else :type="DICT_TYPE.AI_IMAGE_MODE" :value="image.mode" />
         <el-tag v-if="scope === 'mine' && image.publicStatus" type="success" size="small">
           已公开

@@ -44,7 +44,7 @@
       <div v-if="detail" class="min-w-0 flex-1">
         <el-descriptions :column="2" size="small" border>
           <el-descriptions-item label="类型">
-            <el-tag v-if="detail.platform === AiImagePlatformEnum.DOU_BAO" size="small">
+            <el-tag v-if="detail.platform === AiImagePlatformEnum.BYTEDANCE" size="small">
               Seedream
             </el-tag>
             <dict-tag v-else :type="DICT_TYPE.AI_IMAGE_MODE" :value="detail.mode" />

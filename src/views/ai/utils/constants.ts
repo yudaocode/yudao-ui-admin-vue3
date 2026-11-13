@@ -11,17 +11,23 @@
  * AI 平台的枚举
  */
 export const AiPlatformEnum = {
-  TONG_YI: 'TongYi', // 阿里
-  YI_YAN: 'YiYan', // 百度
-  DEEP_SEEK: 'DeepSeek', // DeepSeek
-  ZHI_PU: 'ZhiPu', // 智谱 AI
-  XING_HUO: 'XingHuo', // 讯飞
-  SiliconFlow: 'SiliconFlow', // 硅基流动
-  OPENAI: 'OpenAI',
-  Ollama: 'Ollama',
-  STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
-  MIDJOURNEY: 'Midjourney', // Midjourney
-  SUNO: 'Suno' // Suno AI
+  // TODO DONE @AI：如果要改？貌似阿里也要改。。。（已改为 ALIBABA）
+  ALIBABA: 'ALIBABA', // 阿里
+  BAIDU: 'BAIDU', // 百度
+  DEEPSEEK: 'DEEPSEEK', // DeepSeek
+  ZHIPU: 'ZHIPU', // 智谱 AI
+  IFLYTEK: 'IFLYTEK', // 讯飞
+  SILICONFLOW: 'SILICONFLOW', // 硅基流动
+  OPENAI: 'OPENAI',
+  OLLAMA: 'OLLAMA',
+  STABILITYAI: 'STABILITYAI', // Stability AI
+  MIDJOURNEY: 'MIDJOURNEY', // Midjourney
+  SUNO: 'SUNO', // Suno AI
+  // TODO DONE @AI：希望整合到腾讯、百度、豆包？你感觉我要不要修改下标志？YI_YAN 改成百度，它其实是文心一言（然后相关的包名都改了）tencent（已合并：平台标识改为 TENCENT、BAIDU、BYTEDANCE，文字识别按模型类型区分；包名、类名未改）
+  TENCENT: 'TENCENT', // 腾讯
+  // TODO DONE @AI：这个也是噢，它其实是百度；（已并入上面的 BAIDU）
+  // TODO DONE @AI：火山引擎的包，字节？bytedance？这样就整体统一了。当然，讯飞那也要改；（已改为 BYTEDANCE；讯飞改为 IFLYTEK）
+  BYTEDANCE: 'BYTEDANCE' // 字节
 }
 
 export const AiModelTypeEnum = {
@@ -31,8 +37,21 @@ export const AiModelTypeEnum = {
   VIDEO: 4, // 视频
   EMBEDDING: 5, // 向量
   RERANK: 6, // 重排
-  MUSIC: 7 // 音乐
+  MUSIC: 7, // 音乐
+  OCR: 8 // 文字识别
 }
+
+/**
+ * AI 文字识别状态的枚举，与后端 AiOcrStatusEnum 一致
+ */
+export const AiOcrStatusEnum = {
+  SUCCESS: 20, // 识别成功
+  FAIL: 30 // 识别失败
+}
+
+export const AiOcrImageTypes = ['image/png', 'image/jpeg'] // 文字识别支持的图片类型，后端还会按文件内容校验
+export const AiOcrImageMaxSizeMb = 4 // 文字识别的图片大小上限（MB），与后端一致
+export const AiOcrTextMaxLength = 100000 // 文字识别修订文本的长度上限，与后端一致
 
 /**
  * AI 聊天消息类型的枚举
@@ -61,19 +80,19 @@ export const AiModelInputModalityOptions = [
 
 export const OtherPlatformEnum: ImageModelVO[] = [
   {
-    key: AiPlatformEnum.TONG_YI,
+    key: AiPlatformEnum.ALIBABA,
     name: '通义万相'
   },
   {
-    key: AiPlatformEnum.YI_YAN,
+    key: AiPlatformEnum.BAIDU,
     name: '百度千帆'
   },
   {
-    key: AiPlatformEnum.ZHI_PU,
+    key: AiPlatformEnum.ZHIPU,
     name: '智谱 AI'
   },
   {
-    key: AiPlatformEnum.SiliconFlow,
+    key: AiPlatformEnum.SILICONFLOW,
     name: '硅基流动'
   }
 ]
@@ -161,8 +180,8 @@ export enum AiPptExportFormatEnum {
  */
 export const AiPptImagePlatforms = [
   AiPlatformEnum.OPENAI,
-  AiPlatformEnum.SiliconFlow,
-  AiPlatformEnum.TONG_YI
+  AiPlatformEnum.SILICONFLOW,
+  AiPlatformEnum.ALIBABA
 ]
 
 /**
@@ -171,17 +190,59 @@ export const AiPptImagePlatforms = [
 export const AiPptFileTypes = ['pdf', 'doc', 'docx', 'txt', 'md', 'markdown']
 
 /**
- * AI 写作类型的枚举
+ * AI 写作类型（写作场景）的枚举，与后端 AiWriteTypeEnum、字典 ai_write_type 一致
  */
 export enum AiWriteTypeEnum {
-  WRITING = 1, // 撰写
-  REPLY // 回复
+  WRITING = 1, // 文章写作
+  REPLY = 2, // 回复
+  GENERAL = 3, // 通用写作
+  WEEKLY_REPORT = 4, // 周报
+  XIAOHONGSHU = 5, // 小红书
+  REWRITE = 6, // 润色 / 改写
+  TRANSLATE = 7 // 文本翻译
 }
 
 // 表格展示对照map
 export const AiWriteTypeTableRender = {
-  [AiWriteTypeEnum.WRITING]: '撰写',
-  [AiWriteTypeEnum.REPLY]: '回复'
+  [AiWriteTypeEnum.WRITING]: '文章写作',
+  [AiWriteTypeEnum.REPLY]: '回复',
+  [AiWriteTypeEnum.GENERAL]: '通用写作',
+  [AiWriteTypeEnum.WEEKLY_REPORT]: '周报',
+  [AiWriteTypeEnum.XIAOHONGSHU]: '小红书',
+  [AiWriteTypeEnum.REWRITE]: '润色 / 改写',
+  [AiWriteTypeEnum.TRANSLATE]: '文本翻译'
+}
+
+/**
+ * AI 写作选项的枚举：字典 ai_write_format / ai_write_tone / ai_write_length / ai_write_language 的值 1 都是“自动”
+ */
+export const AiWriteOptionEnum = {
+  AUTO: 1, // 自动
+  TONE_PROFESSIONAL: 5 // 语气“专业”，周报默认
+}
+
+// 写作场景参数的可选值：与后端 AiWriteGenerateReqVO.SceneParams 的校验一致
+export const AiWriteXhsStyles = ['种草', '测评', '攻略', '日常分享'] // 小红书风格
+export const AiWriteRewriteModes = ['润色', '改写', '精简', '扩写'] // 润色 / 改写方式
+export const AiWriteTranslateDomains = ['通用', '技术', '法律', '医学', '商务', '文学'] // 翻译领域
+
+/** 各场景“原文”输入框的标题：没有配置的场景不显示原文 */
+export const AiWriteOriginalLabels: Partial<Record<AiWriteTypeEnum, string>> = {
+  [AiWriteTypeEnum.REPLY]: '原文',
+  [AiWriteTypeEnum.WEEKLY_REPORT]: '本周完成事项（每行一条）',
+  [AiWriteTypeEnum.REWRITE]: '原文',
+  [AiWriteTypeEnum.TRANSLATE]: '原文'
+}
+
+/** 各场景“要求”输入框的标题 */
+export const AiWritePromptLabels: Record<AiWriteTypeEnum, string> = {
+  [AiWriteTypeEnum.WRITING]: '写作主题',
+  [AiWriteTypeEnum.REPLY]: '回复要点',
+  [AiWriteTypeEnum.GENERAL]: '写作要求',
+  [AiWriteTypeEnum.WEEKLY_REPORT]: '下周计划 / 问题与风险',
+  [AiWriteTypeEnum.XIAOHONGSHU]: '主题 / 产品',
+  [AiWriteTypeEnum.REWRITE]: '补充要求',
+  [AiWriteTypeEnum.TRANSLATE]: '术语 / 补充说明'
 }
 
 // ========== 【图片 UI】相关的枚举 ==========
@@ -492,16 +553,42 @@ export const NijiVersionList = [
 
 // ========== 【写作 UI】相关的枚举 ==========
 
-/** 写作点击示例时的数据 **/
+/** 写作点击示例时的数据：按写作场景 **/
 export const WriteExample = {
-  write: {
+  [AiWriteTypeEnum.WRITING]: {
     prompt: 'vue',
     data: 'Vue.js 是一种用于构建用户界面的渐进式 JavaScript 框架。它的核心库只关注视图层，易于上手，同时也便于与其他库或已有项目整合。\n\nVue.js 的特点包括：\n- 响应式的数据绑定：Vue.js 会自动将数据与 DOM 同步，使得状态管理变得更加简单。\n- 组件化：Vue.js 允许开发者通过小型、独立和通常可复用的组件构建大型应用。\n- 虚拟 DOM：Vue.js 使用虚拟 DOM 实现快速渲染，提高了性能。\n\n在 Vue.js 中，一个典型的应用结构可能包括：\n1. 根实例：每个 Vue 应用都需要一个根实例作为入口点。\n2. 组件系统：可以创建自定义的可复用组件。\n3. 指令：特殊的带有前缀 v- 的属性，为 DOM 元素提供特殊的行为。\n4. 插值：用于文本内容，将数据动态地插入到 HTML。\n5. 计算属性和侦听器：用于处理数据的复杂逻辑和响应数据变化。\n6. 条件渲染：根据条件决定元素的渲染。\n7. 列表渲染：用于显示列表数据。\n8. 事件处理：响应用户交互。\n9. 表单输入绑定：处理表单输入和验证。\n10. 组件生命周期钩子：在组件的不同阶段执行特定的函数。\n\nVue.js 还提供了官方的路由器 Vue Router 和状态管理库 Vuex，以支持构建复杂的单页应用（SPA）。\n\n在开发过程中，开发者通常会使用 Vue CLI，这是一个强大的命令行工具，用于快速生成 Vue 项目脚手架，集成了诸如 Babel、Webpack 等现代前端工具，以及热重载、代码检测等开发体验优化功能。\n\nVue.js 的生态系统还包括大量的第三方库和插件，如 Vuetify（UI 组件库）、Vue Test Utils（测试工具）等，这些都极大地丰富了 Vue.js 的开发生态。\n\n总的来说，Vue.js 是一个灵活、高效的前端框架，适合从小型项目到大型企业级应用的开发。它的易用性、灵活性和强大的社区支持使其成为许多开发者的首选框架之一。'
   },
-  reply: {
+  [AiWriteTypeEnum.REPLY]: {
     originalContent: '领导，我想请假',
     prompt: '不批',
     data: '您的请假申请已收悉，经核实和考虑，暂时无法批准您的请假申请。\n\n如有特殊情况或紧急事务，请及时与我联系。\n\n祝工作顺利。\n\n谢谢。'
+  },
+  // 以下新场景的示例只填表单，不在预览放生成结果
+  [AiWriteTypeEnum.GENERAL]: {
+    prompt: '为公司年会写一段 1 分钟的开场主持词，热闹、接地气'
+  },
+  [AiWriteTypeEnum.WEEKLY_REPORT]: {
+    originalContent: '完成登录模块重构\n修复 3 个线上问题\n评审支付对接方案',
+    prompt: '下周上线新版登录；风险：第三方短信通道不稳定',
+    sceneParams: { period: '本周', role: '后端开发' }
+  },
+  [AiWriteTypeEnum.XIAOHONGSHU]: {
+    prompt: '一款适合程序员的机械键盘',
+    sceneParams: { audience: '每天敲代码的程序员', style: '测评', emoji: true, tagCount: 5 }
+  },
+  [AiWriteTypeEnum.REWRITE]: {
+    originalContent: '我们这个产品真的很好用，大家用了都说好，功能很多很强大。',
+    sceneParams: { mode: '润色' }
+  },
+  [AiWriteTypeEnum.TRANSLATE]: {
+    originalContent: '芋道是一个开源的快速开发平台。\n\n- 支持多租户\n- 支持工作流',
+    sceneParams: {
+      sourceLanguage: AiWriteOptionEnum.AUTO,
+      targetLanguage: 3,
+      domain: '技术',
+      preserveFormat: true
+    }
   }
 }
 

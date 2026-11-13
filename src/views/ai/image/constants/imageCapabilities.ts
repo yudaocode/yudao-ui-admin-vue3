@@ -9,12 +9,12 @@
 
 /** AI 绘图涉及的平台（与后端 AiPlatformEnum 的 platform 一致） */
 export const AiImagePlatformEnum = {
-  OPENAI: 'OpenAI',
-  TONG_YI: 'TongYi',
-  SILICON_FLOW: 'SiliconFlow',
-  STABLE_DIFFUSION: 'StableDiffusion',
-  DOU_BAO: 'DouBao',
-  MIDJOURNEY: 'Midjourney'
+  OPENAI: 'OPENAI',
+  ALIBABA: 'ALIBABA',
+  SILICONFLOW: 'SILICONFLOW',
+  STABILITYAI: 'STABILITYAI',
+  BYTEDANCE: 'BYTEDANCE',
+  MIDJOURNEY: 'MIDJOURNEY'
 }
 
 /** AI 绘图的生成方式（与后端 AiImageModeEnum 一致） */
@@ -185,7 +185,7 @@ const STABILITY_ADVANCED: ImageAdvancedField[] = [
 
 /** 已登记模型的能力：键 = `${platform}:${model}`，只做精确匹配 */
 export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
-  'OpenAI:gpt-image-1': {
+  'OPENAI:gpt-image-1': {
     client: 'OPENAI_IMAGE',
     sizeMode: 'fixed',
     sizes: ['1024x1024', '1536x1024', '1024x1536'],
@@ -195,7 +195,7 @@ export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
     reference: { max: 0 },
     status: { legacy: '官方有该模型的历史下线公告，上线前按官方模型页核实' }
   },
-  'OpenAI:dall-e-3': {
+  'OPENAI:dall-e-3': {
     client: 'OPENAI_IMAGE',
     sizeMode: 'fixed',
     sizes: ['1024x1024', '1792x1024', '1024x1792'],
@@ -204,7 +204,7 @@ export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
     negativePrompt: false,
     reference: { max: 0 }
   },
-  'TongYi:wan2.7-image': {
+  'ALIBABA:wan2.7-image': {
     client: 'DASHSCOPE_IMAGE',
     ...TONG_YI_PIXEL,
     promptMax: PROMPT_MAX,
@@ -212,14 +212,14 @@ export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
     reference: { max: 0 },
     status: { blocked: 'DashScope SDK 1.1.2.2 没有 wan2.7-image 路由，暂不可用' }
   },
-  'TongYi:wanx2.1-t2i-turbo': {
+  'ALIBABA:wanx2.1-t2i-turbo': {
     client: 'DASHSCOPE_IMAGE',
     ...TONG_YI_PIXEL,
     promptMax: PROMPT_MAX,
     negativePrompt: false,
     reference: { max: 0 }
   },
-  'SiliconFlow:Kwai-Kolors/Kolors': {
+  'SILICONFLOW:Kwai-Kolors/Kolors': {
     client: 'SILICONFLOW_IMAGE',
     sizeMode: 'pixel',
     sizes: ['1024x1024', '960x1280', '768x1024', '720x1440', '720x1280'],
@@ -247,7 +247,7 @@ export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
       }
     ]
   },
-  'StableDiffusion:stable-diffusion-v1-6': {
+  'STABILITYAI:stable-diffusion-v1-6': {
     client: 'STABILITY_IMAGE',
     sizeMode: 'pixel',
     sizes: ['512x512', '768x768', '1024x1024'],
@@ -258,26 +258,26 @@ export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
     advanced: STABILITY_ADVANCED
   },
   // Seedream 5.0 flash：本期只开放已实测的 2K 文生图；参考图、其它档位未实测，暂不开放
-  'DouBao:doubao-seedream-5-0-flash-260915': {
+  'BYTEDANCE:doubao-seedream-5-0-flash-260915': {
     ...SEEDREAM_BASE,
     tiers: ['2K'],
     promptMax: 1000,
     reference: { max: 0 },
     guide: SEEDREAM_BASE.guide?.slice(1) // 不开放参考图：去掉参考图的写法建议
   },
-  'DouBao:doubao-seedream-5-0-260128': {
+  'BYTEDANCE:doubao-seedream-5-0-260128': {
     ...SEEDREAM_BASE,
     tiers: ['2K', '3K'],
     promptMax: 1000,
     reference: { max: 10, maxMb: 10, accept: IMAGE_ACCEPT }
   },
-  'DouBao:doubao-seedream-4-5-251128': {
+  'BYTEDANCE:doubao-seedream-4-5-251128': {
     ...SEEDREAM_BASE,
     tiers: ['2K', '4K'],
     promptMax: 800,
     reference: { max: 10, maxMb: 5, accept: IMAGE_ACCEPT }
   },
-  'DouBao:doubao-seedream-4-0-250828': {
+  'BYTEDANCE:doubao-seedream-4-0-250828': {
     ...SEEDREAM_BASE,
     tiers: ['1K', '2K', '4K'],
     promptMax: 800,
@@ -285,7 +285,7 @@ export const IMAGE_MODEL_CAPABILITIES: Record<string, ImageModelCapability> = {
   }
 }
 
-/** 未登记的模型标识：按平台保守能力（仅文生图、无参考图）；DouBao 没有默认客户端，不可选 */
+/** 未登记的模型标识：按平台保守能力（仅文生图、无参考图）；ByteDance 没有默认客户端，不可选 */
 export const PLATFORM_FALLBACK: Record<string, ImageModelCapability | null> = {
   [AiImagePlatformEnum.OPENAI]: {
     client: 'OPENAI_IMAGE',
@@ -295,7 +295,7 @@ export const PLATFORM_FALLBACK: Record<string, ImageModelCapability | null> = {
     negativePrompt: false,
     reference: { max: 0 }
   },
-  [AiImagePlatformEnum.TONG_YI]: {
+  [AiImagePlatformEnum.ALIBABA]: {
     client: 'DASHSCOPE_IMAGE',
     sizeMode: 'fixed',
     sizes: ['1024x1024'],
@@ -303,7 +303,7 @@ export const PLATFORM_FALLBACK: Record<string, ImageModelCapability | null> = {
     negativePrompt: false,
     reference: { max: 0 }
   },
-  [AiImagePlatformEnum.SILICON_FLOW]: {
+  [AiImagePlatformEnum.SILICONFLOW]: {
     client: 'SILICONFLOW_IMAGE',
     sizeMode: 'fixed',
     sizes: ['1024x1024'],
@@ -311,7 +311,7 @@ export const PLATFORM_FALLBACK: Record<string, ImageModelCapability | null> = {
     negativePrompt: false,
     reference: { max: 0 }
   },
-  [AiImagePlatformEnum.STABLE_DIFFUSION]: {
+  [AiImagePlatformEnum.STABILITYAI]: {
     client: 'STABILITY_IMAGE',
     sizeMode: 'fixed',
     sizes: ['1024x1024'],
@@ -319,7 +319,7 @@ export const PLATFORM_FALLBACK: Record<string, ImageModelCapability | null> = {
     negativePrompt: false,
     reference: { max: 0 }
   },
-  [AiImagePlatformEnum.DOU_BAO]: null
+  [AiImagePlatformEnum.BYTEDANCE]: null
 }
 
 /** 未登记的豆包模型的不可用说明 */
