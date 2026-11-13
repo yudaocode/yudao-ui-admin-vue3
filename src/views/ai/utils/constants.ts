@@ -49,8 +49,6 @@ export const AiOcrStatusEnum = {
   FAIL: 30 // 识别失败
 }
 
-export const AiOcrImageTypes = ['image/png', 'image/jpeg'] // 文字识别支持的图片类型，后端还会按文件内容校验
-export const AiOcrImageMaxSizeMb = 4 // 文字识别的图片大小上限（MB），与后端一致
 export const AiOcrTextMaxLength = 100000 // 文字识别修订文本的长度上限，与后端一致
 
 /**

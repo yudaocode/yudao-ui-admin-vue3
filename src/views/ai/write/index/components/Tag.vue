@@ -5,7 +5,10 @@
       v-for="tag in props.tags"
       :key="tag.value"
       class="tag mb-2 border-[2px] border-solid border-[#DDDFE3] px-2 leading-6 text-[12px] bg-[#DDDFE3] rounded-[4px] cursor-pointer"
-      :class="modelValue === tag.value && '!border-[#846af7] text-[#846af7]'"
+      :class="
+        modelValue === tag.value &&
+        '!border-[var(--el-color-primary)] text-[var(--el-color-primary)]'
+      "
       @click="emits('update:modelValue', tag.value)"
     >
       {{ tag.label }}
@@ -13,12 +16,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends string | number">
 const props = withDefaults(
   defineProps<{
-    tags?: { label: string; value: string }[]
-    modelValue: string
-    [k: string]: any
+    tags?: { label: string; value: T }[]
+    modelValue?: T
   }>(),
   {
     tags: () => []
@@ -26,6 +28,6 @@ const props = withDefaults(
 )
 
 const emits = defineEmits<{
-  (e: 'update:modelValue', value: string): void
+  (e: 'update:modelValue', value: T): void
 }>()
 </script>

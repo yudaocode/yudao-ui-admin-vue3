@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="AI 对话聊天" url="https://doc.iocoder.cn/ai/chat/" />
+  <doc-alert title="AI 对话" url="https://doc.iocoder.cn/ai/chat/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->

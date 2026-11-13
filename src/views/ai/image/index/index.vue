@@ -10,7 +10,7 @@
       :body-style="{ height: '100%', display: 'flex', flexDirection: 'column' }"
     >
       <div class="mb-16px">
-        <div class="text-16px font-bold">AI 绘图</div>
+        <div class="text-16px font-bold">AI 图片生成</div>
         <div class="mt-4px text-12px text-[var(--el-text-color-secondary)]">
           选择模型后，表单按模型能力显示可用的参数
         </div>

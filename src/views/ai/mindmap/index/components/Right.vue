@@ -1,10 +1,25 @@
 <template>
-  <el-card class="my-card h-full flex-grow">
+  <el-card
+    class="h-full flex flex-col flex-grow"
+    body-class="flex-grow min-h-0 !p-0 overflow-hidden box-border"
+    shadow="never"
+  >
     <template #header>
-      <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
-        <span>思维导图预览</span>
+      <div class="m-0 px-7 shrink-0 flex items-center justify-between gap-12px">
+        <div class="flex items-center gap-8px min-w-0">
+          <span class="text-16px font-bold">思维导图预览</span>
+          <el-tag v-if="statusTag" :type="statusTag.type" size="small" disable-transitions>
+            {{ statusTag.label }}
+          </el-tag>
+        </div>
         <!-- 展示在右上角 -->
         <div class="flex items-center gap-8px">
+          <span
+            v-if="showUsage && (status === 'fail' || status === 'empty')"
+            class="text-12px text-[var(--el-text-color-secondary)] whitespace-nowrap"
+          >
+            本次请求
+          </span>
           <TokenUsage
             v-if="showUsage"
             :pending="isGenerating"
@@ -12,25 +27,54 @@
             :output-tokens="outputTokens"
             :total-tokens="totalTokens"
           />
-          <el-button v-show="isEnd" size="small" type="primary" @click="downloadImage">
-            <template #icon>
-              <Icon icon="ph:copy-bold" />
-            </template>
-            下载图片
-          </el-button>
+          <template v-if="showDownload">
+            <el-tooltip
+              content="PNG 只保证文字节点完整；导图中的外链图片可能缺失"
+              placement="bottom"
+            >
+              <Icon icon="ep:info-filled" class="text-[var(--el-text-color-secondary)]" />
+            </el-tooltip>
+            <el-button
+              size="small"
+              type="primary"
+              :disabled="!canDownload"
+              :loading="exporting"
+              @click="downloadImage"
+            >
+              <template #icon>
+                <Icon icon="ep:download" />
+              </template>
+              下载 PNG
+            </el-button>
+          </template>
         </div>
-      </h3>
+      </div>
     </template>
 
-    <div ref="contentRef" class="hide-scroll-bar h-full box-border">
-      <!--展示 markdown 的容器，最终生成的是 html 字符串，直接用 v-html 嵌入-->
-      <div v-if="isGenerating" ref="mdContainerRef" class="wh-full overflow-y-auto">
-        <div class="flex flex-col items-center justify-center" v-html="html"></div>
+    <div ref="contentRef" class="relative h-full box-border">
+      <!--生成中：流式展示 Markdown（markdown-it 默认不渲染 HTML）-->
+      <div
+        v-if="isGenerating"
+        ref="mdContainerRef"
+        class="absolute inset-0 overflow-y-auto bg-[var(--el-bg-color)] px-24px py-16px"
+      >
+        <div class="leading-[1.7] break-words" v-html="html"></div>
       </div>
 
-      <div ref="mindMapRef" class="wh-full">
-        <svg ref="svgRef" :style="{ height: `${contentAreaHeight}px` }" class="w-full" />
-        <div ref="toolBarRef" class="absolute bottom-[10px] right-5"></div>
+      <div v-show="!isGenerating" class="wh-full relative">
+        <svg
+          v-show="showCanvas"
+          ref="svgRef"
+          :style="{ height: `${contentAreaHeight}px` }"
+          class="w-full"
+        />
+        <div
+          v-if="!showCanvas"
+          class="absolute inset-0 flex items-center justify-center text-14px text-[var(--el-text-color-placeholder)]"
+        >
+          {{ renderError ? '导图渲染失败' : '暂无导图' }}
+        </div>
+        <div v-show="showCanvas" ref="toolBarRef" class="absolute bottom-[10px] right-5"></div>
       </div>
     </div>
   </el-card>
@@ -41,42 +85,80 @@ import { Markmap } from 'markmap-view'
 import { Transformer } from 'markmap-lib'
 import { Toolbar } from 'markmap-toolbar'
 import markdownit from 'markdown-it'
-import download from '@/utils/download'
 import TokenUsage from '@/views/ai/components/TokenUsage.vue'
+import {
+  type MindMapStatus,
+  buildMindMapFileName,
+  getMindMapExportScale,
+  processMindMapContent
+} from '@/views/ai/utils/mindmap'
 
 const md = markdownit()
 const message = useMessage() // 消息弹窗
 
 const props = withDefaults(
   defineProps<{
-    generatedContent: string // 生成结果
-    isEnd: boolean // 是否结束
-    isGenerating: boolean // 是否正在生成
-    isStart: boolean // 开始状态，开始时需要清除 html
+    content?: string | null // 要在画布上渲染的 Markdown；为空表示没有导图
+    streamContent?: string // 生成中的 Markdown
+    isGenerating?: boolean // 是否正在生成
+    status?: MindMapStatus // 状态标签
     inputTokens?: number | null // 业务快照：输入 Token，未知为 null
     outputTokens?: number | null // 业务快照：输出 Token，未知为 null
     totalTokens?: number | null // 业务快照：合计 Token，未知为 null
-    showUsage?: boolean // 是否展示 Token 用量：真实生成的结果才展示，示例内容不展示
+    showUsage?: boolean // 是否展示 Token 用量：真实生成的请求才展示，示例、手工渲染不展示
+    showDownload?: boolean // 是否展示下载按钮
   }>(),
   {
+    content: null,
+    streamContent: '',
+    isGenerating: false,
+    status: '',
     inputTokens: null,
     outputTokens: null,
     totalTokens: null,
-    showUsage: false
+    showUsage: false,
+    showDownload: true
   }
 )
-const contentRef = ref<HTMLDivElement>() // 右侧出来 header 以下的区域
+const contentRef = ref<HTMLDivElement>() // 右侧除 header 以外的区域
 const mdContainerRef = ref<HTMLDivElement>() // markdown 的容器，用来滚动到底下的
-const mindMapRef = ref<HTMLDivElement>() // 思维导图的容器
-const svgRef = ref<SVGElement>() // 思维导图的渲染 svg
+const svgRef = ref<SVGSVGElement>() // 思维导图的渲染 svg
 const toolBarRef = ref<HTMLDivElement>() // 思维导图右下角的工具栏，缩放等
-const html = ref('') // 生成过程中的文本
-const contentAreaHeight = ref(0) // 生成区域的高度，出去 header 部分
+const contentAreaHeight = ref(0) // 画布区域的高度，随容器变化
+const exporting = ref(false) // 是否正在导出 PNG
+const rootTitle = ref('') // 已渲染导图的根节点内容（HTML），用于导出文件名
+const renderError = ref(false) // 当前内容是否渲染失败
 let markMap: Markmap | null = null
+let resizeObserver: ResizeObserver | null = null
 const transformer = new Transformer()
 
+/** 是否有要渲染的导图内容 */
+const hasMap = computed(() => !!props.content && props.content.trim().length > 0)
+/** 画布是否可见：有内容且渲染成功 */
+const showCanvas = computed(() => hasMap.value && !renderError.value)
+/** 画布上有渲染成功的导图、且不在生成中，才可下载 */
+const canDownload = computed(() => showCanvas.value && !props.isGenerating)
+/** 生成中的 Markdown 渲染结果 */
+const html = computed(() => (props.isGenerating ? md.render(props.streamContent || '') : ''))
+
+const STATUS_TAGS: Record<
+  string,
+  { label: string; type: 'primary' | 'success' | 'danger' | 'warning' }
+> = {
+  generating: { label: '生成中', type: 'primary' },
+  success: { label: '已生成', type: 'success' },
+  fail: { label: '失败', type: 'danger' },
+  empty: { label: '空结果', type: 'warning' }
+}
+const statusTag = computed(() => STATUS_TAGS[props.status || ''])
+
 onMounted(() => {
-  contentAreaHeight.value = contentRef.value?.clientHeight || 0 // 获取区域高度
+  updateHeight()
+  // 画布高度随容器变化
+  if (typeof ResizeObserver !== 'undefined' && contentRef.value) {
+    resizeObserver = new ResizeObserver(() => updateHeight())
+    resizeObserver.observe(contentRef.value)
+  }
   /** 初始化思维导图 **/
   try {
     markMap = Markmap.create(svgRef.value!)
@@ -84,63 +166,120 @@ onMounted(() => {
     toolBarRef.value?.append(el)
     nextTick(update)
   } catch (e) {
+    console.error(e)
     message.error('思维导图初始化失败')
   }
 })
 
-watch(props, ({ generatedContent, isGenerating, isEnd, isStart }) => {
-  // 开始生成的时候清空一下 markdown 的内容
-  if (isStart) {
-    html.value = ''
-  }
-  // 生成内容的时候使用 markdown 来渲染
-  if (isGenerating) {
-    html.value = md.render(generatedContent)
-  }
-  // 生成结束时更新思维导图
-  if (isEnd) {
-    update()
-  }
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect()
+  resizeObserver = null
+  markMap?.destroy()
+  markMap = null
 })
 
-/** 更新思维导图的展示 */
-const update = () => {
-  try {
-    const { root } = transformer.transform(processContent(props.generatedContent))
-    markMap?.setData(root)
-    markMap?.fit()
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-/** 处理内容 */
-const processContent = (text: string) => {
-  const arr: string[] = []
-  const lines = text.split('\n')
-  for (let line of lines) {
-    if (line.indexOf('```') !== -1) {
-      continue
+/** 画布内容变化、或生成结束重新显示画布时，重新渲染并适应画布 */
+watch(
+  () => [props.content, props.isGenerating] as const,
+  ([, isGenerating]) => {
+    if (!isGenerating) {
+      nextTick(update)
     }
-    line = line.replace(/([*_~`>])|(\d+\.)\s/g, '')
-    arr.push(line)
   }
-  return arr.join('\n')
+)
+
+const updateHeight = () => {
+  contentAreaHeight.value = contentRef.value?.clientHeight || 0
 }
 
-/** 下载图片：download SVG to png file */
-const downloadImage = () => {
-  const svgElement = mindMapRef.value
-  // 将 SVG 渲染到图片对象
-  const serializer = new XMLSerializer()
-  const source = `<?xml version="1.0" standalone="no"?>\r\n${serializer.serializeToString(svgRef.value!)}`
-  const base64Url = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`
-  download.image({
-    url: base64Url,
-    canvasWidth: svgElement?.offsetWidth,
-    canvasHeight: svgElement?.offsetHeight,
-    drawWithImageSize: false
+/** 更新思维导图的展示：渲染失败时明确提示，不显示画布、不可下载 */
+const update = async () => {
+  renderError.value = false
+  rootTitle.value = ''
+  if (!markMap || !hasMap.value) {
+    return
+  }
+  try {
+    updateHeight()
+    const { root } = transformer.transform(processMindMapContent(props.content!))
+    await markMap.setData(root)
+    await markMap.fit()
+    rootTitle.value = root.content || ''
+  } catch (e) {
+    console.error('思维导图渲染失败', e)
+    renderError.value = true
+    message.error('导图渲染失败，请检查 Markdown 内容')
+  }
+}
+
+/** 根节点的 HTML 转为纯文本：DOMParser 不执行脚本、不加载图片 */
+const getRootText = () => {
+  if (!rootTitle.value) {
+    return ''
+  }
+  return new DOMParser().parseFromString(rootTitle.value, 'text/html').body.textContent || ''
+}
+
+/** 加载 SVG 图片 */
+const loadImage = (url: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('SVG 加载失败'))
+    image.src = url
   })
+
+/** 下载 PNG：先等适应画布完成，再按像素预算导出白底 PNG；失败明确提示，不下载空图 */
+const downloadImage = async () => {
+  if (!canDownload.value || !markMap || !svgRef.value) {
+    return
+  }
+  exporting.value = true
+  try {
+    // 1. 等适应画布的过渡完成
+    await markMap.fit()
+    // 2. 计算导出尺寸：目标 4 倍，超出像素预算自动降倍
+    const svgElement = svgRef.value
+    const { width, height } = svgElement.getBoundingClientRect()
+    const scale = getMindMapExportScale(width, height)
+    if (!scale) {
+      throw new Error(`导出尺寸超出预算：${width} x ${height}`)
+    }
+    // 3. 序列化 SVG
+    const clone = svgElement.cloneNode(true) as SVGSVGElement
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+    clone.setAttribute('width', String(width))
+    clone.setAttribute('height', String(height))
+    const source = new XMLSerializer().serializeToString(clone)
+    const image = await loadImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`)
+    // 4. 绘制到白底画布
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.floor(width * scale)
+    canvas.height = Math.floor(height * scale)
+    const context = canvas.getContext('2d')
+    if (!context) {
+      throw new Error('浏览器不支持 canvas')
+    }
+    context.fillStyle = '#ffffff'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+    if (!blob) {
+      throw new Error('导出结果为空')
+    }
+    // 5. 下载：文件名取根标题
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = buildMindMapFileName(getRootText())
+    link.click()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  } catch (e) {
+    console.error('导出思维导图失败', e)
+    message.error('导图过大或浏览器不支持，导出失败')
+  } finally {
+    exporting.value = false
+  }
 }
 
 defineExpose({
@@ -150,35 +289,7 @@ defineExpose({
 })
 </script>
 <style lang="scss" scoped>
-.hide-scroll-bar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
-}
-
-.my-card {
-  display: flex;
-  flex-direction: column;
-
-  :deep(.el-card__body) {
-    @extend .hide-scroll-bar;
-
-    padding: 0;
-    overflow-y: auto;
-    box-sizing: border-box;
-    flex-grow: 1;
-  }
-}
-
-// markmap的tool样式覆盖
-:deep(.markmap) {
-  width: 100%;
-}
-
+// markmap 工具栏由第三方脚本生成，不在模板里，只能用 :deep 覆盖
 :deep(.mm-toolbar-brand) {
   display: none;
 }

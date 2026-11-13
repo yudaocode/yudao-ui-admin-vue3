@@ -108,14 +108,11 @@
   <el-drawer v-model="previewVisible" :with-header="false" size="800px">
     <Right
       v-if="previewVisible2"
-      :generatedContent="previewContent"
-      :isEnd="true"
-      :isGenerating="false"
-      :isStart="false"
-      :inputTokens="previewRow?.inputTokens"
-      :outputTokens="previewRow?.outputTokens"
-      :totalTokens="previewRow?.totalTokens"
-      :showUsage="true"
+      :content="previewContent"
+      :input-tokens="previewRow?.inputTokens"
+      :output-tokens="previewRow?.outputTokens"
+      :total-tokens="previewRow?.totalTokens"
+      :show-usage="true"
     />
   </el-drawer>
 </template>

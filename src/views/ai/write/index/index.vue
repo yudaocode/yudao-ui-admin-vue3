@@ -1,20 +1,24 @@
 <template>
-  <div class="absolute top-0 left-0 right-0 bottom-0 flex">
-    <Left
-      :is-writing="isWriting"
-      class="h-full"
-      @submit="submit"
-      @reset="reset"
-      @example="handleExampleClick"
-    />
-    <Right
-      :is-writing="isWriting"
-      @stop-stream="stopStream"
-      ref="rightRef"
-      class="flex-grow"
-      v-model:content="writeResult"
-      :usage="writeResp"
-    />
+  <div class="absolute top-0 left-0 right-0 bottom-0 flex flex-col">
+    <doc-alert title="AI 写作翻译" url="https://doc.iocoder.cn/ai/write/" />
+    <div class="min-h-0 flex flex-1 gap-16px">
+      <div class="h-full w-380px flex-shrink-0">
+        <Left
+          :is-writing="isWriting"
+          @submit="submit"
+          @reset="reset"
+          @example="handleExampleClick"
+        />
+      </div>
+      <Right
+        :is-writing="isWriting"
+        @stop-stream="stopStream"
+        ref="rightRef"
+        class="min-w-0 flex-1"
+        v-model:content="writeResult"
+        :usage="writeResp"
+      />
+    </div>
   </div>
 </template>
 
@@ -22,7 +26,9 @@
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
 import { AiWriteGenerateRespVO, WriteApi, WriteVO } from '@/api/ai/write'
-import { WriteExample } from '@/views/ai/utils/constants'
+import { AiWriteTypeEnum, WriteExample } from '@/views/ai/utils/constants'
+
+defineOptions({ name: 'AiWrite' })
 
 const message = useMessage()
 
@@ -37,9 +43,12 @@ const stopStream = () => {
   isWriting.value = false
 }
 
-/** 执行写作 */
+/** 执行写作：不自动重试 */
 const rightRef = ref<InstanceType<typeof Right>>()
 const submit = (data: WriteVO) => {
+  if (isWriting.value) {
+    return
+  }
   abortController.value = new AbortController()
   writeResult.value = ''
   writeResp.value = undefined
@@ -48,8 +57,9 @@ const submit = (data: WriteVO) => {
     data,
     onMessage: async (res) => {
       const { code, data, msg } = JSON.parse(res.data)
+      // 业务错误帧（参数不正确、模型不可用、上游失败等）：提示原因并结束
       if (code !== 0) {
-        message.alert(`写作异常! ${msg}`)
+        message.error(msg || '写作失败')
         stopStream()
         return
       }
@@ -66,17 +76,24 @@ const submit = (data: WriteVO) => {
     ctrl: abortController.value,
     onClose: stopStream,
     onError: (error) => {
+      // 网络异常、非 SSE 响应（库默认的 onopen 已校验）等
       console.error('写作异常', error)
+      if (isWriting.value) {
+        message.error('写作失败，请稍后重试')
+      }
       stopStream()
       // 需要抛出异常，禁止重试
       throw error
     }
+  }).catch(() => {
+    // 已在 onError 中提示，这里只避免未处理的 Promise 异常
   })
 }
 
-/** 点击示例触发 */
-const handleExampleClick = (type: keyof typeof WriteExample) => {
-  writeResult.value = WriteExample[type].data
+/** 点击示例：撰写 / 回复在预览显示示例正文；新场景只填表单 */
+const handleExampleClick = (type: AiWriteTypeEnum) => {
+  const example = WriteExample[type]
+  writeResult.value = 'data' in example ? example.data : ''
   writeResp.value = undefined // 示例内容不是模型生成，不展示用量
 }
 
@@ -85,4 +102,9 @@ const reset = () => {
   writeResult.value = ''
   writeResp.value = undefined
 }
+
+/** 卸载：取消生成；keep-alive 切换菜单不会卸载，也不重置 */
+onBeforeUnmount(() => {
+  abortController.value?.abort()
+})
 </script>

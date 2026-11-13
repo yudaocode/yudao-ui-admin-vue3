@@ -19,7 +19,8 @@ export interface MindMapVO {
 
 // AI 思维导图生成 VO
 export interface AiMindMapGenerateReqVO {
-  prompt: string
+  prompt: string // 需求原文，不截断
+  modelId: number // 模型编号，必须为启用的对话模型
 }
 
 // AI 思维导图流式生成的单帧数据：CommonResult.data

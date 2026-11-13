@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="AI 写作助手" url="https://doc.iocoder.cn/ai/write/" />
+  <doc-alert title="AI 写作翻译" url="https://doc.iocoder.cn/ai/write/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -122,6 +122,9 @@
           <dict-tag :type="DICT_TYPE.AI_WRITE_LANGUAGE" :value="scope.row.language" />
         </template>
       </el-table-column>
+      <el-table-column label="场景参数" align="center" prop="sceneParams" width="180">
+        <template #default="scope">{{ formatSceneParams(scope.row.sceneParams) }}</template>
+      </el-table-column>
       <el-table-column label="输入 Token" align="center" prop="inputTokens" width="110">
         <template #default="scope">{{ formatTokenCount(scope.row.inputTokens) }}</template>
       </el-table-column>
@@ -163,9 +166,9 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { WriteApi, AiWritePageReqVO, AiWriteRespVo } from '@/api/ai/write'
+import { WriteApi, AiWritePageReqVO, AiWriteRespVo, AiWriteSceneParams } from '@/api/ai/write'
 import * as UserApi from '@/api/system/user'
 import { formatTokenCount } from '@/views/ai/utils/format'
 
@@ -199,6 +202,30 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+/** 场景参数的展示，如“自动 → 英文 · 技术”；旧记录为空。后端未设置的键返回 null */
+const formatSceneParams = (params?: AiWriteSceneParams | null) => {
+  if (!params) {
+    return ''
+  }
+  const language = (value?: number) => getDictLabel(DICT_TYPE.AI_WRITE_LANGUAGE, value)
+  return [
+    params.targetLanguage
+      ? `${language(params.sourceLanguage)} → ${language(params.targetLanguage)}`
+      : '',
+    params.domain,
+    params.preserveFormat != null ? (params.preserveFormat ? '保留格式' : '不保留格式') : '',
+    params.mode,
+    params.style,
+    params.audience,
+    params.emoji != null ? (params.emoji ? '使用 emoji' : '不用 emoji') : '',
+    params.tagCount != null ? `${params.tagCount} 个标签` : '',
+    params.period,
+    params.role
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 /** 搜索按钮操作 */

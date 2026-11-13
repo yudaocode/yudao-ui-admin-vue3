@@ -12,7 +12,7 @@
             :output-tokens="usage.outputTokens"
             :total-tokens="usage.totalTokens"
           />
-          <el-button color="#846af7" v-show="showCopy" @click="copyContent" size="small">
+          <el-button type="primary" v-show="showCopy" @click="copyContent" size="small">
             <template #icon>
               <Icon icon="ph:copy-bold" />
             </template>
@@ -22,8 +22,9 @@
       </h3>
     </template>
 
-    <div ref="contentRef" class="hide-scroll-bar h-full box-border overflow-y-auto">
-      <div class="w-full min-h-full relative flex-grow bg-white box-border p-3 sm:p-7">
+    <div class="hide-scroll-bar h-full box-border overflow-y-auto">
+      <!-- 编辑框撑满预览区、内部滚动（与 OCR 识别结果一致），不依赖 autosize 测量，避免文字被裁切 -->
+      <div class="w-full h-full relative flex flex-col bg-white box-border p-3 sm:p-7">
         <!-- 终止生成内容的按钮 -->
         <el-button
           v-show="isWriting"
@@ -38,9 +39,10 @@
         </el-button>
         <el-input
           id="inputId"
+          ref="inputRef"
           type="textarea"
           v-model="compContent"
-          autosize
+          class="write-text min-h-0 flex-1"
           :input-style="{ boxShadow: 'none' }"
           resize="none"
           placeholder="生成的内容……"
@@ -88,11 +90,12 @@ const compContent = computed({
   }
 })
 
-/** 滚动 */
-const contentRef = ref<HTMLDivElement>()
+/** 滚动：编辑框内部滚动，生成过程中滚到底部 */
+const inputRef = ref()
 defineExpose({
   scrollToBottom() {
-    contentRef.value?.scrollTo(0, contentRef.value?.scrollHeight)
+    const textarea: HTMLTextAreaElement | undefined = inputRef.value?.textarea
+    textarea?.scrollTo(0, textarea.scrollHeight)
   }
 })
 
@@ -118,6 +121,12 @@ watch(copied, (val) => {
   &::-webkit-scrollbar {
     width: 0;
     height: 0;
+  }
+}
+
+.write-text {
+  :deep(.el-textarea__inner) {
+    height: 100%;
   }
 }
 

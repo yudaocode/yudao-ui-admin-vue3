@@ -1,110 +1,156 @@
 <template>
-  <div class="absolute top-0 left-0 right-0 bottom-0 flex">
-    <!--表单区域-->
-    <Left
-      ref="leftRef"
-      :is-generating="isGenerating"
-      @submit="submit"
-      @direct-generate="directGenerate"
-    />
-    <!--右边生成思维导图区域-->
-    <Right
-      ref="rightRef"
-      :generatedContent="generatedContent"
-      :isEnd="isEnd"
-      :isGenerating="isGenerating"
-      :isStart="isStart"
-      :inputTokens="generateResp?.inputTokens"
-      :outputTokens="generateResp?.outputTokens"
-      :totalTokens="generateResp?.totalTokens"
-      :showUsage="!!generateResp"
-    />
+  <div class="absolute top-0 left-0 right-0 bottom-0 flex flex-col">
+    <doc-alert title="AI 思维导图" url="https://doc.iocoder.cn/ai/mindmap/" />
+    <div class="min-h-0 flex flex-1 gap-16px">
+      <!--表单区域-->
+      <div class="h-full w-380px flex-shrink-0">
+        <Left
+          ref="leftRef"
+          :is-generating="isGenerating"
+          @submit="submit"
+          @direct-generate="directGenerate"
+        />
+      </div>
+      <!--右边生成思维导图区域-->
+      <div class="h-full min-w-0 flex-1">
+        <Right
+          ref="rightRef"
+          :content="canvasContent"
+          :stream-content="streamContent"
+          :is-generating="isGenerating"
+          :status="status"
+          :input-tokens="usage?.inputTokens"
+          :output-tokens="usage?.outputTokens"
+          :total-tokens="usage?.totalTokens"
+          :show-usage="showUsage"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import {
-  AiMindMapApi,
-  AiMindMapGenerateReqVO,
-  AiMindMapGenerateRespVO
-} from '@/api/ai/mindmap'
+import { AiMindMapApi, AiMindMapGenerateReqVO } from '@/api/ai/mindmap'
 import { MindMapContentExample } from '@/views/ai/utils/constants'
+import type { MindMapStatus } from '@/views/ai/utils/mindmap'
 
 defineOptions({
   name: 'AiMindMap'
 })
-const ctrl = ref<AbortController>() // 请求控制
-const isGenerating = ref(false) // 是否正在生成思维导图
-const isStart = ref(false) // 开始生成，用来清空思维导图
-const isEnd = ref(true) // 用来判断结束的时候渲染思维导图
-const message = useMessage() // 消息提示
 
-const generatedContent = ref('') // 生成思维导图结果
-const generateResp = ref<AiMindMapGenerateRespVO>() // 最近一帧的生成结果，用于展示 Token 用量；示例、直接生成已有内容时为空，不展示
+const message = useMessage() // 消息提示
 
 const leftRef = ref<InstanceType<typeof Left>>() // 左边组件
 const rightRef = ref<InstanceType<typeof Right>>() // 右边组件
 
-/** 使用已有内容直接生成 **/
-const directGenerate = (existPrompt: string) => {
-  isEnd.value = false // 先设置为 false 再设置为 true，让子组建的 watch 能够监听到
-  generatedContent.value = existPrompt
-  generateResp.value = undefined // 已有内容不是模型生成，不展示用量
-  isEnd.value = true
+// 以下状态只在当前页面内存：keep-alive 切换菜单保留，刷新、关闭页签、重新登录后不恢复
+const canvasContent = ref(MindMapContentExample) // 画布渲染的 Markdown；首次进入为内置示例
+const streamContent = ref('') // 本次生成的流式内容
+const isGenerating = ref(false) // 是否正在生成
+const status = ref<MindMapStatus>('') // 状态标签
+const usage = ref<{
+  inputTokens: number | null
+  outputTokens: number | null
+  totalTokens: number | null
+} | null>(null) // 本次请求的 Token 快照，不归属画布上的旧导图
+const showUsage = ref(false) // 只有 AI 生成的请求展示 Token
+
+let ctrl: AbortController | undefined // 当前生成的请求控制，卸载时取消
+
+/** 使用已有 Markdown 直接渲染：不调模型、不展示 Token、不落库 */
+const directGenerate = (content: string) => {
+  if (!content || !content.trim()) {
+    message.warning('请输入 Markdown 内容')
+    return
+  }
+  canvasContent.value = content
+  status.value = ''
+  usage.value = null
+  showUsage.value = false
 }
 
-/** 停止 stream 生成 */
-const stopStream = () => {
+/** 生成失败：画布仍是原来的导图，不回填文本框 */
+const finishFail = (msg: string) => {
+  if (!isGenerating.value) {
+    return
+  }
   isGenerating.value = false
-  isStart.value = false
-  ctrl.value?.abort()
+  status.value = 'fail'
+  message.error(msg)
 }
 
-/** 提交生成 */
+/** 正常结束：非空结果交给画布并回填“已有 Markdown”；空结果保留原来的导图 */
+const finishClose = () => {
+  if (!isGenerating.value) {
+    return
+  }
+  isGenerating.value = false
+  const content = streamContent.value
+  if (!content.trim()) {
+    status.value = 'empty'
+    message.warning('生成结果为空，请重试或更换模型')
+    return
+  }
+  status.value = 'success'
+  canvasContent.value = content
+  leftRef.value?.setMarkdown(content)
+}
+
+/** 提交 AI 生成：不自动重试 */
 const submit = (data: AiMindMapGenerateReqVO) => {
+  if (isGenerating.value) {
+    return
+  }
   isGenerating.value = true
-  isStart.value = true
-  isEnd.value = false
-  ctrl.value = new AbortController() // 请求控制赋值
-  generatedContent.value = '' // 清空生成数据
-  generateResp.value = undefined
+  status.value = 'generating'
+  streamContent.value = ''
+  usage.value = null
+  showUsage.value = true
+  const controller = new AbortController()
+  ctrl = controller
   AiMindMapApi.generateMindMap({
     data,
     onMessage: async (res) => {
       const { code, data, msg } = JSON.parse(res.data)
+      // 业务错误帧（模型不可用、上游失败等）：提示原因并结束
       if (code !== 0) {
-        message.alert(`生成思维导图异常! ${msg}`)
-        stopStream()
+        finishFail(msg || '生成失败')
+        controller.abort()
         return
       }
       // Token 取最新快照，不累加；仅携带用量的尾帧 content 为空字符串
-      generateResp.value = data
-      if (!data.content) {
+      usage.value = {
+        inputTokens: data?.inputTokens ?? null,
+        outputTokens: data?.outputTokens ?? null,
+        totalTokens: data?.totalTokens ?? null
+      }
+      if (!data?.content) {
         return
       }
-      generatedContent.value = generatedContent.value + data.content
+      streamContent.value = streamContent.value + data.content
       await nextTick()
       rightRef.value?.scrollBottom()
     },
     onClose() {
-      isEnd.value = true
-      leftRef.value?.setGeneratedContent(generatedContent.value)
-      stopStream()
+      finishClose()
     },
     onError(err) {
+      // 网络异常、非 SSE 响应（库默认的 onopen 已校验）等
       console.error('生成思维导图失败', err)
-      stopStream()
+      finishFail('生成失败，请稍后重试')
       // 需要抛出异常，禁止重试
       throw err
     },
-    ctrl: ctrl.value
+    ctrl: controller
+  }).catch(() => {
+    // 已在 onError 中提示，这里只避免未处理的 Promise 异常
   })
 }
 
-/** 初始化 */
-onMounted(() => {
-  generatedContent.value = MindMapContentExample
+/** 卸载：取消生成；keep-alive 切换菜单不会卸载，也不重置 */
+onBeforeUnmount(() => {
+  ctrl?.abort()
 })
 </script>
