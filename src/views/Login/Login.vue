@@ -109,9 +109,12 @@ $prefix-cls: #{$namespace}-login;
 
 .#{$prefix-cls} {
   --login-ink: #11182a;
+  --login-muted: #68728a;
   --login-panel: #f4f7fc;
   --login-card: #fff;
+  --login-line: #e7ebf3;
   --login-cyan: #19c6df;
+  --login-blue: #347edf;
   --login-pink: #df2aa7;
   --login-tool-color: #34405a;
 
@@ -599,6 +602,70 @@ $prefix-cls: #{$namespace}-login;
   }
 }
 
+// 六类表单的控件外观（参考上游 c7f8db52d LoginForm / RegisterForm 样式）：只在外壳内调整输入框、按钮、复选框外观与 46px 高度，
+// 表单组件、校验与认证逻辑不变；禁用、校验失败状态与带后缀按钮的输入组圆角沿用 Element Plus
+.form-card {
+  :deep(.el-input__wrapper) {
+    min-height: 46px;
+  }
+
+  :deep(.el-input:not(.el-input-group) > .el-input__wrapper) {
+    border-radius: 13px;
+  }
+
+  :deep(.el-input:not(.is-disabled) > .el-input__wrapper) {
+    background: color-mix(in srgb, var(--login-panel) 72%, var(--login-card));
+    box-shadow: inset 0 0 0 1px var(--login-line);
+    transition:
+      box-shadow 180ms ease,
+      transform 180ms ease,
+      background-color 180ms ease;
+  }
+
+  :deep(.el-input:not(.is-disabled) > .el-input__wrapper:hover) {
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--login-blue) 42%, var(--login-line));
+  }
+
+  :deep(.el-input:not(.is-disabled) > .el-input__wrapper.is-focus) {
+    background: var(--login-card);
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 0 0 1.5px var(--login-blue),
+      0 7px 20px rgb(52 126 223 / 10%);
+  }
+
+  :deep(.el-form-item.is-error .el-input > .el-input__wrapper) {
+    box-shadow: inset 0 0 0 1px var(--el-color-danger);
+  }
+
+  :deep(.el-input__inner) {
+    color: var(--login-ink);
+  }
+
+  :deep(.el-checkbox__label) {
+    color: var(--login-muted);
+  }
+
+  :deep(.el-button:not(.is-link, .is-text)) {
+    min-height: 46px;
+    border-radius: 13px;
+  }
+
+  :deep(.el-button--primary:not(.is-link, .is-text, .is-plain)) {
+    font-weight: 650;
+    border: 0;
+    box-shadow: 0 13px 28px color-mix(in srgb, var(--el-color-primary) 25%, transparent);
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  :deep(.el-button--primary:not(.is-link, .is-text, .is-plain, .is-disabled):hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px color-mix(in srgb, var(--el-color-primary) 32%, transparent);
+  }
+}
+
 .ambient {
   position: fixed;
   z-index: -1;
@@ -647,8 +714,10 @@ $prefix-cls: #{$namespace}-login;
 
 .#{$prefix-cls}.is-dark {
   --login-ink: #eef3ff;
+  --login-muted: #9da9c1;
   --login-panel: #0d1425;
   --login-card: #151e31;
+  --login-line: #27324a;
   --login-tool-color: #dce6fb;
 
   .login-tools {
@@ -802,6 +871,11 @@ $prefix-cls: #{$namespace}-login;
   .signal-line i,
   .form-card {
     animation: none !important;
+  }
+
+  .form-card :deep(.el-input__wrapper),
+  .form-card :deep(.el-button) {
+    transition: none !important;
   }
 }
 </style>

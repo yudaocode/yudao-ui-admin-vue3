@@ -214,7 +214,8 @@ export default defineComponent({
         class={[
           prefixCls,
           'h-[var(--top-tool-height)] relative px-[var(--top-tool-p-x)] flex items-center justify-between',
-          'dark:bg-[var(--el-bg-color)]'
+          // 暗色底色：默认主题跟随头部色，已保存自定义头部色时为 --el-bg-color（由 app store 内联）
+          'dark:bg-[var(--top-tool-dark-bg-color)]'
         ]}
       >
         {showSidebarControl.value || showBreadcrumb.value ? (

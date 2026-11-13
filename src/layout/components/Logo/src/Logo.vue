@@ -39,18 +39,16 @@ const show = computed(
       :class="[
         prefixCls,
         getLayoutRenderMode(layout) !== 'classic' ? `${prefixCls}__Top` : '',
-        'flex !h-[var(--logo-height)] items-center cursor-pointer pl-8px relative decoration-none overflow-hidden'
+        'flex !h-[var(--logo-height)] min-w-0 items-center cursor-pointer px-10px relative decoration-none overflow-hidden'
       ]"
       to="/"
     >
-      <img
-        class="h-[calc(var(--logo-height)-10px)] w-[calc(var(--logo-height)-10px)] flex-none"
-        src="@/assets/imgs/logo.png"
-      />
+      <!-- 图片 38px、左右内距 10px（上游 e66532cf9 Logo）；标题空间不足时省略，顶栏让位给菜单“更多”入口 -->
+      <img class="h-38px w-38px flex-none" src="@/assets/imgs/logo.png" />
       <div
         v-if="show"
         :class="[
-          'ml-10px text-15px font-600 tracking-[-0.01em]',
+          'ml-10px min-w-0 truncate text-15px font-600 tracking-[-0.01em]',
           {
             'text-[var(--logo-title-text-color)]': getLayoutRenderMode(layout) === 'classic',
             'text-[var(--top-header-text-color)]':

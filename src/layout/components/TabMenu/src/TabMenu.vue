@@ -281,6 +281,14 @@ export default defineComponent({
       }
     }
 
+    // 扩展菜单的二级标题：当前展开的一级入口标题（参考上游 6b10db306 secondary-title）
+    const extraMenuTitle = computed(() => {
+      const activeTab = unref(tabRouters).find(
+        (route) => getFullTabPath(route) === unref(tabActive)
+      )
+      return activeTab ? getRouteTitle(activeTab.meta) : ''
+    })
+
     // 设置高亮
     const isActive = (currentPath: string) => {
       const { path } = unref(currentRoute)
@@ -368,6 +376,7 @@ export default defineComponent({
           <Menu
             split={false}
             menus={permissionStore.getMenuTabRouters}
+            secondaryTitle={unref(extraMenuTitle)}
             mode="vertical"
             class={[
               '!absolute top-0 z-11',
@@ -434,6 +443,7 @@ $prefix-cls: #{$namespace}-tab-menu;
 
   // 一级入口 pill + 选中主色指示条（参考上游 PrimaryNav rail，6b10db306）：
   // 用伪元素绘制，按钮尺寸与点击区域不变；颜色全部取自菜单主题变量，已保存的自定义主题继续生效
+  // 展开宽度 72px 时 pill 宽 56px（上游 e66532cf9 rail item）
   &__item {
     isolation: isolate;
 
@@ -443,7 +453,7 @@ $prefix-cls: #{$namespace}-tab-menu;
       border-radius: 10px;
       content: '';
       transition: background-color var(--transition-time-02);
-      inset: 4px 6px;
+      inset: 4px 8px;
     }
 
     &:hover::before {

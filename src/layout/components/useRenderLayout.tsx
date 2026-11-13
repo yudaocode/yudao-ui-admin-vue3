@@ -136,17 +136,20 @@ export const useRenderLayout = () => {
           role="banner"
           class={[
             `${prefixCls}__topbar`,
-            'relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom dark:bg-[var(--el-bg-color)]'
+            'relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom dark:bg-[var(--top-tool-dark-bg-color)]'
           ]}
         >
-          {logo.value ? <Logo class="custom-hover !w-auto !pr-15px"></Logo> : undefined}
+          {/* 窄屏时 Logo 标题省略让位（最小保留图片 58px + 右内距 15px），根菜单至少保留左右内距 20px + “更多”64px */}
+          {logo.value ? (
+            <Logo class="custom-hover !w-auto !pr-15px min-w-[73px]"></Logo>
+          ) : undefined}
 
           {showHeaderMenu ? (
             <Menu
               mode="horizontal"
               rootOnly
               theme="header"
-              class="h-[var(--top-tool-height)] min-w-0 flex-1 px-10px"
+              class="h-[var(--top-tool-height)] !min-w-[84px] flex-1 px-10px"
             ></Menu>
           ) : undefined}
 
@@ -270,14 +273,16 @@ export const useRenderLayout = () => {
             'relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom'
           ]}
         >
-          {logo.value ? <Logo class="custom-hover !w-auto !pr-15px"></Logo> : undefined}
+          {logo.value ? (
+            <Logo class="custom-hover !w-auto !pr-15px min-w-[73px]"></Logo>
+          ) : undefined}
 
           {showHeaderMenu ? (
             <Menu
               mode="horizontal"
               rootOnly
               theme="header"
-              class="h-[var(--top-tool-height)] min-w-0 flex-1 px-10px"
+              class="h-[var(--top-tool-height)] !min-w-[84px] flex-1 px-10px"
             ></Menu>
           ) : undefined}
 

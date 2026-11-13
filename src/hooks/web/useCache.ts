@@ -15,6 +15,8 @@ export const CACHE_KEY = {
   IS_DARK: 'isDark',
   LANG: 'lang',
   THEME: 'theme',
+  // 主题中用户显式自定义过的部分（primary / menu / header），与 THEME 一起写入
+  THEME_CUSTOM_PARTS: 'themeCustomParts',
   LAYOUT: 'layout',
   CURRENT_SIZE: 'currentSize',
   FIXED_MENU: 'fixedMenu',

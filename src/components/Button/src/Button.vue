@@ -107,7 +107,10 @@ const color = computed(() => {
     return color
   }
   if (type === 'primary' && !plain && !text && !link) {
-    return unref(getTheme).elColorPrimary || ''
+    // 未自定义主色时交给 ElButton 按 --el-color-primary 着色（随明暗变化）
+    return appStore.getCustomThemeParts.includes('primary')
+      ? unref(getTheme).elColorPrimary || ''
+      : ''
   }
   return ''
 })

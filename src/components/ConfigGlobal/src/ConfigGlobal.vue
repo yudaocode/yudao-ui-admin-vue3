@@ -42,7 +42,8 @@ watch(
         : undefined
     } else {
       appStore.getMobile ? appStore.setMobile(false) : undefined
-      setCssVar('--left-menu-min-width', '64px')
+      // 桌面端去掉移动端写入的内联值，回落 var.css 的折叠宽度（72px），尺寸只在 var.css 维护
+      document.documentElement.style.removeProperty('--left-menu-min-width')
     }
   },
   {
