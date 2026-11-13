@@ -1,15 +1,15 @@
 import Form from './src/Form.vue'
 import { ElForm, ElFormItem } from 'element-plus'
-import { FormSchema, FormSetPropsType } from '@/types/form'
+import type { FormSchema, FormSetPropsType } from './src/types'
 
-// 与上游一致的类型入口；类型定义仍在 @/types/form、@/types/components
+// 与上游一致的类型入口；类型定义在 ./src/types（参考上游 9eb87ad13 Form/src/types/index.ts）
 export type {
   FormSchema,
   FormSetPropsType,
   FormSetPropsType as FormSetProps,
   FormItemProps,
   FormValueType
-} from '@/types/form'
+} from './src/types'
 export type {
   ComponentName,
   ComponentOptions,
@@ -18,7 +18,7 @@ export type {
   ComponentProps,
   ColProps,
   RadioButtonComponentProps
-} from '@/types/components'
+} from './src/types'
 // 组件名运行时枚举与可选的组件属性命名类型（参考上游 28d1654b2、1d0f4b4c3、2261f4997、c5b545d2c、283bc58d4）
 export { ComponentNameEnum } from './src/componentProps'
 export type {

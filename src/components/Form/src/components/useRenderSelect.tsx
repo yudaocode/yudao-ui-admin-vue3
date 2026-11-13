@@ -1,5 +1,4 @@
-import { FormSchema } from '@/types/form'
-import { ComponentOptions } from '@/types/components'
+import type { ComponentOptions, FormSchema } from '../types'
 import { ElOption, ElOptionGroup } from 'element-plus'
 import { getSlot } from '@/utils/tsxHelper'
 import { isFunction, isObject, isString } from '@/utils/is'

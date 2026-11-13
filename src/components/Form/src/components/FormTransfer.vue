@@ -2,7 +2,7 @@
 import { computed, PropType, ref, useAttrs } from 'vue'
 import { ElTransfer } from 'element-plus'
 import type { TransferDirection, TransferInstance } from 'element-plus'
-import type { ComponentOptionsAlias } from '@/types/components'
+import type { ComponentOptionsAlias } from '../types'
 
 /**
  * Form 专用的 Transfer 适配组件

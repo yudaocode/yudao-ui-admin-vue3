@@ -39,9 +39,9 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { findIndex } from '@/utils'
 import { isFunction } from '@/utils/is'
 import { cloneDeep, cloneDeepWith, isObject, isPlainObject, set, toPath } from 'lodash-es'
-import { FormProps } from './types'
+import type { FormProps } from './types'
 import { Icon } from '@/components/Icon'
-import { FormSchema, FormSetPropsType } from '@/types/form'
+import type { FormSchema, FormSetPropsType } from './types'
 
 const { getPrefixCls } = useDesign()
 

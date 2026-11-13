@@ -694,7 +694,7 @@ $prefix-cls: #{$namespace}-tags-view;
       left: 0;
       width: 100%;
       height: 100%;
-      border-left: 1px solid var(--el-border-color);
+      border-left: 1px solid var(--layout-border-color);
       content: '';
     }
 
@@ -705,7 +705,7 @@ $prefix-cls: #{$namespace}-tags-view;
         left: 0;
         width: 100%;
         height: 100%;
-        border-right: 1px solid var(--el-border-color);
+        border-right: 1px solid var(--layout-border-color);
         border-left: none;
         content: '';
       }
@@ -873,11 +873,6 @@ $prefix-cls: #{$namespace}-tags-view;
 // 圆角卡片、壳层分隔色边框，选中为主色浅底 + 主色字，选中的可关闭标签常显关闭按钮；
 // 尺寸、结构、事件与沉浸式标签均不变；放在 .dark 规则之后，明暗两套共用
 .#{$prefix-cls} {
-  &__tool::before,
-  &__tool--first::before {
-    border-color: var(--layout-border-color);
-  }
-
   &__item:not(.#{$prefix-cls}__item--immerse) {
     color: var(--el-text-color-regular);
     border: 1px solid var(--layout-border-color);

@@ -1,7 +1,5 @@
-import type { Form, FormExpose } from '@/components/Form'
+import type { Form, FormExpose, FormProps, FormSchema, FormSetPropsType } from '@/components/Form'
 import type { ElForm, ElFormItem } from 'element-plus'
-import type { FormProps } from '@/components/Form/src/types'
-import { FormSchema, FormSetPropsType } from '@/types/form'
 import { isPlainObject } from 'lodash-es'
 import { isEmptyVal } from '@/utils/is'
 

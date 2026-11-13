@@ -23,7 +23,7 @@ import {
 import { InputPassword } from '@/components/InputPassword'
 import { UploadImg, UploadImgs, UploadFile } from '@/components/UploadFile'
 import { IAgree } from '@/components/IAgree'
-import { ComponentName } from '@/types/components'
+import type { ComponentName } from './types'
 import FormTransfer from './components/FormTransfer.vue'
 
 // 富文本编辑器按需加载，避免使用 Form 的页面因此加载 wangEditor

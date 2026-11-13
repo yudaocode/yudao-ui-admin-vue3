@@ -1,5 +1,5 @@
 import type { SearchExpose, SearchProps } from '@/components/Search'
-import { FormSchema, FormSetPropsType } from '@/types/form'
+import type { FormSchema, FormSetPropsType } from '@/components/Form'
 import type { ElForm, ElFormItem } from 'element-plus'
 
 /**

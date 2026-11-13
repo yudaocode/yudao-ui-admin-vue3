@@ -1,6 +1,6 @@
 import Search from './src/Search.vue'
 import type { ElForm, ElFormItem } from 'element-plus'
-import type { FormSchema, FormSetPropsType } from '@/types/form'
+import type { FormSchema, FormSetPropsType } from '@/components/Form'
 
 // 可通过 setProps 临时覆盖的 Search 属性；值为 undefined 时取消覆盖，恢复使用组件传入的属性
 export interface SearchProps {

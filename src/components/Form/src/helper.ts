@@ -4,9 +4,7 @@ import { clone, get, has, toPath } from 'lodash-es'
 import { getSlot } from '@/utils/tsxHelper'
 import { humpToDash } from '@/utils'
 import { isFunction } from '@/utils/is'
-import { PlaceholderModel } from './types'
-import { FormSchema } from '@/types/form'
-import { ColProps } from '@/types/components'
+import type { ColProps, FormSchema, PlaceholderModel } from './types'
 
 // 与 lodash set 的防护一致：路径中包含这些键时不按嵌套路径处理，避免修改对象原型
 const UNSAFE_PATH_KEYS = ['__proto__', 'constructor', 'prototype']

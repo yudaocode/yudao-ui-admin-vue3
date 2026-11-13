@@ -44,7 +44,7 @@ import type {
   ComponentOptions,
   ComponentOptionsAlias,
   ComponentOptionsProps
-} from '@/types/components'
+} from './types'
 
 /**
  * Form 组件名（运行时枚举，参考上游 28d1654b2，名称沿用上游 RADIO_GROUP / I_AGREE 等写法）：

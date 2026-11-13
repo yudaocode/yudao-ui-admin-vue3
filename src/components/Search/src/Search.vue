@@ -5,9 +5,13 @@ import { propTypes } from '@/utils/propTypes'
 import { useForm } from '@/hooks/web/useForm'
 import { findIndex } from '@/utils'
 import { cloneDeep, set, toPath } from 'lodash-es'
-import { FormSchema, FormSetPropsType } from '@/types/form'
 import type { ElForm, FormItemProp } from 'element-plus'
-import type { Form as FormComponent, FormExpose } from '@/components/Form'
+import type {
+  Form as FormComponent,
+  FormExpose,
+  FormSchema,
+  FormSetPropsType
+} from '@/components/Form'
 import type { SearchExpose, SearchProps } from '../index'
 
 defineOptions({ name: 'Search' })

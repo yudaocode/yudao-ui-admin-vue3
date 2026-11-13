@@ -1,4 +1,4 @@
-import { FormSchema } from '@/types/form'
+import type { FormSchema } from '../types'
 import { ElRadio, ElRadioButton } from 'element-plus'
 import { defineComponent } from 'vue'
 import {

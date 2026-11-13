@@ -39,7 +39,7 @@ ${selector}:before {
   left: 0;
   width: 1px;
   height: 100%;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -57,7 +57,7 @@ ${selector}:after {
   right: 0;
   width: 1px;
   height: 100%;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -75,7 +75,7 @@ ${selector}:before {
   left: 0;
   width: 100%;
   height: 1px;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -93,7 +93,7 @@ ${selector}:after {
   left: 0;
   width: 100%;
   height: 1px;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
