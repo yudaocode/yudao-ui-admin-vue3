@@ -16,6 +16,7 @@ export interface ChatRoleVO {
   knowledgeIds?: number[] // 引用的知识库 ID 列表
   toolIds?: number[] // 引用的工具 ID 列表
   mcpClientNames?: string[] // 引用的 MCP Client 名字列表
+  skillIds?: number[] // 引用的技能 ID 列表
 }
 
 // AI 聊天角色 分页请求 vo
@@ -64,6 +65,11 @@ export const ChatRoleApi = {
   // 获取角色分类
   getCategoryList: async () => {
     return await request.get({ url: `/ai/chat-role/category-list` })
+  },
+
+  // 获取 my role 详情
+  getMy: async (id: number) => {
+    return await request.get({ url: `/ai/chat-role/get-my?id=` + id })
   },
 
   // 创建角色

@@ -32,6 +32,18 @@
       <el-form-item label="角色设定" prop="systemMessage">
         <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
       </el-form-item>
+      <el-form-item label="引用技能" prop="skillIds">
+        <el-select v-model="formData.skillIds" placeholder="请选择技能" clearable multiple>
+          <el-option v-for="item in skillList" :key="item.id" :label="item.name" :value="item.id">
+            <span>{{ item.name }}</span>
+            <span
+              class="ml-8px inline-block max-w-360px truncate align-bottom text-12px text-[var(--el-text-color-secondary)]"
+            >
+              {{ item.description }}
+            </span>
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="引用知识库" prop="knowledgeIds">
         <el-select v-model="formData.knowledgeIds" placeholder="请选择知识库" clearable multiple>
           <el-option
@@ -98,6 +110,7 @@ import { FormRules } from 'element-plus'
 import { AiModelTypeEnum } from '@/views/ai/utils/constants'
 import { KnowledgeApi, KnowledgeVO } from '@/api/ai/knowledge/knowledge'
 import { ToolApi, ToolVO } from '@/api/ai/model/tool'
+import { SkillApi, SkillVO } from '@/api/ai/skill'
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -122,12 +135,14 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   knowledgeIds: [] as number[],
   toolIds: [] as number[],
-  mcpClientNames: [] as string[]
+  mcpClientNames: [] as string[],
+  skillIds: [] as number[]
 })
 const formRef = ref() // 表单 Ref
 const models = ref([] as ModelVO[]) // 聊天模型列表
 const knowledgeList = ref([] as KnowledgeVO[]) // 知识库列表
 const toolList = ref([] as ToolVO[]) // 工具列表
+const skillList = ref([] as SkillVO[]) // 技能列表：只包含启用的技能
 
 /** 是否【我】自己创建，私有角色 */
 const isUser = computed(() => {
@@ -155,7 +170,10 @@ const open = async (type: string, id?: number, title?: string) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ChatRoleApi.getChatRole(id)
+      // 我的角色：使用 get-my 接口，普通用户没有后台角色的查询权限
+      formData.value = isUser.value
+        ? await ChatRoleApi.getMy(id)
+        : await ChatRoleApi.getChatRole(id)
     } finally {
       formLoading.value = false
     }
@@ -166,6 +184,11 @@ const open = async (type: string, id?: number, title?: string) => {
   knowledgeList.value = await KnowledgeApi.getSimpleKnowledgeList()
   // 获取工具列表
   toolList.value = await ToolApi.getToolSimpleList()
+  // 获取技能列表：已停用、删除的技能不能再绑定，从已选中移除
+  skillList.value = await SkillApi.getSkillSimpleList()
+  formData.value.skillIds = (formData.value.skillIds || []).filter((skillId) =>
+    skillList.value.some((skill) => skill.id === skillId)
+  )
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -216,7 +239,8 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE,
     knowledgeIds: [],
     toolIds: [],
-    mcpClientNames: []
+    mcpClientNames: [],
+    skillIds: []
   }
   formRef.value?.resetFields()
 }

@@ -150,6 +150,14 @@ export const AiPptModeEnum = {
 }
 
 /**
+ * AI 技能文件类型的枚举
+ */
+export const AiSkillFileTypeEnum = {
+  DIRECTORY: 1, // 目录
+  FILE: 2 // 文件
+}
+
+/**
  * AI PPT 素材来源的枚举
  */
 export const AiPptSourceEnum = {

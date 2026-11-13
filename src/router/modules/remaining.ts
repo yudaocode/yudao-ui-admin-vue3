@@ -1025,6 +1025,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '设计 AI 工作流',
           activeMenu: '/ai/console/workflow'
         }
+      },
+      {
+        path: 'console/skill/file/:skillId',
+        component: () => import('@/views/ai/skill/file/index.vue'),
+        name: 'AiSkillFile',
+        meta: {
+          title: '技能文件',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/console/skill'
+        }
       }
     ]
   },
