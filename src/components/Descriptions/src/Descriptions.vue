@@ -5,7 +5,7 @@ import { get } from 'lodash-es'
 import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
 import { useAppStore } from '@/store/modules/app'
-import { DescriptionsSchema } from '@/types/descriptions'
+import type { DescriptionsSchema } from './types'
 
 defineOptions({ name: 'Descriptions' })
 

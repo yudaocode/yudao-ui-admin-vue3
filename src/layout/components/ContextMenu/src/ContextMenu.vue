@@ -3,7 +3,7 @@ import { PropType } from 'vue'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
-import { contextMenuSchema } from '@/types/contextMenu'
+import type { contextMenuSchema } from './types'
 import type { ElDropdown } from 'element-plus'
 
 defineOptions({ name: 'ContextMenu' })

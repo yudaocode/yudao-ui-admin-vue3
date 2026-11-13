@@ -12,7 +12,7 @@ import type {
   FormSchema,
   FormSetPropsType
 } from '@/components/Form'
-import type { SearchExpose, SearchProps } from '../index'
+import type { SearchExpose, SearchProps } from './types'
 
 defineOptions({ name: 'Search' })
 

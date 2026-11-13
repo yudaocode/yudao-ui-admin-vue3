@@ -1,7 +1,7 @@
 import type { ComponentSize } from 'element-plus'
 import type { CSSProperties, VNodeChild } from 'vue'
 
-// 注意：本文件是 Table 类型的唯一定义处，@/types/table 从这里重导出，这里不能反向导入 @/types/table
+// 注意：本文件是 Table 类型的唯一定义处，外部请通过公共入口 @/components/Table 以 import type 导入
 
 /** 列固定方式：false 表示不固定 */
 export type ColumnFixed = false | 'left' | 'right'
