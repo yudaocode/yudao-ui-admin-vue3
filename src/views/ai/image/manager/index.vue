@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="AI 绘图创作" url="https://doc.iocoder.cn/ai/image/" />
+  <doc-alert title="AI 图片生成" url="https://doc.iocoder.cn/ai/image/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
