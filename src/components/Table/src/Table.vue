@@ -25,6 +25,7 @@ import { set, get } from 'lodash-es'
 import { getSlot } from '@/utils/tsxHelper'
 import TableActions from './components/TableActions.vue'
 import { Icon } from '@/components/Icon'
+import { DictTag } from '@/components/DictTag'
 
 export default defineComponent({
   name: 'Table',
@@ -498,7 +499,8 @@ export default defineComponent({
     }
 
     // 普通列（含嵌套子列）的插槽。判断插槽 / 函数是否存在，不用结果做 || 回退，formatter 返回 0、false、'' 也原样显示：
-    // 内容：column.slots.default > 旧 slots[field] > formatter > 图片/视频预览 > get(row, field)
+    // 内容：column.slots.default > 旧 slots[field] > formatter > dictType 字典标签 > 图片/视频预览 > get(row, field)
+    // dictType：交给现有 DictTag 渲染，0 / false / 数组 / 逗号分隔字符串均可；null / undefined / '' 不渲染标签
     // 表头：column.slots.header > 旧 slots[`${field}-header`]，都没有时由 ElTableColumn 显示 label
     const getColumnSlots = (v: TableColumn) => {
       const children = v.children
@@ -511,6 +513,10 @@ export default defineComponent({
           const value = get(data?.row, v.field)
           if (typeof v.formatter === 'function') {
             return v.formatter(data.row, data.column, value, data.$index)
+          }
+          if (v.dictType) {
+            if (value === undefined || value === null || value === '') return null
+            return <DictTag type={v.dictType} value={value} />
           }
           if (isPreviewField(v.field)) return renderPreview(value, v.field)
           return value
@@ -526,12 +532,14 @@ export default defineComponent({
       return columnSlots
     }
 
-    // 普通列：children / slots 不作为 ElTableColumn 属性透传
+    // 普通列：children / slots / dictType / dictClass 不作为 ElTableColumn 属性透传
     const renderNormalColumn = (v: TableColumn) => {
       const { align, headerAlign, showOverflowTooltip } = unref(getProps)
       const columnProps: Recordable = { ...v }
       delete columnProps.children
       delete columnProps.slots
+      delete columnProps.dictType
+      delete columnProps.dictClass
       return (
         <ElTableColumn
           key={getColumnKey(v)}

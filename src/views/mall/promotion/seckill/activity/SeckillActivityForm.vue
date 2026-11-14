@@ -1,40 +1,135 @@
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="65%">
-    <Form
+    <el-form
       ref="formRef"
       v-loading="formLoading"
-      :isCol="true"
+      :model="formData"
       :rules="rules"
-      :schema="allSchemas.formSchema"
+      label-width="auto"
+      @submit.prevent
     >
-      <!-- 先选择 -->
-      <template #spuId>
-        <el-button @click="spuSelectRef.open()">选择商品</el-button>
-        <SpuAndSkuList
-          ref="spuAndSkuListRef"
-          :rule-config="ruleConfig"
-          :spu-list="spuList"
-          :spu-property-list-p="spuPropertyList"
-        >
-          <el-table-column align="center" label="秒杀库存" min-width="168">
-            <template #default="{ row: sku }">
-              <el-input-number v-model="sku.productConfig.stock" :min="0" class="w-100%" />
-            </template>
-          </el-table-column>
-          <el-table-column align="center" label="秒杀价格(元)" min-width="168">
-            <template #default="{ row: sku }">
-              <el-input-number
-                v-model="sku.productConfig.seckillPrice"
-                :min="0"
-                :precision="2"
-                :step="0.1"
-                class="w-100%"
+      <el-row :gutter="20" class="!mx-0">
+        <el-col :span="24">
+          <el-form-item label="秒杀活动名称" prop="name">
+            <el-input
+              v-model="formData.name"
+              clearable
+              :placeholder="t('common.inputText') + '秒杀活动名称'"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="活动开始时间" prop="startTime">
+            <el-date-picker
+              v-model="formData.startTime"
+              class="!w-full"
+              clearable
+              :placeholder="t('common.selectText') + '活动开始时间'"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="活动结束时间" prop="endTime">
+            <el-date-picker
+              v-model="formData.endTime"
+              class="!w-full"
+              clearable
+              :placeholder="t('common.selectText') + '活动结束时间'"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="秒杀时段" prop="configIds">
+            <el-select
+              v-model="formData.configIds"
+              class="!w-full"
+              clearable
+              multiple
+              :placeholder="t('common.selectText') + '秒杀时段'"
+            >
+              <el-option
+                v-for="item in seckillConfigList"
+                :key="item.id"
+                v-bind="omit(item, ['label', 'value'])"
+                :label="t(item.name)"
+                :value="item.id"
               />
-            </template>
-          </el-table-column>
-        </SpuAndSkuList>
-      </template>
-    </Form>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="总限购数量" prop="totalLimitCount">
+            <el-input-number
+              v-model="formData.totalLimitCount"
+              class="!w-full"
+              :placeholder="t('common.inputText') + '总限购数量'"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="单次限够数量" prop="singleLimitCount">
+            <el-input-number
+              v-model="formData.singleLimitCount"
+              class="!w-full"
+              :placeholder="t('common.inputText') + '单次限够数量'"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="排序" prop="sort">
+            <el-input-number
+              v-model="formData.sort"
+              class="!w-full"
+              :placeholder="t('common.inputText') + '排序'"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="秒杀活动商品" prop="spuId">
+            <!-- 先选择 -->
+            <el-button @click="spuSelectRef.open()">选择商品</el-button>
+            <SpuAndSkuList
+              ref="spuAndSkuListRef"
+              :rule-config="ruleConfig"
+              :spu-list="spuList"
+              :spu-property-list-p="spuPropertyList"
+            >
+              <el-table-column align="center" label="秒杀库存" min-width="168">
+                <template #default="{ row: sku }">
+                  <el-input-number v-model="sku.productConfig.stock" :min="0" class="w-100%" />
+                </template>
+              </el-table-column>
+              <el-table-column align="center" label="秒杀价格(元)" min-width="168">
+                <template #default="{ row: sku }">
+                  <el-input-number
+                    v-model="sku.productConfig.seckillPrice"
+                    :min="0"
+                    :precision="2"
+                    :step="0.1"
+                    class="w-100%"
+                  />
+                </template>
+              </el-table-column>
+            </SpuAndSkuList>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              v-model="formData.remark"
+              :rows="4"
+              clearable
+              :placeholder="t('common.inputText') + '备注'"
+              type="textarea"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -43,12 +138,13 @@
   <SpuSelect ref="spuSelectRef" :isSelectSku="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
+import type { FormInstance, FormRules } from 'element-plus'
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '../../components'
-import { allSchemas, rules } from './seckillActivity.data'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, omit } from 'lodash-es'
 
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
+import { SeckillConfigApi, SeckillConfigVO } from '@/api/mall/promotion/seckill/seckillConfig'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
 import { convertToInteger, formatToFraction } from '@/utils'
@@ -62,7 +158,42 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formRef = ref() // 表单 Ref
+const formRef = ref<FormInstance>() // 表单 Ref
+
+// 半宽表单项的栅格：小屏整行，其余半行
+const colProps = { xs: 24, sm: 12, md: 12, lg: 12, xl: 12 }
+
+/** 表单初始数据：新增与每次打开时重置使用 */
+const createFormData = (): Recordable => ({
+  name: '',
+  startTime: '',
+  endTime: '',
+  configIds: '',
+  totalLimitCount: 0,
+  singleLimitCount: 0,
+  sort: 0,
+  spuId: '',
+  remark: ''
+})
+const formData = ref<Recordable>(createFormData())
+// 表单校验
+const rules = reactive<FormRules>({
+  spuId: [required],
+  name: [required],
+  startTime: [required],
+  endTime: [required],
+  sort: [required],
+  configIds: [required],
+  totalLimitCount: [required],
+  singleLimitCount: [required],
+  totalStock: [required]
+})
+
+// 秒杀时段选项（id / name）
+const seckillConfigList = ref<SeckillConfigVO[]>([])
+const getSeckillConfigList = async () => {
+  seckillConfigList.value = (await SeckillConfigApi.getSimpleSeckillConfigList()) || []
+}
 
 // ================= 商品选择相关 =================
 
@@ -83,7 +214,7 @@ const ruleConfig: RuleConfig[] = [
 const spuList = ref<SeckillActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<SeckillActivityApi.SpuExtension>[]>([])
 const selectSpu = (spuId: number, skuIds: number[]) => {
-  formRef.value.setValues({ spuId })
+  formData.value.spuId = spuId
   getSpuDetails(spuId, skuIds)
 }
 /**
@@ -150,7 +281,8 @@ const open = async (type: string, id?: number) => {
         data.products?.map((sku) => sku.skuId),
         data.products
       )
-      formRef.value.setValues(data)
+      // 合并接口返回的全部字段（与原表单 setValues 一致：隔离接口对象）
+      Object.assign(formData.value, cloneDeep(data))
     } finally {
       formLoading.value = false
     }
@@ -162,8 +294,8 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
-  if (!formRef) return
-  const valid = await formRef.value.getElFormRef().validate()
+  if (!formRef.value) return
+  const valid = await formRef.value.validate()
   if (!valid) return
   // 提交请求
   formLoading.value = true
@@ -173,7 +305,7 @@ const submitForm = async () => {
     products.forEach((item: SeckillProductVO) => {
       item.seckillPrice = convertToInteger(item.seckillPrice)
     })
-    const data = formRef.value.formModel as SeckillActivityApi.SeckillActivityVO
+    const data = formData.value as SeckillActivityApi.SeckillActivityVO
     data.products = products
     // 真正提交
     if (formType.value === 'create') {
@@ -195,7 +327,14 @@ const submitForm = async () => {
 const resetForm = async () => {
   spuList.value = []
   spuPropertyList.value = []
+  // 每次打开使用全新的初始数据，不带上一次编辑对象的字段（如 id）
+  formData.value = createFormData()
   await nextTick()
-  formRef.value.getElFormRef().resetFields()
+  formRef.value?.resetFields()
 }
+
+/** 初始化 */
+onMounted(() => {
+  getSeckillConfigList()
+})
 </script>

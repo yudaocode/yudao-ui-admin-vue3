@@ -31,6 +31,14 @@ export interface TableColumn {
   sortOrders?: (string | null)[]
   resizable?: boolean
   formatter?: (...args: any[]) => any
+  /**
+   * 字典类型：未配置 slots / formatter 时，使用 DictTag 渲染单元格，例如 DICT_TYPE.COMMON_STATUS
+   */
+  dictType?: string
+  /**
+   * 字典值类型（兼容原 CrudSchema 的配置）：DictTag 按字符串比较字典值，表格渲染不依赖该值
+   */
+  dictClass?: 'string' | 'number' | 'boolean'
   showOverflowTooltip?: boolean
   align?: 'left' | 'center' | 'right'
   headerAlign?: 'left' | 'center' | 'right'

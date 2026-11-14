@@ -3,7 +3,7 @@ import { computed, ref, toRaw, type Ref } from 'vue'
 /**
  * 可选的无 UI 表单状态 hook（参考上游 c7f8db52d packages/hooks/useForm）
  *
- * - 独立于现有基于 Form 组件实例的 useForm，不自动迁移业务表单
+ * - 不依赖任何表单组件实例，不自动迁移业务表单（业务表单直接使用 el-form）
  * - values / dirty / reset 只处理顶层字段（浅复制、Object.is 比较），不做嵌套深比较
  * - 0、false 是合法的非空值；requiredModelField 只把 null / undefined / 空白字符串 / 空数组视为空
  */

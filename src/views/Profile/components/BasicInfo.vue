@@ -1,27 +1,47 @@
 <template>
-  <Form ref="formRef" :is-col="false" :labelWidth="200" :rules="rules" :schema="schema">
-    <template #sex="form">
-      <el-radio-group v-model="form['sex']">
+  <el-form ref="formRef" :label-width="200" :model="formData" :rules="rules" @submit.prevent>
+    <el-form-item :label="t('profile.user.nickname')" prop="nickname">
+      <el-input
+        v-model="formData.nickname"
+        :placeholder="t('common.inputText') + t('profile.user.nickname')"
+        clearable
+      />
+    </el-form-item>
+    <el-form-item :label="t('profile.user.mobile')" prop="mobile">
+      <el-input
+        v-model="formData.mobile"
+        :placeholder="t('common.inputText') + t('profile.user.mobile')"
+        clearable
+      />
+    </el-form-item>
+    <el-form-item :label="t('profile.user.email')" prop="email">
+      <el-input
+        v-model="formData.email"
+        :placeholder="t('common.inputText') + t('profile.user.email')"
+        clearable
+      />
+    </el-form-item>
+    <el-form-item :label="t('profile.user.sex')" prop="sex">
+      <el-radio-group v-model="formData.sex">
         <el-radio :value="1">{{ t('profile.user.man') }}</el-radio>
         <el-radio :value="2">{{ t('profile.user.woman') }}</el-radio>
       </el-radio-group>
-    </template>
-  </Form>
+    </el-form-item>
+  </el-form>
   <div style="text-align: center">
     <el-button type="primary" @click="submit()">{{ t('common.save') }}</el-button>
     <el-button type="danger" @click="init()">{{ t('common.reset') }}</el-button>
   </div>
 </template>
 <script lang="ts" setup>
-import type { FormRules } from 'element-plus'
-import type { FormExpose, FormSchema } from '@/components/Form'
+import type { FormInstance, FormRules } from 'element-plus'
+import { cloneDeep } from 'lodash-es'
 import {
   getUserProfile,
   updateUserProfile,
   UserProfileUpdateReqVO
 } from '@/api/system/user/profile'
 import { useUserStore } from '@/store/modules/user'
-import { useLocaleStore } from '@/store/modules/locale'
 
 defineOptions({ name: 'BasicInfo' })
 
@@ -54,61 +74,31 @@ const rules = reactive<FormRules>({
     }
   ]
 })
-const schema = reactive<FormSchema[]>([
-  {
-    field: 'nickname',
-    label: t('profile.user.nickname'),
-    component: 'Input'
-  },
-  {
-    field: 'mobile',
-    label: t('profile.user.mobile'),
-    component: 'Input'
-  },
-  {
-    field: 'email',
-    label: t('profile.user.email'),
-    component: 'Input'
-  },
-  {
-    field: 'sex',
-    label: t('profile.user.sex'),
-    component: 'InputNumber',
-    value: 0
-  }
-])
-// 不刷新切换语言后原地更新表单项标题（语言 key 为 profile.user.<field>），不重建表单、保留已填写的数据
-const localeStore = useLocaleStore()
-watch(
-  () => localeStore.getCurrentLocale.lang,
-  () => {
-    for (const item of schema) {
-      item.label = t(`profile.user.${item.field}`)
-    }
-  }
-)
-const formRef = ref<FormExpose>() // 表单 Ref
+// 表单数据：除可编辑字段外，保留接口返回的其它字段（如 avatar），提交时一并传回
+const formData = ref<Recordable>({
+  nickname: '',
+  mobile: '',
+  email: '',
+  sex: 0
+})
+const formRef = ref<FormInstance>() // 表单 Ref
 
 // 监听 userStore 中头像的变化，同步更新表单数据
 watch(
   () => userStore.getUser.avatar,
   (newAvatar) => {
-    if (newAvatar && formRef.value) {
-      // 直接更新表单模型中的头像字段
-      const formModel = formRef.value.formModel
-      if (formModel) {
-        formModel.avatar = newAvatar
-      }
+    if (newAvatar) {
+      formData.value.avatar = newAvatar
     }
   }
 )
 
 const submit = () => {
-  const elForm = unref(formRef)?.getElFormRef()
+  const elForm = unref(formRef)
   if (!elForm) return
   elForm.validate(async (valid) => {
     if (valid) {
-      const data = unref(formRef)?.formModel as UserProfileUpdateReqVO
+      const data = formData.value as UserProfileUpdateReqVO
       await updateUserProfile(data)
       message.success(t('common.updateSuccess'))
       const profile = await init()
@@ -121,7 +111,8 @@ const submit = () => {
 
 const init = async () => {
   const res = await getUserProfile()
-  unref(formRef)?.setValues(res)
+  // 合并接口返回的全部字段（隔离接口对象，避免编辑时改动原数据）
+  Object.assign(formData.value, cloneDeep(res))
   return res
 }
 
