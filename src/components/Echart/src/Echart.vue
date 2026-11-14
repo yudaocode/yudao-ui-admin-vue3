@@ -29,7 +29,9 @@ const props = defineProps({
   width: propTypes.oneOfType([Number, String]).def('100%'),
   // 默认高度 300（参考上游 e66532cf9），数字按 px 处理
   height: propTypes.oneOfType([Number, String]).def(300),
-  notMerge: propTypes.bool.def(false)
+  // 默认整体替换配置（参考上游 notMerge=true），配置更新时图例选中、区域缩放等交互状态重置为配置初值；
+  // 显式传 false 时按 ECharts 普通合并，保留已有组件与交互状态
+  notMerge: propTypes.bool.def(true)
 })
 
 const isDark = computed(() => appStore.getIsDark)
