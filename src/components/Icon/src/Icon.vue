@@ -44,8 +44,9 @@ const symbolId = computed(() => {
 })
 
 // 离线图标模式下未注册的图标（参考上游 49a1f54c9 在线 / 离线开关）：渲染同尺寸占位，不请求 Iconify API
+// 未传或空 icon 不渲染（见模板），也不视为未注册图标告警
 const isUnavailable = computed(
-  () => isOfflineIcon && !unref(isLocal) && !isIconAvailable(unref(symbolId))
+  () => !!props.icon && isOfflineIcon && !unref(isLocal) && !isIconAvailable(unref(symbolId))
 )
 
 watchEffect(() => {
@@ -74,7 +75,14 @@ const getHoverStyle = computed(() => {
 </script>
 
 <template>
-  <ElIcon :class="[prefixCls, getHoverClass]" :color="color" :size="size" :style="getHoverStyle">
+  <!-- 未传或空 icon 时不渲染（参考上游 e66532cf9 Icon v-if="icon"），不再留下同尺寸空白 -->
+  <ElIcon
+    v-if="icon"
+    :class="[prefixCls, getHoverClass]"
+    :color="color"
+    :size="size"
+    :style="getHoverStyle"
+  >
     <svg v-if="isLocal" :class="getSvgClass">
       <use :xlink:href="symbolId" />
     </svg>
