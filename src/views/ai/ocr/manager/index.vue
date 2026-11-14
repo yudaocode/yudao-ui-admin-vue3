@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="OCR 文字识别" url="https://doc.iocoder.cn/ai/ocr/" />
+  <doc-alert title="AI 图片识别" url="https://doc.iocoder.cn/ai/ocr/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -92,11 +92,6 @@
       </el-table-column>
       <el-table-column label="耗时" align="center" prop="duration" width="100">
         <template #default="{ row }">{{ formatOcrDuration(row.duration) }}</template>
-      </el-table-column>
-      <el-table-column label="是否修订" align="center" prop="editedText" width="90">
-        <template #default="{ row }">
-          {{ row.editedText !== null && row.editedText !== undefined ? '是' : '否' }}
-        </template>
       </el-table-column>
       <el-table-column label="失败原因" prop="errorMessage" min-width="200">
         <template #default="{ row }">

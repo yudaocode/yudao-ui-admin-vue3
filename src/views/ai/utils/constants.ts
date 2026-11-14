@@ -38,7 +38,8 @@ export const AiModelTypeEnum = {
   EMBEDDING: 5, // 向量
   RERANK: 6, // 重排
   MUSIC: 7, // 音乐
-  OCR: 8 // 文字识别
+  OCR: 8, // 文字识别
+  ASR: 9 // 语音识别
 }
 
 /**
@@ -49,7 +50,13 @@ export const AiOcrStatusEnum = {
   FAIL: 30 // 识别失败
 }
 
-export const AiOcrTextMaxLength = 100000 // 文字识别修订文本的长度上限，与后端一致
+/**
+ * AI 语音识别状态的枚举，与后端 AiAsrStatusEnum 一致
+ */
+export const AiAsrStatusEnum = {
+  SUCCESS: 20, // 识别成功
+  FAIL: 30 // 识别失败
+}
 
 /**
  * AI 聊天消息类型的枚举

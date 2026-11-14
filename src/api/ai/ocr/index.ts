@@ -13,7 +13,6 @@ export interface OcrVO {
   imageUrl: string // 图片地址
   status: number // 识别状态，参见 AiOcrStatusEnum
   originalText?: string | null // 识别出的原文
-  editedText?: string | null // 修订后的文本：null 表示未修订，空字符串表示已清空
   errorMessage?: string // 失败原因
   duration?: number // 识别耗时，单位：毫秒
   createTime: Date // 创建时间
@@ -51,11 +50,6 @@ export const OcrApi = {
   // 获得【我的】识别记录
   getOcrMy: async (id: number): Promise<OcrVO> => {
     return await request.get({ url: '/ai/ocr/get-my?id=' + id })
-  },
-
-  // 保存【我的】识别修订：空字符串表示清空内容
-  updateOcrMy: async (data: { id: number; editedText: string }): Promise<OcrVO> => {
-    return await request.put({ url: '/ai/ocr/update-my', data })
   },
 
   // 删除【我的】识别记录

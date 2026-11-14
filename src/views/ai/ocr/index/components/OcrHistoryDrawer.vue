@@ -35,9 +35,6 @@
               </div>
               <div class="truncate text-12px text-[var(--el-text-color-secondary)]">
                 {{ formatDate(item.createTime, 'YYYY-MM-DD HH:mm') }} · {{ item.modelName }}
-                <template v-if="item.editedText !== null && item.editedText !== undefined">
-                  · 已修订
-                </template>
               </div>
               <div
                 v-if="item.status === AiOcrStatusEnum.FAIL"
@@ -49,7 +46,7 @@
                 v-else
                 class="line-clamp-2 whitespace-pre-wrap break-all text-12px text-[var(--el-text-color-regular)]"
               >
-                {{ getText(item) || '（无文字）' }}
+                {{ item.originalText || '（无文字）' }}
               </div>
               <div class="flex justify-end gap-8px">
                 <el-button link type="primary" size="small" @click="emit('open', item)">
@@ -98,9 +95,6 @@ const loading = ref(false) // 列表的加载中
 const list = ref<OcrVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总数
 const queryParams = reactive({ pageNo: 1, pageSize: 10 })
-
-/** 当前文本：已修订（包括清空为空字符串）用修订文本，否则用原文 */
-const getText = (item: OcrVO) => item.editedText ?? item.originalText ?? ''
 
 /** 查询列表 */
 const getList = async () => {

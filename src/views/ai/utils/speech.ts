@@ -80,6 +80,19 @@ export const SPEECH_PLATFORM_CONFIGS: Record<string, SpeechPlatformConfig> = {
     minSpeed: 0.5,
     maxSpeed: 2,
     voices: [{ value: '5003', name: '度逍遥' }]
+  },
+  // DeepSeek：整段合成，只有两个音色，不支持调节语速
+  DEEPSEEK: {
+    async: false,
+    maxTextLength: 5000,
+    textUnit: 'char',
+    formats: ['wav'],
+    minSpeed: 1,
+    maxSpeed: 1,
+    voices: [
+      { value: 'stella', name: '海星（女声）' },
+      { value: 'tide', name: '暗潮（男声）' }
+    ]
   }
 }
 

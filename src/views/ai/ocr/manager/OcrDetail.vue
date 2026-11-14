@@ -54,18 +54,6 @@
         </div>
         <span v-else>-</span>
       </el-descriptions-item>
-      <el-descriptions-item label="修订文本" :span="2">
-        <template v-if="detail.editedText !== null && detail.editedText !== undefined">
-          <div
-            v-if="detail.editedText"
-            class="max-h-240px overflow-y-auto whitespace-pre-wrap leading-20px"
-          >
-            {{ detail.editedText }}
-          </div>
-          <span v-else class="text-[var(--el-text-color-secondary)]">（已清空）</span>
-        </template>
-        <span v-else>未修订</span>
-      </el-descriptions-item>
     </el-descriptions>
     <template #footer>
       <el-button @click="dialogVisible = false">关 闭</el-button>

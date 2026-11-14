@@ -89,6 +89,18 @@
           <div class="flex justify-between pb-0 pt-5px">
             <div class="flex items-center">
               <MessageFileUpload v-model="uploadFiles" :limit="5" :max-size="10" class="mr-10px" />
+              <!-- 语音输入：有可用的语音识别模型才展示；识别结果追加到输入框，不自动发送 -->
+              <el-button
+                v-if="asrModel"
+                size="small"
+                class="mr-10px"
+                :type="voiceRecording ? 'danger' : undefined"
+                :loading="voiceTranscribing"
+                @click="handleVoiceInput"
+              >
+                <Icon :icon="voiceRecording ? 'ep:video-pause' : 'ep:microphone'" class="mr-3px" />
+                {{ voiceRecording ? '停止录音' : '语音输入' }}
+              </el-button>
               <el-switch v-model="enableContext" />
               <span class="ml-5px mr-15px text-14px text-#8f8f8f">上下文</span>
               <el-switch v-model="enableWebSearch" />
@@ -164,7 +176,13 @@ import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
 import MessageFileUpload from './components/message/MessageFileUpload.vue'
-import { AiChatMessageTypeEnum } from '@/views/ai/utils/constants'
+import { AiAsrStatusEnum, AiChatMessageTypeEnum, AiModelTypeEnum } from '@/views/ai/utils/constants'
+import { ModelApi, ModelVO } from '@/api/ai/model/model'
+import { AsrApi } from '@/api/ai/asr'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
+import type { UploadRequestOptions } from 'element-plus'
+import { formatDate } from '@/utils/formatTime'
+import { getAsrMaxSeconds, startWavRecorder, WavRecorder } from '@/views/ai/utils/asr'
 import {
   getReasoningLevelLabel,
   getReasoningLevels,
@@ -208,6 +226,12 @@ const reasoningSelectedLevel = ref<string>() // 选中的思考档位
 const reasoningLevels = computed(() =>
   getReasoningLevels(activeConversation.value?.modelReasoningConfig)
 ) // 当前对话模型配置的思考档位，按配置顺序；未配置时为空数组
+// 语音输入
+const asrModel = ref<ModelVO>() // 语音识别模型：取第一个可用的模型，没有时不展示
+const voiceRecording = ref(false) // 是否正在录音
+const voiceTranscribing = ref(false) // 是否正在识别
+let voiceRecorder: WavRecorder | undefined
+let voiceRecordTimer: any // 录音达到最长时长后自动停止
 // 接收 Stream 消息
 const receiveMessageFullText = ref('')
 const receiveMessageDisplayedText = ref('')
@@ -682,8 +706,63 @@ const textRoll = async () => {
   } catch {}
 }
 
+// =========== 【语音输入】相关 ===========
+
+/** 点击语音输入：未录音时开始，录音中时停止并识别 */
+const handleVoiceInput = async () => {
+  if (voiceRecording.value) {
+    await stopVoiceInput()
+    return
+  }
+  const maxSeconds = getAsrMaxSeconds(asrModel.value?.platform)
+  try {
+    voiceRecorder = await startWavRecorder(maxSeconds)
+  } catch {
+    message.error('无法使用麦克风，请检查浏览器的麦克风权限')
+    return
+  }
+  voiceRecording.value = true
+  voiceRecordTimer = setTimeout(stopVoiceInput, maxSeconds * 1000)
+}
+
+const { httpRequest: uploadVoiceFile } = useUpload()
+
+/** 停止录音并识别：录音上传到文件服务后识别（会生成一条识别记录），结果追加到输入框，不自动发送 */
+const stopVoiceInput = async () => {
+  clearTimeout(voiceRecordTimer)
+  const recorder = voiceRecorder
+  if (!recorder) {
+    return
+  }
+  voiceRecorder = undefined
+  voiceRecording.value = false
+  voiceTranscribing.value = true
+  try {
+    const wav = await recorder.stop()
+    const file = new File([wav], `语音输入-${formatDate(new Date(), 'YYYYMMDDHHmmss')}.wav`, {
+      type: 'audio/wav'
+    })
+    const res: any = await uploadVoiceFile({ file, filename: 'file' } as UploadRequestOptions)
+    const record = await AsrApi.recognizeAsr({ modelId: asrModel.value!.id, fileUrl: res.data })
+    if (record.status !== AiAsrStatusEnum.SUCCESS) {
+      message.error(record.errorMessage || '语音识别失败')
+      return
+    }
+    if (record.originalText) {
+      prompt.value = (prompt.value || '') + record.originalText
+    }
+  } finally {
+    voiceTranscribing.value = false
+  }
+}
+
 /** 初始化 **/
 onMounted(async () => {
+  // 获取语音识别模型：不阻塞对话加载
+  ModelApi.getModelSimpleList(AiModelTypeEnum.ASR).then((models) => {
+    asrModel.value = models?.[0]
+  })
+
   // 如果有 conversationId 参数，则默认选中
   if (route.query.conversationId) {
     const id = route.query.conversationId as unknown as number
@@ -694,5 +773,11 @@ onMounted(async () => {
   // 获取列表数据
   activeMessageListLoading.value = true
   await getMessageList()
+})
+
+/** 销毁：放弃进行中的录音，释放麦克风 */
+onBeforeUnmount(() => {
+  clearTimeout(voiceRecordTimer)
+  voiceRecorder?.cancel()
 })
 </script>
