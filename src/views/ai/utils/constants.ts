@@ -27,7 +27,10 @@ export const AiPlatformEnum = {
   TENCENT: 'TENCENT', // 腾讯
   // TODO DONE @AI：这个也是噢，它其实是百度；（已并入上面的 BAIDU）
   // TODO DONE @AI：火山引擎的包，字节？bytedance？这样就整体统一了。当然，讯飞那也要改；（已改为 BYTEDANCE；讯飞改为 IFLYTEK）
-  BYTEDANCE: 'BYTEDANCE' // 字节
+  BYTEDANCE: 'BYTEDANCE', // 字节
+  MINIMAX: 'MINIMAX', // MiniMax
+  KLING: 'KLING', // 可灵
+  GEMINI: 'GEMINI' // 谷歌 Gemini（视频生成为 Vertex AI Veo）
 }
 
 export const AiModelTypeEnum = {
@@ -127,6 +130,69 @@ export const isAiMusicRunning = (status?: number) =>
   status === AiMusicStatusEnum.PENDING ||
   status === AiMusicStatusEnum.IN_PROGRESS ||
   status === AiMusicStatusEnum.SAVING
+
+/**
+ * AI 视频状态的枚举，与后端 AiVideoStatusEnum 一致
+ */
+export const AiVideoStatusEnum = {
+  PENDING: 10, // 待处理
+  IN_PROGRESS: 20, // 生成中
+  SAVING: 30, // 转存中
+  SUCCESS: 40, // 已完成
+  FAIL: 50 // 已失败
+}
+
+/** AI 视频是否未结束：待处理、生成中、转存中 */
+export const isAiVideoRunning = (status?: number) =>
+  status === AiVideoStatusEnum.PENDING ||
+  status === AiVideoStatusEnum.IN_PROGRESS ||
+  status === AiVideoStatusEnum.SAVING
+
+/**
+ * AI 视频创作类型的枚举，与后端 AiVideoTypeEnum 一致
+ */
+export const AiVideoTypeEnum = {
+  GENERATE: 1, // 视频生成
+  AVATAR: 2, // 数字人口播
+  MOTION: 3 // 动作模仿
+}
+
+/**
+ * AI 视频生成方式的枚举，与后端 AiVideoModeEnum 一致
+ */
+export const AiVideoModeEnum = {
+  TEXT: 'text', // 文生视频
+  IMAGE: 'image', // 图生视频
+  FIRST_LAST: 'first_last', // 首尾帧
+  REFERENCE: 'reference' // 参考生视频
+}
+
+/** AI 视频生成方式的选项：创作面板使用的短名称 */
+export const AiVideoModeOptions = [
+  { label: '文生', value: AiVideoModeEnum.TEXT },
+  { label: '图生', value: AiVideoModeEnum.IMAGE },
+  { label: '首尾帧', value: AiVideoModeEnum.FIRST_LAST },
+  { label: '参考', value: AiVideoModeEnum.REFERENCE }
+]
+
+/** AI 视频生成模式（quality）的选项：可灵旧版接口 */
+export const AiVideoQualityOptions = [
+  { label: '标准', value: 'std' },
+  { label: '高品质', value: 'pro' }
+]
+
+/** AI 视频提示词扩写（promptExpansionMode）的选项：MiniMax H3 */
+export const AiVideoPromptExpansionModeOptions = [
+  { label: '关闭', value: 'disabled' },
+  { label: '均衡', value: 'balanced' },
+  { label: '质量', value: 'quality' }
+]
+
+/** AI 视频镜头类型（shotType）的选项：通义万相 */
+export const AiVideoShotTypeOptions = [
+  { label: '单镜头', value: 'single' },
+  { label: '多镜头', value: 'multi' }
+]
 
 /**
  * AI 音乐生成模式的枚举
