@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { Icon as IconifyIcon } from '@iconify/vue'
 import { useDesign } from '@/hooks/web/useDesign'
 import { isIconAvailable, isOfflineIcon, warnUnavailableIcon } from '@/plugins/svgIcon'
@@ -11,17 +10,19 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('icon')
 
+// 原生运行时 props 声明（上游 6b10db306 起 Icon 不再使用 propTypes）；运行时与原 vue-types 声明一致：
+// icon、color、hoverColor 无默认值（未传为 undefined），size 默认 16，svgClass 默认 ''
 const props = defineProps({
   // icon name
-  icon: propTypes.string,
+  icon: { type: String },
   // icon color
-  color: propTypes.string,
+  color: { type: String },
   // icon size：数字按 px，也可传 '1.5em'、'2rem'、'var(--x)' 等 CSS 尺寸
-  size: propTypes.oneOfType([Number, String]).def(16),
+  size: { type: [Number, String], default: 16 },
   // icon svg class
-  svgClass: propTypes.string.def(''),
+  svgClass: { type: String, default: '' },
   // icon hover color：仅传值时生效，不影响未传值的图标
-  hoverColor: propTypes.string
+  hoverColor: { type: String }
 })
 
 // 上游图标名前缀（如 vi-ep:close），解析时去掉一次，等同 ep:close
@@ -38,7 +39,8 @@ const iconName = computed(() => {
 })
 
 const symbolId = computed(() => {
-  return unref(isLocal) ? `#icon-${props.icon.split('svg-icon:')[1]}` : unref(iconName)
+  // isLocal 为 true 时 icon 必为字符串，可选链只用于类型收窄，不改变结果
+  return unref(isLocal) ? `#icon-${props.icon?.split('svg-icon:')[1]}` : unref(iconName)
 })
 
 // 离线图标模式下未注册的图标（参考上游 49a1f54c9 在线 / 离线开关）：渲染同尺寸占位，不请求 Iconify API
@@ -84,9 +86,10 @@ const getHoverStyle = computed(() => {
       aria-hidden="true"
     ></span>
 
+    <!-- 未传 icon 时与原先一样原样传入 undefined；类型断言只为满足 IconifyIcon 的必填声明，不改变运行时值 -->
     <IconifyIcon
       v-else
-      :icon="symbolId"
+      :icon="symbolId as string"
       :class="getSvgClass"
       :style="{ fontSize: getInnerSize, color }"
     />

@@ -1,19 +1,15 @@
 import { i18n } from '@/plugins/vueI18n'
 import { useLocaleStoreWithOut } from '@/store/modules/locale'
-import { setHtmlPageLang } from '@/plugins/vueI18n/helper'
 
 const setI18nLanguage = (locale: LocaleType) => {
   const localeStore = useLocaleStoreWithOut()
 
-  if (i18n.mode === 'legacy') {
-    i18n.global.locale = locale
-  } else {
-    ;(i18n.global.locale as any).value = locale
-  }
+  // i18n 固定为组合式实例（legacy: false），直接设置 locale（参考上游 c7f8db52d）
+  i18n.global.locale.value = locale
   localeStore.setCurrentLocale({
     lang: locale
   })
-  setHtmlPageLang(locale)
+  document.documentElement.lang = locale
 }
 
 export const useLocale = () => {
