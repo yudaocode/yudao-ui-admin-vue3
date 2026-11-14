@@ -221,7 +221,7 @@ export default defineComponent({
         {showSidebarControl.value || showBreadcrumb.value ? (
           <div ref={leftRef} class="h-full flex items-center">
             {showSidebarControl.value && hamburger.value && !isTwoColumnLayout(layout.value) ? (
-              <Collapse class="custom-hover" color="var(--top-header-text-color)"></Collapse>
+              <Collapse class="header-action" color="var(--top-header-text-color)"></Collapse>
             ) : undefined}
             {showBreadcrumb.value && breadcrumb.value ? (
               <Breadcrumb class="lt-md:hidden"></Breadcrumb>
@@ -235,7 +235,7 @@ export default defineComponent({
           {hideSetting ? undefined : (
             <button
               type="button"
-              class={['v-setting custom-hover', `${prefixCls}__action`]}
+              class={['v-setting header-action', `${prefixCls}__action`]}
               title={t('setting.projectSetting')}
               aria-label={t('setting.projectSetting')}
               onClick={openSetting}
@@ -252,36 +252,36 @@ export default defineComponent({
               ]}
             >
               <LayoutSwitcher
-                class="custom-hover"
+                class="header-action"
                 color="var(--top-header-text-color)"
                 available={quickActionsFit.value}
               ></LayoutSwitcher>
-              <ThemeSwitch class={['custom-hover', `${prefixCls}__theme-switch`]}></ThemeSwitch>
+              <ThemeSwitch class={['header-action', `${prefixCls}__theme-switch`]}></ThemeSwitch>
             </div>
           ) : undefined}
           {screenfull.value ? (
-            <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
+            <Screenfull class="header-action" color="var(--top-header-text-color)"></Screenfull>
           ) : undefined}
           {search.value ? (
             <RouterSearch isModal={false} color="var(--top-header-text-color)" />
           ) : undefined}
           {size.value ? (
-            <SizeDropdown class="custom-hover" color="var(--top-header-text-color)"></SizeDropdown>
+            <SizeDropdown class="header-action" color="var(--top-header-text-color)"></SizeDropdown>
           ) : undefined}
           {locale.value ? (
             <LocaleDropdown
-              class="custom-hover"
+              class="header-action"
               color="var(--top-header-text-color)"
             ></LocaleDropdown>
           ) : undefined}
           {message.value ? (
-            <Message class="custom-hover" color="var(--top-header-text-color)"></Message>
+            <Message class="header-action" color="var(--top-header-text-color)"></Message>
           ) : undefined}
           {/* IM 聊天入口 */}
           {im.value ? (
             <button
               type="button"
-              class={['custom-hover', `${prefixCls}__action`]}
+              class={['header-action', `${prefixCls}__action`]}
               title={t('layout.openChat')}
               aria-label={t('layout.openChat')}
               onClick={goToChat}
@@ -303,7 +303,7 @@ $prefix-cls: #{$namespace}-tool-header;
 .#{$prefix-cls} {
   transition: left var(--transition-time-02);
 
-  // ElSwitch 自带高度，撑满工具栏高度以与其它 custom-hover 操作项的悬停区域一致
+  // ElSwitch 自带高度，撑满工具栏高度以与其它 header-action 操作项的悬停区域一致
   :deep(.#{$prefix-cls}__theme-switch.el-switch) {
     height: 100%;
   }
@@ -318,7 +318,7 @@ $prefix-cls: #{$namespace}-tool-header;
   }
 }
 
-// :where 不增加优先级，只重置原生 button 默认样式；高度、内边距、hover 仍由 custom-hover 决定，保留 focus outline
+// :where 不增加优先级，只重置原生 button 默认样式；高度、内边距、hover 仍由 header-action 决定，保留 focus outline
 :where(.#{$prefix-cls}__action) {
   padding: 0;
   font: inherit;

@@ -3,7 +3,6 @@ import { camelize, useAttrs } from 'vue'
 import { dropdownProps } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
 import { useLocale } from '@/hooks/web/useLocale'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 // 属性由下方 getDropdownAttrs / getTriggerAttrs 分配，不自动落到 ElDropdown 根节点
@@ -13,9 +12,7 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('locale-dropdown')
 
-defineProps({
-  color: propTypes.string.def('')
-})
+withDefaults(defineProps<{ color?: string }>(), { color: '' })
 
 const { t } = useI18n()
 

@@ -17,7 +17,7 @@
       />
     </el-select>
   </ElDialog>
-  <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
+  <div v-else class="header-action" @click.stop="showTopSearch = !showTopSearch">
     <!-- 原生 button 便于键盘聚焦与读屏；不单独绑定点击，激活后冒泡到外层统一切换，只切换一次 -->
     <button
       :aria-expanded="showTopSearch"
@@ -137,7 +137,7 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-// :where 不增加优先级，只重置原生 button 默认样式，图标仍在外层 custom-hover 中居中，保留 focus outline
+// :where 不增加优先级，只重置原生 button 默认样式，图标仍在外层 header-action 中居中，保留 focus outline
 :where(.router-search-trigger) {
   display: inline-flex;
   padding: 0;

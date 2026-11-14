@@ -2,8 +2,6 @@
 import type { EChartsOption } from 'echarts'
 import echarts from '@/plugins/echarts'
 import { debounce } from 'lodash-es'
-import { propTypes } from '@/utils/propTypes'
-import { PropType } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 import { isString } from '@/utils/is'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -20,19 +18,20 @@ const prefixCls = getPrefixCls('echart')
 
 const appStore = useAppStore()
 
-const props = defineProps({
-  options: {
-    type: Object as PropType<EChartsOption>,
-    required: true
-  },
-  // 默认铺满容器（参考上游 f977fdb05d），flex 等父容器中不会因无内容而宽度为 0
-  width: propTypes.oneOfType([Number, String]).def('100%'),
-  // 默认高度 300（参考上游 e66532cf9），数字按 px 处理
-  height: propTypes.oneOfType([Number, String]).def(300),
-  // 默认整体替换配置（参考上游 notMerge=true），配置更新时图例选中、区域缩放等交互状态重置为配置初值；
-  // 显式传 false 时按 ECharts 普通合并，保留已有组件与交互状态
-  notMerge: propTypes.bool.def(true)
-})
+// props 声明写法与上游一致（withDefaults + 类型声明）；接口保持芋道 options / width / height / notMerge
+const props = withDefaults(
+  defineProps<{
+    options: EChartsOption
+    // 默认铺满容器（参考上游 f977fdb05d），flex 等父容器中不会因无内容而宽度为 0
+    width?: number | string
+    // 默认高度 300（参考上游 e66532cf9），数字按 px 处理
+    height?: number | string
+    // 默认整体替换配置（参考上游 notMerge=true），配置更新时图例选中、区域缩放等交互状态重置为配置初值；
+    // 显式传 false 时按 ECharts 普通合并，保留已有组件与交互状态
+    notMerge?: boolean
+  }>(),
+  { width: '100%', height: 300, notMerge: true }
+)
 
 const isDark = computed(() => appStore.getIsDark)
 

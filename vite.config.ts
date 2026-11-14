@@ -31,7 +31,6 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
         .filter(Boolean)
     return {
         base: env.VITE_BASE_PATH,
-        root: root,
         // 服务端渲染
         server: {
             port: env.VITE_PORT, // 端口号
@@ -72,8 +71,8 @@ export default ({command, mode}: ConfigEnv): UserConfig => {
                 }
             }
         },
+        // 与上游一致使用 Vite 默认的 resolve.extensions；样式文件导入均带扩展名
         resolve: {
-            extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json', '.scss', '.css'],
             alias: [
                 {
                     find: /\@\//,

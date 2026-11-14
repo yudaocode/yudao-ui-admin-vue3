@@ -141,7 +141,7 @@ export const useRenderLayout = () => {
         >
           {/* 窄屏时 Logo 标题省略让位（最小保留图片 58px + 右内距 15px），根菜单至少保留左右内距 20px + “更多”64px */}
           {logo.value ? (
-            <Logo class="custom-hover !w-auto !pr-15px min-w-[73px]"></Logo>
+            <Logo class="header-action !w-auto !pr-15px min-w-[73px]"></Logo>
           ) : undefined}
 
           {showHeaderMenu ? (
@@ -221,7 +221,7 @@ export const useRenderLayout = () => {
             }
           ]}
         >
-          {logo.value ? <Logo class="custom-hover"></Logo> : undefined}
+          {logo.value ? <Logo class="header-action"></Logo> : undefined}
           <Menu
             mode="horizontal"
             theme="header"
@@ -274,7 +274,7 @@ export const useRenderLayout = () => {
           ]}
         >
           {logo.value ? (
-            <Logo class="custom-hover !w-auto !pr-15px min-w-[73px]"></Logo>
+            <Logo class="header-action !w-auto !pr-15px min-w-[73px]"></Logo>
           ) : undefined}
 
           {showHeaderMenu ? (

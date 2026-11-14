@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { provide, computed, watch, onMounted } from 'vue'
-import { propTypes } from '@/utils/propTypes'
+import type { PropType } from 'vue'
 import { ComponentSize, ElConfigProvider } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
 import { useWindowSize } from '@vueuse/core'
@@ -13,8 +13,13 @@ const { variables } = useDesign()
 
 const appStore = useAppStore()
 
+// 原生运行时 props 声明（上游已移除 propTypes），保留尺寸取值的运行时校验与默认 default；props 仍 provide 给 configGlobal 使用方
 const props = defineProps({
-  size: propTypes.oneOf<ComponentSize>(['default', 'small', 'large']).def('default')
+  size: {
+    type: String as PropType<ComponentSize>,
+    default: 'default',
+    validator: (v: string) => ['default', 'small', 'large'].includes(v)
+  }
 })
 
 provide('configGlobal', props)

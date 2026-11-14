@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import { isNumber } from '@/utils/is'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'CountTo' })
@@ -10,17 +9,18 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('count-to')
 
+// 原生运行时 props 声明（上游已移除 propTypes），默认值不变，保留 decimals >= 0 的运行时校验
 const props = defineProps({
-  startVal: propTypes.number.def(0), // 开始播放值
-  endVal: propTypes.number.def(2021), // 最终值
-  duration: propTypes.number.def(3000), // 动画时长
-  autoplay: propTypes.bool.def(true), // 是否自动播放动画, 默认播放
-  decimals: propTypes.number.validate((value: number) => value >= 0).def(0), // 显示的小数位数, 默认不显示小数
-  decimal: propTypes.string.def('.'), // 小数分隔符号, 默认为点
-  separator: propTypes.string.def(','), // 数字每三位的分隔符, 默认为逗号
-  prefix: propTypes.string.def(''), // 前缀, 数值前面显示的内容
-  suffix: propTypes.string.def(''), // 后缀, 数值后面显示的内容
-  useEasing: propTypes.bool.def(true), // 是否使用缓动效果, 默认启用
+  startVal: { type: Number, default: 0 }, // 开始播放值
+  endVal: { type: Number, default: 2021 }, // 最终值
+  duration: { type: Number, default: 3000 }, // 动画时长
+  autoplay: { type: Boolean, default: true }, // 是否自动播放动画, 默认播放
+  decimals: { type: Number, default: 0, validator: (value: number) => value >= 0 }, // 显示的小数位数, 默认不显示小数
+  decimal: { type: String, default: '.' }, // 小数分隔符号, 默认为点
+  separator: { type: String, default: ',' }, // 数字每三位的分隔符, 默认为逗号
+  prefix: { type: String, default: '' }, // 前缀, 数值前面显示的内容
+  suffix: { type: String, default: '' }, // 后缀, 数值后面显示的内容
+  useEasing: { type: Boolean, default: true }, // 是否使用缓动效果, 默认启用
   easingFn: {
     type: Function as PropType<(t: number, b: number, c: number, d: number) => number>,
     default(t: number, b: number, c: number, d: number) {

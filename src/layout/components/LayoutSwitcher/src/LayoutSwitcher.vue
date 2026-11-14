@@ -2,21 +2,23 @@
 import { useEventListener } from '@vueuse/core'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
-import { propTypes } from '@/utils/propTypes'
 import { normalizeLayout } from '@/utils/layout'
 import type { VbenLayoutType } from '@/types/layout'
 import LayoutRadioPicker from '@/layout/components/Setting/src/components/LayoutRadioPicker.vue'
 
 // 顶部工具栏快捷切换页面布局（参考上游 6b10db306 / e66532cf9 LayoutSwitcher）：
 // 复用设置抽屉的 6 种布局选项与 appStore.setLayout（含缓存、移动端限制），不引入上游 4 种布局
-// 外部属性（如工具栏的 custom-hover）落到原生触发按钮上，使整个悬停区域都可点击打开弹层
+// 外部属性（如工具栏的 header-action）落到原生触发按钮上，使整个悬停区域都可点击打开弹层
 defineOptions({ name: 'LayoutSwitcher', inheritAttrs: false })
 
-const props = defineProps({
-  color: propTypes.string.def(''),
-  // 所在工具栏是否有空间显示本入口；由 ToolHeader 的宽度检测传入，空间不足时入口被隐藏
-  available: propTypes.bool.def(true)
-})
+const props = withDefaults(
+  defineProps<{
+    color?: string
+    // 所在工具栏是否有空间显示本入口；由 ToolHeader 的宽度检测传入，空间不足时入口被隐藏
+    available?: boolean
+  }>(),
+  { color: '', available: true }
+)
 
 const { t } = useI18n()
 

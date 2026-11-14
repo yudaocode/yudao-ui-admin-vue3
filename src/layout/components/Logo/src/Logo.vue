@@ -2,18 +2,21 @@
 import { computed, unref } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
-import { propTypes } from '@/utils/propTypes'
 import { getLayoutRenderMode, isHeaderNavLayout } from '@/utils/layout'
 
 defineOptions({ name: 'Logo' })
 
-const props = defineProps({
-  // 紧凑模式：只显示图片、隐藏标题（参考上游 6b10db306）；默认 false，标题按布局与折叠规则显示
-  compact: propTypes.bool.def(false)
-})
+const props = withDefaults(
+  defineProps<{
+    // 紧凑模式：只显示图片、隐藏标题（参考上游 6b10db306）；默认 false，标题按布局与折叠规则显示
+    compact?: boolean
+  }>(),
+  { compact: false }
+)
 
 const { getPrefixCls } = useDesign()
 
+// 顶栏（非 classic 渲染模式）中的 Logo 加 `${prefixCls}--header` 修饰类，类名与上游一致（参考上游 6b10db306），判断仍按芋道布局
 const prefixCls = getPrefixCls('logo')
 
 const appStore = useAppStore()
@@ -38,7 +41,7 @@ const show = computed(
       :aria-label="title"
       :class="[
         prefixCls,
-        getLayoutRenderMode(layout) !== 'classic' ? `${prefixCls}__Top` : '',
+        getLayoutRenderMode(layout) !== 'classic' ? `${prefixCls}--header` : '',
         'flex !h-[var(--logo-height)] min-w-0 items-center cursor-pointer px-10px relative decoration-none overflow-hidden'
       ]"
       to="/"

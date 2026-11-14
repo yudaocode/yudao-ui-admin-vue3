@@ -1,55 +1,56 @@
 import { computed, ref, toRaw, type Ref } from 'vue'
 
 /**
- * 可选的无 UI 表单状态 hook（参考上游 c7f8db52d packages/hooks/useForm）
+ * 可选的无 UI 表单状态 hook（名称与导出对齐上游 packages/hooks/src/useForm.ts，来源 c7f8db52d、14d2bec7b）
  *
- * - 不依赖任何表单组件实例，不自动迁移业务表单（业务表单直接使用 el-form）
+ * - 不依赖任何表单组件实例，不是旧的 schema Form 注册 hook；业务表单直接使用 el-form
  * - values / dirty / reset 只处理顶层字段（浅复制、Object.is 比较），不做嵌套深比较
- * - 0、false 是合法的非空值；requiredModelField 只把 null / undefined / 空白字符串 / 空数组视为空
+ * - 0、false 是合法的非空值；本文件的 required 只把 null / undefined / 空白字符串 / 空数组视为空
+ * - 本地保留的修复：reset 代次隔离旧校验与提交、校验序号单调递增、dirty 两侧取原始对象比较
+ * - 不加入自动导入；el-form 规则中自动导入的 required 仍来自 @/utils/formRules
  */
-export type ModelFormValues = object
-export type ModelFormField<Model extends ModelFormValues> = Extract<keyof Model, string>
-export type ModelFormValidatorResult = string | string[] | null | undefined
+export type FormModel = object
+export type FormField<Model extends FormModel> = Extract<keyof Model, string>
+export type FormValidatorResult = string | string[] | null | undefined
 
-export type ModelFormValidator<Value = unknown, Model extends ModelFormValues = ModelFormValues> = (
+export type FormValidator<Value = unknown, Model extends FormModel = FormModel> = (
   value: Value,
   values: Readonly<Model>
-) => ModelFormValidatorResult | Promise<ModelFormValidatorResult>
+) => FormValidatorResult | Promise<FormValidatorResult>
 
-export type ModelFormRules<Model extends ModelFormValues> = Partial<{
-  [Field in ModelFormField<Model>]:
-    | ModelFormValidator<Model[Field], Model>
-    | ModelFormValidator<Model[Field], Model>[]
+export type FormRules<Model extends FormModel> = Partial<{
+  [Field in FormField<Model>]:
+    | FormValidator<Model[Field], Model>
+    | FormValidator<Model[Field], Model>[]
 }>
 
-export type ModelFormErrors<Model extends ModelFormValues> = Partial<
-  Record<ModelFormField<Model>, string[]>
+export type FormErrors<Model extends FormModel> = Partial<Record<FormField<Model>, string[]>>
+
+export type FormErrorInput<Model extends FormModel> = Partial<
+  Record<FormField<Model>, string | string[] | null | undefined>
 >
 
-export type ModelFormErrorInput<Model extends ModelFormValues> = Partial<
-  Record<ModelFormField<Model>, string | string[] | null | undefined>
->
-
-export interface UseModelFormOptions<Model extends ModelFormValues> {
+export interface UseFormOptions<Model extends FormModel> {
   initialValues: Model
-  rules?: ModelFormRules<Model>
+  rules?: FormRules<Model>
 }
 
-type FieldInput<Model extends ModelFormValues> =
-  | ModelFormField<Model>
-  | readonly ModelFormField<Model>[]
+type FieldInput<Model extends FormModel> = FormField<Model> | readonly FormField<Model>[]
 
 const toArray = <Value>(value: Value | readonly Value[]) =>
   (Array.isArray(value) ? value : [value]) as readonly Value[]
 
-const clone = <Model extends ModelFormValues>(values: Model) => ({ ...values }) as Model
+const clone = <Model extends FormModel>(values: Model) => ({ ...values }) as Model
 
 const message = (value: string | (() => string)) => (typeof value === 'function' ? value() : value)
 
-/** 必填校验：命名与全局的 required 规则区分 */
-export const requiredModelField = (
+/**
+ * 本 hook 的必填校验函数（与上游同名），需从 @/hooks/web/useForm 显式导入；
+ * 与自动导入的 @/utils/formRules required（Element Plus FormItemRule 对象）不是同一个
+ */
+export const required = (
   errorMessage: string | (() => string) = 'This field is required'
-): ModelFormValidator => {
+): FormValidator => {
   return (value) => {
     const empty =
       value == null ||
@@ -59,13 +60,11 @@ export const requiredModelField = (
   }
 }
 
-export const useModelForm = <Model extends ModelFormValues>(
-  options: UseModelFormOptions<Model>
-) => {
+export const useForm = <Model extends FormModel>(options: UseFormOptions<Model>) => {
   let initialValues = clone(options.initialValues)
   const values = ref(clone(initialValues)) as Ref<Model>
-  const errors = ref<ModelFormErrors<Model>>({}) as Ref<ModelFormErrors<Model>>
-  const touchedFields = ref<ModelFormField<Model>[]>([]) as Ref<ModelFormField<Model>[]>
+  const errors = ref<FormErrors<Model>>({}) as Ref<FormErrors<Model>>
+  const touchedFields = ref<FormField<Model>[]>([]) as Ref<FormField<Model>[]>
   const validating = ref(false)
   const submitting = ref(false)
   const submitError = ref<unknown>(null)
@@ -76,13 +75,13 @@ export const useModelForm = <Model extends ModelFormValues>(
   let activeValidations = 0
   // 校验序号单调递增（reset 也不归零），避免 reset 前的旧校验与新校验序号相同而覆盖结果
   let validationSeq = 0
-  const validationVersions = new Map<ModelFormField<Model>, number>()
+  const validationVersions = new Map<FormField<Model>, number>()
 
   const dirtyFields = computed(() => {
     const fields = new Set([
       ...Object.keys(initialValues),
       ...Object.keys(values.value)
-    ] as ModelFormField<Model>[])
+    ] as FormField<Model>[])
     // 两侧都取原始对象再比较：初始值为 reactive 时，同一引用不被误判为已修改
     return [...fields].filter(
       (field) => !Object.is(toRaw(values.value[field]), toRaw(initialValues[field]))
@@ -95,7 +94,7 @@ export const useModelForm = <Model extends ModelFormValues>(
     )
   )
 
-  const setValue = <Field extends ModelFormField<Model>>(field: Field, value: Model[Field]) => {
+  const setValue = <Field extends FormField<Model>>(field: Field, value: Model[Field]) => {
     values.value[field] = value
   }
 
@@ -106,7 +105,7 @@ export const useModelForm = <Model extends ModelFormValues>(
   const touch = (fields: FieldInput<Model>) => {
     touchedFields.value = [
       ...new Set([...touchedFields.value, ...toArray(fields)])
-    ] as ModelFormField<Model>[]
+    ] as FormField<Model>[]
   }
 
   const clearErrors = (fields?: FieldInput<Model>) => {
@@ -120,9 +119,9 @@ export const useModelForm = <Model extends ModelFormValues>(
     errors.value = nextErrors
   }
 
-  const setErrors = (nextErrors: ModelFormErrorInput<Model>) => {
+  const setErrors = (nextErrors: FormErrorInput<Model>) => {
     const merged = { ...errors.value }
-    for (const field of Object.keys(nextErrors) as ModelFormField<Model>[]) {
+    for (const field of Object.keys(nextErrors) as FormField<Model>[]) {
       const fieldMessages = nextErrors[field] as string | string[] | null | undefined
       if (fieldMessages == null || fieldMessages.length === 0) delete merged[field]
       else merged[field] = typeof fieldMessages === 'string' ? [fieldMessages] : fieldMessages
@@ -130,11 +129,11 @@ export const useModelForm = <Model extends ModelFormValues>(
     errors.value = merged
   }
 
-  const validateField = async (field: ModelFormField<Model>) => {
+  const validateField = async (field: FormField<Model>) => {
     touch(field)
     const configured = options.rules?.[field]
     const validators = configured
-      ? (toArray(configured) as readonly ModelFormValidator<Model[typeof field], Model>[])
+      ? (toArray(configured) as readonly FormValidator<Model[typeof field], Model>[])
       : []
     const currentEpoch = epoch
     const version = ++validationSeq
@@ -155,7 +154,7 @@ export const useModelForm = <Model extends ModelFormValues>(
 
       // 只有该字段最新一次、且 reset 之后开始的校验可以写入错误
       if (currentEpoch === epoch && validationVersions.get(field) === version) {
-        setErrors({ [field]: fieldErrors } as ModelFormErrorInput<Model>)
+        setErrors({ [field]: fieldErrors } as FormErrorInput<Model>)
       }
       return fieldErrors.length === 0
     } finally {
@@ -168,7 +167,7 @@ export const useModelForm = <Model extends ModelFormValues>(
   }
 
   const validate = async () => {
-    const fields = Object.keys(options.rules ?? {}) as ModelFormField<Model>[]
+    const fields = Object.keys(options.rules ?? {}) as FormField<Model>[]
     const results = await Promise.all(fields.map(validateField))
     return results.every(Boolean)
   }

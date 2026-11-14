@@ -90,13 +90,17 @@ export default defineComponent({
         // 路由未配置 meta 或 title 时回退为空
         const meta = (v.meta ?? {}) as RouteMeta
         const title = getRouteTitle(meta)
+        // 渲染结构与上游一致：key 在 name 缺失时回退 path（参考上游 e66532cf9）；图标（右间距 5px）与标题直接作为 __inner（已是 flex 居中）的子节点
         return (
-          <ElBreadcrumbItem to={canNavigate ? { path: v.path } : undefined} key={v.name}>
+          <ElBreadcrumbItem
+            to={canNavigate ? { path: v.path } : undefined}
+            key={String(v.name ?? v.path)}
+          >
             {meta.icon && breadcrumbIcon.value ? (
-              <div class="flex items-center">
-                <Icon icon={meta.icon} class="mr-[2px]" svgClass="inline-block"></Icon>
+              <>
+                <Icon icon={meta.icon} class="mr-[5px]"></Icon>
                 {title}
-              </div>
+              </>
             ) : (
               title
             )}
@@ -157,8 +161,6 @@ $prefix-cls: #{$elNamespace}-breadcrumb;
 
   :deep(.#{$prefix-cls}__item):last-child {
     .#{$prefix-cls}__inner {
-      display: flex;
-      align-items: center;
       color: var(--el-text-color-placeholder);
 
       &:hover {
