@@ -9,13 +9,11 @@
   </el-alert>
 </template>
 <script setup lang="tsx">
-import { propTypes } from '@/utils/propTypes'
-
 defineOptions({ name: 'DocAlert' })
 
 defineProps({
-  title: propTypes.string,
-  url: propTypes.string
+  title: { type: String },
+  url: { type: String }
 })
 
 /** 是否开启 */

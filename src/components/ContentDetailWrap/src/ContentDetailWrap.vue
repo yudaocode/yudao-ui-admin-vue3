@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'ContentDetailWrap' })
@@ -11,8 +10,8 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('content-detail-wrap')
 
 defineProps({
-  title: propTypes.string.def(''),
-  message: propTypes.string.def('')
+  title: { type: String, default: '' },
+  message: { type: String, default: '' }
 })
 const emit = defineEmits(['back'])
 const offset = ref(85)

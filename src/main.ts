@@ -54,7 +54,7 @@ window.addEventListener('vite:preloadError', (event) => {
 const setupAll = async () => {
   const app = createApp(App)
 
-  await setupI18n(app)
+  setupI18n(app)
 
   setupStore(app)
 

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { useConfigGlobal } from '@/hooks/web/useConfigGlobal'
 import type { ZxcvbnResult } from '@zxcvbn-ts/core'
 import { zxcvbn } from '@zxcvbn-ts/core'
@@ -13,8 +12,8 @@ const prefixCls = getPrefixCls('input-password')
 
 const props = defineProps({
   // 是否显示密码强度
-  strength: propTypes.bool.def(false),
-  modelValue: propTypes.string.def('')
+  strength: { type: Boolean, default: false },
+  modelValue: { type: String, default: '' }
 })
 
 watch(

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 
 // 关闭自动透传：attrs 只经模板中的 getBindValue() 转发一次，避免透传在显式 align-center 之后再次合并原始值
@@ -10,18 +9,18 @@ const slots = useSlots()
 const emits = defineEmits(['update:modelValue'])
 
 const props = defineProps({
-  modelValue: propTypes.bool.def(false),
-  title: propTypes.string.def('Dialog'),
-  fullscreen: propTypes.bool.def(true),
-  defaultFullscreen: propTypes.bool.def(false),
+  modelValue: { type: Boolean, default: false },
+  title: { type: String, default: 'Dialog' },
+  fullscreen: { type: Boolean, default: true },
+  defaultFullscreen: { type: Boolean, default: false },
   // 未传时不设默认值，由 ElDialog 使用 Element Plus 默认宽度 50%（与上游一致：上游 Dialog 不强制宽度）
-  width: propTypes.oneOfType([String, Number]),
-  scroll: propTypes.bool.def(false), // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
-  maxHeight: propTypes.oneOfType([String, Number]).def('400px'),
-  loading: propTypes.bool.def(false),
+  width: { type: [String, Number] },
+  scroll: { type: Boolean, default: false }, // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
+  maxHeight: { type: [String, Number], default: '400px' },
+  loading: { type: Boolean, default: false },
   // 点击遮罩是否关闭：默认 false（与上游一致）。声明为 prop 后，未传与显式 undefined 都取默认值，
   // close-on-click-modal / closeOnClickModal 由 Vue 统一归一化，空布尔属性按 true 处理
-  closeOnClickModal: propTypes.bool.def(false)
+  closeOnClickModal: { type: Boolean, default: false }
 })
 
 const attrs = useAttrs()

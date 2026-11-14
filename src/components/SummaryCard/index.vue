@@ -32,21 +32,21 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { toNumber } from 'lodash-es'
 
 /** 统计卡片 */
 defineOptions({ name: 'SummaryCard' })
 
 defineProps({
-  title: propTypes.string.def(''),
-  tooltip: propTypes.string.def(''),
-  icon: propTypes.string.def(''),
-  iconColor: propTypes.string.def(''),
-  iconBgColor: propTypes.string.def(''),
-  prefix: propTypes.string.def(''),
-  value: propTypes.number.def(0),
-  decimals: propTypes.number.def(0),
-  percent: propTypes.oneOfType([Number, String]).def(undefined)
+  title: { type: String, default: '' },
+  tooltip: { type: String, default: '' },
+  icon: { type: String, default: '' },
+  iconColor: { type: String, default: '' },
+  iconBgColor: { type: String, default: '' },
+  prefix: { type: String, default: '' },
+  value: { type: Number, default: 0 },
+  decimals: { type: Number, default: 0 },
+  // 未传时不设默认值（原 .def(undefined) 即无默认值）
+  percent: { type: [Number, String] }
 })
 </script>

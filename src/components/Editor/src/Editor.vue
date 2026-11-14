@@ -2,7 +2,6 @@
 import { PropType } from 'vue'
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
 import { i18nChangeLanguage, IDomEditor, IEditorConfig } from '@wangeditor-next/editor'
-import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { ElMessage } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
@@ -27,15 +26,15 @@ watch(
 )
 
 const props = defineProps({
-  editorId: propTypes.string.def('wangEditor-1'),
-  height: propTypes.oneOfType([Number, String]).def('500px'),
+  editorId: { type: String, default: 'wangEditor-1' },
+  height: { type: [Number, String], default: '500px' },
   editorConfig: {
     type: Object as PropType<Partial<IEditorConfig>>,
     default: () => undefined
   },
-  readonly: propTypes.bool.def(false),
-  modelValue: propTypes.string.def(''),
-  directory: propTypes.string.def('editor-default')
+  readonly: { type: Boolean, default: false },
+  modelValue: { type: String, default: '' },
+  directory: { type: String, default: 'editor-default' }
 })
 
 const emit = defineEmits(['change', 'update:modelValue'])

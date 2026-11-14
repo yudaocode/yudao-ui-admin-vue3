@@ -1,16 +1,15 @@
 <script lang="tsx">
 import { defineComponent, getCurrentInstance, PropType, h, VNode } from 'vue'
-import { propTypes } from '@/utils/propTypes'
 
 export default defineComponent({
   name: 'Highlight',
   props: {
-    tag: propTypes.string.def('span'),
+    tag: { type: String, default: 'span' },
     keys: {
       type: Array as PropType<string[]>,
       default: () => []
     },
-    color: propTypes.string.def('var(--el-color-primary)')
+    color: { type: String, default: 'var(--el-color-primary)' }
   },
   emits: ['click'],
   setup(props, { emit, slots }) {

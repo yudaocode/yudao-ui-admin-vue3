@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import { computed, nextTick, onBeforeUnmount, ref, unref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, unref, watch, type PropType } from 'vue'
 import { useEventListener, useIntersectionObserver } from '@vueuse/core'
 import { debounce } from 'lodash-es'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'Waterfall' })
@@ -14,21 +13,49 @@ const prefixCls = getPrefixCls('waterfall')
 const emit = defineEmits(['loadMore'])
 
 const prop = defineProps({
-  data: propTypes.arrayOf(propTypes.any),
-  reset: propTypes.bool.def(true),
-  width: propTypes.number.def(200),
-  gap: propTypes.number.def(20),
-  props: propTypes.objectOf(propTypes.string).def({
-    src: 'src',
-    height: 'height'
-  }),
-  cols: propTypes.number.def(undefined),
-  loadingText: propTypes.string.def('加载中...'),
-  loading: propTypes.bool.def(false),
-  end: propTypes.bool.def(false),
-  endText: propTypes.string.def('没有更多了'),
-  autoCenter: propTypes.bool.def(true),
-  layout: propTypes.oneOf(['javascript', 'flex']).def('flex')
+  data: { type: Array as PropType<any[]> },
+  reset: { type: Boolean, default: true },
+  width: { type: Number, default: 200 },
+  gap: { type: Number, default: 20 },
+  // 字段映射：保留原 vue-types objectOf(propTypes.string) 的运行时校验（defineProps 会被提升，校验逻辑须内联）
+  props: {
+    type: Object as PropType<Record<string, string>>,
+    default: () => ({ src: 'src', height: 'height' }),
+    validator: (value: unknown) => {
+      // 1. 普通对象（同 vue-types isPlainObject）：原型为 null、Object.prototype 或原型的原型为 null，
+      //    且不含 Symbol.toStringTag / Symbol.iterator；数组、Date、RegExp、Map、Set、类实例、Object.create({}) 不通过
+      if (typeof value !== 'object' || value === null) return false
+      const prototype = Object.getPrototypeOf(value)
+      const isPlainObject =
+        (prototype === null ||
+          prototype === Object.prototype ||
+          Object.getPrototypeOf(prototype) === null) &&
+        !(Symbol.toStringTag in value) &&
+        !(Symbol.iterator in value)
+      if (!isPlainObject) return false
+      // 2. 每个自有可枚举字符串键的值：null / undefined 通过，否则构造函数名须为 String（同 vue-types getNativeType，含 new String()）
+      return Object.keys(value).every((key) => {
+        const item = (value as Record<string, unknown>)[key]
+        if (item == null) return true
+        const match = (item as { constructor?: { toString(): string } }).constructor
+          ?.toString()
+          .match(/^\s*function (\w+)/)
+        return (match ? match[1].replace(/^Async/, '') : '') === 'String'
+      })
+    }
+  },
+  // 未传时不设默认值（原 .def(undefined) 即无默认值）
+  cols: { type: Number },
+  loadingText: { type: String, default: '加载中...' },
+  loading: { type: Boolean, default: false },
+  end: { type: Boolean, default: false },
+  endText: { type: String, default: '没有更多了' },
+  autoCenter: { type: Boolean, default: true },
+  layout: {
+    type: String,
+    default: 'flex',
+    validator: (value: string) => ['javascript', 'flex'].includes(value)
+  }
 })
 
 const wrapEl = ref<HTMLDivElement>()

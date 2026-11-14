@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { Icon } from '@/components/Icon'
 import { useFullscreen } from '@vueuse/core'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'ScreenFull' })
@@ -10,9 +9,7 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('screenfull')
 
-defineProps({
-  color: propTypes.string.def('')
-})
+withDefaults(defineProps<{ color?: string }>(), { color: '' })
 
 const { t } = useI18n()
 

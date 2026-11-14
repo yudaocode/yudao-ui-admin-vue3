@@ -8,36 +8,28 @@ import { DEFAULT_LOCALE, localeMessages } from '@/config/locale'
 
 export let i18n: ReturnType<typeof createI18n>
 
-const createI18nOptions = async (): Promise<I18nOptions> => {
+// 组合式模式（legacy: false）只读取以下选项，与上游 createAppI18n 一致；
+// 原先的 availableLocales、sync、silentTranslationWarn、silentFallbackWarn 仅 legacy 模式读取，已移除
+const createI18nOptions = (lang: LocaleType): I18nOptions => ({
+  legacy: false,
+  locale: lang,
+  // 当前语言缺失的文案回退到默认语言显示，而不是显示原始 key（参考上游 c7f8db52d）
+  fallbackLocale: DEFAULT_LOCALE,
+  messages: localeMessages,
+  missingWarn: false,
+  // 回退到默认语言时不告警（参考上游 c7f8db52d）
+  fallbackWarn: false
+})
+
+// 语言包为静态引入，安装过程无异步步骤，与上游一样同步执行
+export const setupI18n = (app: App<Element>) => {
   const localeStore = useLocaleStoreWithOut()
-  const locale = localeStore.getCurrentLocale
-  const localeMap = localeStore.getLocaleMap
+  const lang = localeStore.getCurrentLocale.lang
 
-  setHtmlPageLang(locale.lang)
+  // 写回规范化后的语言：缓存值不受支持时 store 已回退默认语言，这里同步缓存与 Element Plus 语言对象
+  localeStore.setCurrentLocale({ lang })
+  setHtmlPageLang(lang)
 
-  localeStore.setCurrentLocale({
-    lang: locale.lang
-    // elLocale: elLocal
-  })
-
-  return {
-    legacy: false,
-    locale: locale.lang,
-    // 当前语言缺失的文案回退到默认语言显示，而不是显示原始 key（参考上游 c7f8db52d）
-    fallbackLocale: DEFAULT_LOCALE,
-    messages: localeMessages,
-    availableLocales: localeMap.map((v) => v.lang),
-    sync: true,
-    silentTranslationWarn: true,
-    missingWarn: false,
-    // legacy: false 时 composer 只读取 fallbackWarn，回退到默认语言时不告警（参考上游 c7f8db52d）
-    fallbackWarn: false,
-    silentFallbackWarn: true
-  }
-}
-
-export const setupI18n = async (app: App<Element>) => {
-  const options = await createI18nOptions()
-  i18n = createI18n(options) as I18n
+  i18n = createI18n(createI18nOptions(lang)) as I18n
   app.use(i18n)
 }

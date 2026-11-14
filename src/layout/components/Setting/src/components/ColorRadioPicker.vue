@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'ColorRadioPicker' })
@@ -14,7 +13,7 @@ const props = defineProps({
     type: Array as PropType<string[]>,
     default: () => []
   },
-  modelValue: propTypes.string.def('')
+  modelValue: { type: String, default: '' }
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])

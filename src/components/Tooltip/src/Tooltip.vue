@@ -1,12 +1,10 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
-
 defineOptions({ name: 'Tooltip' })
 
 defineProps({
-  title: propTypes.string.def(''),
-  message: propTypes.string.def(''),
-  icon: propTypes.string.def('ep:question-filled')
+  title: { type: String, default: '' },
+  message: { type: String, default: '' },
+  icon: { type: String, default: 'ep:question-filled' }
 })
 </script>
 <template>

@@ -49,14 +49,13 @@
 </template>
 
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { getRouteTitle } from '@/utils/routeTitle'
 defineProps({
   isModal: {
     type: Boolean,
     default: true
   },
-  color: propTypes.string.def('')
+  color: { type: String, default: '' }
 })
 
 const { t } = useI18n()

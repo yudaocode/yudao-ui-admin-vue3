@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
-
 defineOptions({ name: 'IFrame' })
 
 const props = defineProps({
-  src: propTypes.string.def('')
+  src: { type: String, default: '' }
 })
 const loading = ref(true)
 const frameRef = ref<HTMLIFrameElement | null>(null)

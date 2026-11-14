@@ -199,8 +199,7 @@ import { component as TAB_BAR_COMPONENT } from './components/mobile/TabBar/confi
 import { isEmpty, isString } from '@/utils/is'
 import { DiyComponent, DiyComponentLibrary, PageConfig } from '@/components/DiyEditor/util'
 import { componentConfigs } from '@/components/DiyEditor/components/mobile'
-import { array, oneOfType } from 'vue-types'
-import { propTypes } from '@/utils/propTypes'
+import type { PropType } from 'vue'
 
 /** 页面装修详情页 */
 defineOptions({ name: 'DiyPageDetail' })
@@ -222,19 +221,19 @@ const pageComponents = ref<DiyComponent<any>[]>([])
 // 定义属性
 const props = defineProps({
   // 页面配置，支持Json字符串
-  modelValue: oneOfType<string | PageConfig>([String, Object]).isRequired,
+  modelValue: { type: [String, Object] as PropType<string | PageConfig>, required: true },
   // 标题
-  title: propTypes.string.def(''),
+  title: { type: String, default: '' },
   // 组件库
-  libs: array<DiyComponentLibrary>(),
+  libs: { type: Array as PropType<DiyComponentLibrary[]> },
   // 是否显示顶部导航栏
-  showNavigationBar: propTypes.bool.def(true),
+  showNavigationBar: { type: Boolean, default: true },
   // 是否显示底部导航菜单
-  showTabBar: propTypes.bool.def(false),
+  showTabBar: { type: Boolean, default: false },
   // 是否显示页面配置
-  showPageConfig: propTypes.bool.def(true),
+  showPageConfig: { type: Boolean, default: true },
   // 预览地址：提供了预览地址，才会显示预览按钮
-  previewUrl: propTypes.string.def('')
+  previewUrl: { type: String, default: '' }
 })
 
 // 兼容历史装修数据：旧版只有 alwaysShow，新增 showType 后统一转成枚举并继续输出 alwaysShow。

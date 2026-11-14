@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useId } from 'vue'
-import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { useDesign } from '@/hooks/web/useDesign'
 import Dialog from './Dialog.vue'
@@ -15,16 +14,16 @@ import { useResize } from './useResize'
 defineOptions({ name: 'ResizeDialog', inheritAttrs: false })
 
 const props = defineProps({
-  modelValue: propTypes.bool.def(false),
+  modelValue: { type: Boolean, default: false },
   // 初始宽度 40%、内容区初始高度 400px：保留本组件原有兼容默认值（不随 Dialog 回落 50%）
-  width: propTypes.oneOfType([String, Number]).def('40%'),
-  maxHeight: propTypes.oneOfType([String, Number]).def('400px'),
+  width: { type: [String, Number], default: '40%' },
+  maxHeight: { type: [String, Number], default: '400px' },
   // 与上游属性名一致：设置时优先于 width / maxHeight（单位 px）
-  initWidth: propTypes.number,
-  initHeight: propTypes.number,
+  initWidth: { type: Number },
+  initHeight: { type: Number },
   // 拖拽时的最小宽度、最小内容高度（px）
-  minResizeWidth: propTypes.number.def(300),
-  minResizeHeight: propTypes.number.def(100)
+  minResizeWidth: { type: Number, default: 300 },
+  minResizeHeight: { type: Number, default: 100 }
 })
 
 const emit = defineEmits(['update:modelValue'])
