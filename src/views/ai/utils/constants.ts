@@ -195,6 +195,42 @@ export const AiVideoShotTypeOptions = [
 ]
 
 /**
+ * AI 短剧生成状态的枚举：角色形象、场景、视觉资产、镜头视频、成片共用；为空表示未生成
+ */
+export const AiDramaStatusEnum = {
+  PENDING: 10, // 待处理
+  IN_PROGRESS: 20, // 生成中
+  SAVING: 30, // 转存中
+  SUCCESS: 40, // 已完成
+  FAIL: 50 // 已失败
+}
+
+/** AI 短剧是否生成中：待处理、生成中、转存中 */
+export const isAiDramaRunning = (status?: number) =>
+  status === AiDramaStatusEnum.PENDING ||
+  status === AiDramaStatusEnum.IN_PROGRESS ||
+  status === AiDramaStatusEnum.SAVING
+
+/**
+ * AI 短剧项目步骤的枚举
+ */
+export const AiDramaStepEnum = {
+  IDEA: 1, // 故事想法
+  SCRIPT: 2, // 剧本审阅
+  ASSET: 3, // 资产配置
+  STORYBOARD: 4 // 分镜与成片
+}
+
+/**
+ * AI 短剧音频类型的枚举
+ */
+export const AiDramaAudioTypeEnum = {
+  SAMPLE: 1, // 角色样音
+  SAMPLE_SELECTED: 2, // 选用的样音
+  NARRATION: 3 // 旁白
+}
+
+/**
  * AI 音乐生成模式的枚举
  */
 export const AiMusicGenerateModeEnum = {

@@ -1036,6 +1036,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           activeMenu: '/ai/console/skill'
         }
+      },
+      {
+        path: 'drama/project/create',
+        component: () => import('@/views/ai/drama/project/form/index.vue'),
+        name: 'AiDramaProjectCreate',
+        meta: {
+          title: '新建短剧',
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          activeMenu: '/ai/drama'
+        }
+      },
+      {
+        path: 'drama/project/:id',
+        component: () => import('@/views/ai/drama/project/form/index.vue'),
+        name: 'AiDramaProject',
+        meta: {
+          title: '短剧项目',
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          activeMenu: '/ai/drama'
+        }
       }
     ]
   },
