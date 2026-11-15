@@ -17,6 +17,9 @@ const props = defineProps({
   alt: propTypes.string.def(''),
   circled: propTypes.bool.def(false),
   realTimePreview: propTypes.bool.def(true),
+  coordinatesOnly: propTypes.bool.def(false),
+  aspectRatio: { type: Number, default: 1 },
+  transformable: propTypes.bool.def(true),
   height: propTypes.string.def('360px'),
   crossorigin: {
     type: String as PropType<'' | 'anonymous' | 'use-credentials' | undefined>,
@@ -66,7 +69,7 @@ async function init() {
 
   if (cropperSelection) {
     cropperSelection.initialCoverage = 0.5
-    cropperSelection.aspectRatio = 1
+    cropperSelection.aspectRatio = props.aspectRatio
     cropperSelection.movable = true
     cropperSelection.resizable = true
     cropperSelection.addEventListener('change', () => {
@@ -75,6 +78,10 @@ async function init() {
   }
 
   if (cropperImage) {
+    cropperImage.rotatable = props.transformable
+    cropperImage.scalable = props.transformable
+    cropperImage.skewable = props.transformable
+    cropperImage.translatable = props.transformable
     cropperImage.addEventListener('transform', () => {
       debounceRealTimeCroppered()
     })
@@ -98,11 +105,11 @@ async function croppered() {
   const selection = cropper.value.getCropperSelection()
   if (!selection) return
 
-  const imgInfo = {
-    x: selection.x,
-    y: selection.y,
-    width: selection.width,
-    height: selection.height
+  const imgInfo = getSourceImageCoordinates(selection)
+
+  if (props.coordinatesOnly) {
+    emit('cropend', { imgBase64: '', imgInfo })
+    return
   }
 
   try {
@@ -126,6 +133,29 @@ async function croppered() {
     }, 'image/png')
   } catch {
     // Selection may not be ready yet
+  }
+}
+
+// 将选区坐标转换为原图坐标
+function getSourceImageCoordinates(selection: HTMLElement) {
+  const cropperImage = cropper.value?.getCropperImage()
+  if (!cropperImage) return { x: 0, y: 0, width: 0, height: 0 }
+  const selectionRect = selection.getBoundingClientRect()
+  const imageRect = cropperImage.getBoundingClientRect()
+  const naturalWidth = cropperImage.$image.naturalWidth
+  const naturalHeight = cropperImage.$image.naturalHeight
+  if (!imageRect.width || !imageRect.height || !naturalWidth || !naturalHeight) {
+    return { x: 0, y: 0, width: 0, height: 0 }
+  }
+  const scaleX = naturalWidth / imageRect.width
+  const scaleY = naturalHeight / imageRect.height
+  const x = Math.max(0, Math.round((selectionRect.left - imageRect.left) * scaleX))
+  const y = Math.max(0, Math.round((selectionRect.top - imageRect.top) * scaleY))
+  return {
+    x,
+    y,
+    width: Math.min(naturalWidth - x, Math.max(1, Math.round(selectionRect.width * scaleX))),
+    height: Math.min(naturalHeight - y, Math.max(1, Math.round(selectionRect.height * scaleY)))
   }
 }
 
