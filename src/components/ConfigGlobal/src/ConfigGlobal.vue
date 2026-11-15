@@ -46,7 +46,11 @@ watch(
         ? appStore.setLayout('sidebar-nav')
         : undefined
     } else {
-      appStore.getMobile ? appStore.setMobile(false) : undefined
+      if (appStore.getMobile) {
+        appStore.setMobile(false)
+        // 移动端强制的 sidebar-nav 未写缓存，回到桌面端恢复用户选择的布局
+        appStore.restoreLayout()
+      }
       // 桌面端去掉移动端写入的内联值，回落 var.css 的折叠宽度（72px），尺寸只在 var.css 维护
       document.documentElement.style.removeProperty('--left-menu-min-width')
     }

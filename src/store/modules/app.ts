@@ -395,9 +395,21 @@ export const useAppStore = defineStore('app', {
         return
       }
       this.layout = normalizedLayout
-      wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      // 移动端强制的 sidebar-nav 只用于显示，不写入缓存，回到桌面端由 restoreLayout 恢复用户选择的布局
+      // （参考上游 6b10db306 Layout：移动端仅覆盖显示布局，不改用户设置）
+      if (!this.mobile) {
+        wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      }
       // 顶部导航布局的菜单跟随头部色显示：只重新渲染，不改已保存的主题
       this.setCssVarTheme()
+    },
+    // 从移动端回到桌面端时，恢复缓存中用户选择的布局
+    restoreLayout() {
+      const layout = normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT))
+      if (layout !== this.layout) {
+        this.layout = layout
+        this.setCssVarTheme()
+      }
     },
     setTitle(title: string) {
       this.title = title
