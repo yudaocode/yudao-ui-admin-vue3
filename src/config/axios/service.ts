@@ -239,7 +239,11 @@ service.interceptors.response.use(
   },
   (error: AxiosError) => {
     // request.cancelRequest / cancelAllRequest 主动取消的请求（含刷新令牌后的回放）不提示，原样拒绝；调用方自管 signal 的取消仍按原逻辑提示
-    if (isCanceledByRequestCancellation(error)) {
+    // 请求选项 silentCancel 为 true 时，调用方自管 signal 的取消同样不提示（默认 false）
+    if (
+      isCanceledByRequestCancellation(error) ||
+      (axios.isCancel(error) && (error.config as Recordable | undefined)?.silentCancel === true)
+    ) {
       return Promise.reject(error)
     }
     console.log('err' + error) // for debug
