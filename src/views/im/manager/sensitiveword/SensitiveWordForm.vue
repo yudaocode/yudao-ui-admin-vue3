@@ -38,25 +38,26 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as ManagerSensitiveWordApi from '@/api/im/manager/sensitiveword'
+import { FormRules } from 'element-plus'
 
 defineOptions({ name: 'ImSensitiveWordForm' })
 
-const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false) // 弹窗的显示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create / update
-const formData = ref({
-  id: undefined as number | undefined,
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref<ManagerSensitiveWordApi.ImManagerSensitiveWordVO>({
+  id: undefined,
   word: '',
   status: CommonStatusEnum.ENABLE
-})
-const formRules = reactive({
+}) // 表单数据
+const formRules = reactive<FormRules>({
   word: [{ required: true, whitespace: true, message: '敏感词不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
-})
+}) // 表单校验规则
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
@@ -81,11 +82,13 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
-  await formRef.value.validate()
+  if (!formRef.value) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ManagerSensitiveWordApi.ImManagerSensitiveWordVO
+    const data = formData.value
     if (formType.value === 'create') {
       await ManagerSensitiveWordApi.createManagerSensitiveWord(data)
       message.success(t('common.createSuccess'))
