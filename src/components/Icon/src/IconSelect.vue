@@ -148,21 +148,33 @@ function getIconPage(name: string) {
   return iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
 }
 
-// 绑定值变化（含编辑回显）时，定位到所属分类及所在页
+// 定位到绑定图标所属分类及所在页（参考上游 4490d5eee init）；空值或未知前缀时保持当前浏览位置
+// 页码按当前搜索过滤后的列表计算，选中图标不在过滤结果中时回到第 1 页
+function locateSelected() {
+  const selected = parseModelValue()
+  if (!selected) {
+    return
+  }
+  currentActiveType.value = selected.type
+  currentPage.value = getIconPage(selected.name)
+}
+
+// 绑定值变化（含编辑回显）时定位
 watch(
   () => {
     return props.modelValue
   },
   () => {
-    const selected = parseModelValue()
-    if (!selected) {
-      return
-    }
-    currentActiveType.value = selected.type
-    currentPage.value = getIconPage(selected.name)
+    locateSelected()
   },
   { immediate: true }
 )
+// 每次打开弹层时重新定位（参考上游 4490d5eee @show），浏览其它分类/页后未选择而关闭，再次打开仍回到选中图标
+watch(visible, (value) => {
+  if (value) {
+    locateSelected()
+  }
+})
 // 搜索时回到第 1 页；清空搜索时，若选中图标属于当前分类，则回到其所在页
 watch(
   () => {
