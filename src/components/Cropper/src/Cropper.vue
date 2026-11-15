@@ -7,17 +7,16 @@
 import { CSSProperties, PropType } from 'vue'
 import Cropper from 'cropperjs'
 import { useDesign } from '@/hooks/web/useDesign'
-import { propTypes } from '@/utils/propTypes'
 import { useDebounceFn } from '@vueuse/core'
 
 defineOptions({ name: 'Cropper' })
 
 const props = defineProps({
-  src: propTypes.string.def(''),
-  alt: propTypes.string.def(''),
-  circled: propTypes.bool.def(false),
-  realTimePreview: propTypes.bool.def(true),
-  height: propTypes.string.def('360px'),
+  src: { type: String, default: '' },
+  alt: { type: String, default: '' },
+  circled: { type: Boolean, default: false },
+  realTimePreview: { type: Boolean, default: true },
+  height: { type: String, default: '360px' },
   crossorigin: {
     type: String as PropType<'' | 'anonymous' | 'use-credentials' | undefined>,
     default: undefined

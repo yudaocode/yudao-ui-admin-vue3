@@ -88,7 +88,7 @@ declare global {
     componentName?: string
     id?: number | string
     path: string
-    redirect: string
+    redirect?: string
     children?: AppCustomRouteRecordRaw[]
     keepAlive?: boolean
     visible?: boolean

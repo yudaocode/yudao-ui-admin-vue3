@@ -2,7 +2,7 @@
 import 'virtual:element-plus-style'
 
 // 引入unocss css
-import '@/plugins/unocss'
+import 'virtual:uno.css'
 
 // 导入全局的svg图标
 import '@/plugins/svgIcon'
@@ -54,7 +54,7 @@ window.addEventListener('vite:preloadError', (event) => {
 const setupAll = async () => {
   const app = createApp(App)
 
-  await setupI18n(app)
+  setupI18n(app)
 
   setupStore(app)
 

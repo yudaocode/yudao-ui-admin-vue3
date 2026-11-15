@@ -1,11 +1,6 @@
 @use './var.css';
 @use './FormCreate/index.scss';
-@use './theme.scss';
 @use 'element-plus/theme-chalk/dark/css-vars.css';
-
-.reset-margin [class*='el-icon'] + span {
-  margin-left: 2px !important;
-}
 
 // 解决抽屉弹出时，body宽度变化的问题
 .el-popup-parent--hidden {

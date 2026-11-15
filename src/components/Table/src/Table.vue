@@ -11,7 +11,6 @@ import {
 import type { ComponentSize, ElTooltipProps } from 'element-plus'
 import { defineComponent, PropType, ref, computed, unref, watch, onMounted } from 'vue'
 import type { CSSProperties, VNode } from 'vue'
-import { propTypes } from '@/utils/propTypes'
 import { DEFAULT_FILTER_COLUMN, getColumnKey, normalizeColumnFixed, setIndex } from './helper'
 import type {
   ColumnPreference,
@@ -25,20 +24,21 @@ import { set, get } from 'lodash-es'
 import { getSlot } from '@/utils/tsxHelper'
 import TableActions from './components/TableActions.vue'
 import { Icon } from '@/components/Icon'
+import { DictTag } from '@/components/DictTag'
 
 export default defineComponent({
   name: 'Table',
   props: {
-    pageSize: propTypes.number.def(10),
-    currentPage: propTypes.number.def(1),
+    pageSize: { type: Number, default: 10 },
+    currentPage: { type: Number, default: 1 },
     // 是否多选（芋道原有能力，源列中已有 selection 列时不重复生成）
-    selection: propTypes.bool.def(false),
+    selection: { type: Boolean, default: false },
     // 是否展开行（芋道原有能力，使用 expand 插槽；源列中已有 expand 列时不重复生成）
-    expand: propTypes.bool.def(false),
+    expand: { type: Boolean, default: false },
     // 是否展示表格的工具栏
-    showAction: propTypes.bool.def(false),
+    showAction: { type: Boolean, default: false },
     // 是否所有的超出隐藏，优先级低于schema中的showOverflowTooltip,
-    showOverflowTooltip: propTypes.bool.def(true),
+    showOverflowTooltip: { type: Boolean, default: true },
     // 表头
     columns: {
       type: Array as PropType<TableColumn[]>,
@@ -55,19 +55,23 @@ export default defineComponent({
       default: (): Pagination | undefined => undefined
     },
     // 仅对 type=selection 的列有效，类型为 Boolean，为 true 则会在数据更新之后保留之前选中的数据（需指定 row-key）
-    reserveSelection: propTypes.bool.def(false),
+    reserveSelection: { type: Boolean, default: false },
     // 加载状态
-    loading: propTypes.bool.def(false),
+    loading: { type: Boolean, default: false },
     // 是否叠加索引
-    reserveIndex: propTypes.bool.def(false),
+    reserveIndex: { type: Boolean, default: false },
     // 对齐方式（芋道默认 center）
-    align: propTypes.string
-      .validate((v: string) => ['left', 'center', 'right'].includes(v))
-      .def('center'),
+    align: {
+      type: String,
+      default: 'center',
+      validator: (v: string) => ['left', 'center', 'right'].includes(v)
+    },
     // 表头对齐方式（芋道默认 center）
-    headerAlign: propTypes.string
-      .validate((v: string) => ['left', 'center', 'right'].includes(v))
-      .def('center'),
+    headerAlign: {
+      type: String,
+      default: 'center',
+      validator: (v: string) => ['left', 'center', 'right'].includes(v)
+    },
     data: {
       type: Array as PropType<Recordable[]>,
       default: () => []
@@ -82,18 +86,18 @@ export default defineComponent({
       type: Array as PropType<string[]>,
       default: () => []
     },
-    height: propTypes.oneOfType([Number, String]),
-    maxHeight: propTypes.oneOfType([Number, String]),
-    stripe: propTypes.bool.def(false),
-    border: propTypes.bool.def(true),
+    height: { type: [Number, String] },
+    maxHeight: { type: [Number, String] },
+    stripe: { type: Boolean, default: false },
+    border: { type: Boolean, default: true },
     size: {
       type: String as PropType<ComponentSize>,
       validator: (v: ComponentSize) => ['default', 'small', 'large'].includes(v)
     },
-    fit: propTypes.bool.def(true),
-    showHeader: propTypes.bool.def(true),
-    highlightCurrentRow: propTypes.bool.def(false),
-    currentRowKey: propTypes.oneOfType([Number, String]),
+    fit: { type: Boolean, default: true },
+    showHeader: { type: Boolean, default: true },
+    highlightCurrentRow: { type: Boolean, default: false },
+    currentRowKey: { type: [Number, String] },
     // row-class-name, 类型为 (row: Recordable, rowIndex: number) => string | string
     rowClassName: {
       type: [Function, String] as PropType<(row: Recordable, rowIndex: number) => string | string>,
@@ -145,8 +149,8 @@ export default defineComponent({
       default: 'id'
     },
     // 未传时交给 ElementPlus 的国际化默认文案
-    emptyText: propTypes.string,
-    defaultExpandAll: propTypes.bool.def(false),
+    emptyText: { type: String },
+    defaultExpandAll: { type: Boolean, default: false },
     expandRowKeys: {
       type: Array as PropType<string[]>,
       default: undefined
@@ -182,9 +186,9 @@ export default defineComponent({
         popperOptions: { strategy: 'fixed' }
       })
     },
-    showSummary: propTypes.bool.def(false),
+    showSummary: { type: Boolean, default: false },
     // 未传时交给 ElementPlus 的国际化默认文案
-    sumText: propTypes.string,
+    sumText: { type: String },
     summaryMethod: {
       type: Function as PropType<(param: { columns: any[]; data: any[] }) => any[]>,
       default: undefined
@@ -195,9 +199,9 @@ export default defineComponent({
       >,
       default: undefined
     },
-    selectOnIndeterminate: propTypes.bool.def(true),
-    indent: propTypes.number.def(16),
-    lazy: propTypes.bool.def(false),
+    selectOnIndeterminate: { type: Boolean, default: true },
+    indent: { type: Number, default: 16 },
+    lazy: { type: Boolean, default: false },
     load: {
       type: Function as PropType<(row: Recordable, treeNode: any, resolve: Function) => void>,
       default: undefined
@@ -210,10 +214,10 @@ export default defineComponent({
       type: String as PropType<'auto' | 'fixed'>,
       default: 'fixed'
     },
-    scrollbarAlwaysOn: propTypes.bool.def(false),
-    flexible: propTypes.bool.def(false),
+    scrollbarAlwaysOn: { type: Boolean, default: false },
+    flexible: { type: Boolean, default: false },
     // 自定义内容
-    customContent: propTypes.bool.def(false),
+    customContent: { type: Boolean, default: false },
     cardBodyStyle: {
       type: Object as PropType<CSSProperties>,
       default: () => ({})
@@ -407,14 +411,19 @@ export default defineComponent({
     })
 
     const pagination = computed(() => {
-      // update by 芋艿：保持和 Pagination 组件的逻辑一致
+      // 默认分页外观与上游一致（无背景、含 40 条/页，桌面总数在右侧）；
+      // 窗口小于 992 时仍收窄页码数并保留总数在前的布局，避免当前页被挤出右浮动容器左侧
+      // 调用方传入的 pagination 优先
+      const isSmallScreen = document.body.clientWidth < 992
       return Object.assign(
         {
           small: false,
-          background: true,
-          pagerCount: document.body.clientWidth < 992 ? 5 : 7,
-          layout: 'total, sizes, prev, pager, next, jumper',
-          pageSizes: [10, 20, 30, 50, 100],
+          background: false,
+          pagerCount: isSmallScreen ? 5 : 7,
+          layout: isSmallScreen
+            ? 'total, sizes, prev, pager, next, jumper'
+            : 'sizes, prev, pager, next, jumper, ->, total',
+          pageSizes: [10, 20, 30, 40, 50, 100],
           disabled: false,
           hideOnSinglePage: false,
           total: 10
@@ -493,7 +502,8 @@ export default defineComponent({
     }
 
     // 普通列（含嵌套子列）的插槽。判断插槽 / 函数是否存在，不用结果做 || 回退，formatter 返回 0、false、'' 也原样显示：
-    // 内容：column.slots.default > 旧 slots[field] > formatter > 图片/视频预览 > get(row, field)
+    // 内容：column.slots.default > 旧 slots[field] > formatter > dictType 字典标签 > 图片/视频预览 > get(row, field)
+    // dictType：交给现有 DictTag 渲染，0 / false / 数组 / 逗号分隔字符串均可；null / undefined / '' 不渲染标签
     // 表头：column.slots.header > 旧 slots[`${field}-header`]，都没有时由 ElTableColumn 显示 label
     const getColumnSlots = (v: TableColumn) => {
       const children = v.children
@@ -506,6 +516,10 @@ export default defineComponent({
           const value = get(data?.row, v.field)
           if (typeof v.formatter === 'function') {
             return v.formatter(data.row, data.column, value, data.$index)
+          }
+          if (v.dictType) {
+            if (value === undefined || value === null || value === '') return null
+            return <DictTag type={v.dictType} value={value} />
           }
           if (isPreviewField(v.field)) return renderPreview(value, v.field)
           return value
@@ -521,12 +535,14 @@ export default defineComponent({
       return columnSlots
     }
 
-    // 普通列：children / slots 不作为 ElTableColumn 属性透传
+    // 普通列：children / slots / dictType / dictClass 不作为 ElTableColumn 属性透传
     const renderNormalColumn = (v: TableColumn) => {
       const { align, headerAlign, showOverflowTooltip } = unref(getProps)
       const columnProps: Recordable = { ...v }
       delete columnProps.children
       delete columnProps.slots
+      delete columnProps.dictType
+      delete columnProps.dictClass
       return (
         <ElTableColumn
           key={getColumnKey(v)}

@@ -15,9 +15,13 @@ export const CACHE_KEY = {
   IS_DARK: 'isDark',
   LANG: 'lang',
   THEME: 'theme',
+  // 主题中用户显式自定义过的部分（primary / menu / header），与 THEME 一起写入
+  THEME_CUSTOM_PARTS: 'themeCustomParts',
   LAYOUT: 'layout',
   CURRENT_SIZE: 'currentSize',
   FIXED_MENU: 'fixedMenu',
+  // 侧栏折叠状态（仅桌面端写入，参考上游 c7f8db52d app store persist collapse）
+  COLLAPSE: 'collapse',
   DICT_CACHE: 'dictCache',
   // 登录表单
   LoginForm: 'loginForm',

@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import { useDesign } from '@/hooks/web/useDesign'
-import { propTypes } from '@/utils/propTypes'
-import { TipSchema } from '@/types/infoTip'
+import type { TipSchema } from './types'
 
 defineOptions({ name: 'InfoTip' })
 
@@ -11,13 +10,13 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('infotip')
 
 defineProps({
-  title: propTypes.string.def(''),
+  title: { type: String, default: '' },
   schema: {
     type: Array as PropType<Array<string | TipSchema>>,
     default: () => []
   },
-  showIndex: propTypes.bool.def(true),
-  highlightColor: propTypes.string.def('var(--el-color-primary)')
+  showIndex: { type: Boolean, default: true },
+  highlightColor: { type: String, default: 'var(--el-color-primary)' }
 })
 
 const emit = defineEmits(['click'])

@@ -10,9 +10,9 @@ const prefixCls = getPrefixCls('backtop')
 </script>
 
 <template>
-  <!-- 根类名与上游一致为 prefixCls；保留原 `${prefixCls}-backtop` 类名，兼容已有自定义样式 -->
+  <!-- 滚动目标与上游一致；去掉无人引用的遗留 `${prefixCls}-backtop` 类名（上游 ac186be70 起不再附加组件类名），保留根类名 prefixCls -->
   <ElBacktop
-    :class="[prefixCls, `${prefixCls}-backtop`]"
+    :class="prefixCls"
     :target="`.${variables.namespace}-layout-content-scrollbar .${variables.elNamespace}-scrollbar__wrap`"
   />
 </template>

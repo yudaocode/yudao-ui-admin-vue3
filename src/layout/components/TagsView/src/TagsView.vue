@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, nextTick, ref, unref, watch } from 'vue'
-import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
+import type { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -13,6 +13,7 @@ import { useTemplateRefsList } from '@vueuse/core'
 import { ElScrollbar } from 'element-plus'
 import { useScrollTo } from '@/hooks/event/useScrollTo'
 import { useTagsView } from '@/hooks/web/useTagsView'
+import { getRouteTitle } from '@/utils/routeTitle'
 import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'TagsView' })
@@ -23,7 +24,7 @@ const prefixCls = getPrefixCls('tags-view')
 
 const { t } = useI18n()
 
-const { currentRoute, push } = useRouter()
+const { currentRoute, push, hasRoute } = useRouter()
 
 const { closeAll, closeLeft, closeRight, closeOther, closeCurrent, refreshPage } = useTagsView()
 
@@ -37,7 +38,11 @@ const visitedViews = computed(() => tagsViewStore.getVisitedViews)
 
 const affixTagArr = ref<RouteLocationNormalizedLoaded[]>([])
 
-const selectedTag = computed(() => tagsViewStore.getSelectedTag)
+// 当前路由对应的 tag（按 fullPath 匹配，保留同一路径不同 query 的多实例）：工具栏的刷新与“更多”操作以它为准，
+// 不受右键其它 tag 的影响（参考上游 e66532cf9 activeTag）；当前页不显示 tag（noTagsView）时为 undefined
+const activeTag = computed(() =>
+  unref(visitedViews).find((v) => v.fullPath === unref(currentRoute).fullPath)
+)
 
 const setSelectTag = tagsViewStore.setSelectedTag
 
@@ -72,39 +77,95 @@ const addTags = () => {
   }
 }
 
-// 关闭选中的tag
-const closeSelectedTag = (view: RouteLocationNormalizedLoaded) => {
-  closeCurrent(view, () => {
-    if (isActive(view)) {
-      toLastView()
-    }
-  })
+// 关闭选中的tag：非当前页的 tag 直接关闭；当前页的 tag 先离开当前页（见 leaveClosingView），成功后才关闭，
+// 跳转被守卫拒绝、被其它导航取代或出错时保留 tag 与缓存。固定 tag 不关闭也不跳转
+const closeSelectedTag = async (view: RouteLocationNormalizedLoaded) => {
+  if (view?.meta?.affix) return
+  if (isActive(view) && !(await leaveClosingView([view], view))) return
+  // 无需跳转而仍停留在该页时保留其 tag（原逻辑为删除后由 toLastView 重新添加）
+  if (!isActive(view)) {
+    closeCurrent(view)
+  }
+}
+
+// tag 对应的路由仍注册在 router 中：tag 带路由名，路由已被移除时按 tag 跳转会在 push 内同步抛出 MATCHER_NOT_FOUND，
+// 因此只把仍注册的 tag 作为关闭后的跳转目标，已移除的 tag 保留在原处
+const isRegisteredView = (view: RouteLocationNormalizedLoaded) => {
+  return !view.name || hasRoute(view.name)
+}
+
+// 跳转结果与 push 一致；push 同步抛出的错误也转为失败（返回 true），由调用方保留 tag 与缓存
+const tryPush = async (to: RouteLocationRaw) => {
+  try {
+    return await push(to)
+  } catch {
+    return true
+  }
 }
 
 // 去最后一个
 const toLastView = () => {
   const visitedViews = tagsViewStore.getVisitedViews
-  const latestView = visitedViews.slice(-1)[0]
+  const latestView = visitedViews.filter(isRegisteredView).slice(-1)[0]
   if (latestView) {
-    push(latestView)
+    tryPush(latestView)
   } else {
+    const firstRoute = permissionStore.getAddRouters[0]
+    // 动态路由尚未生成、没有首个路由时无处可去，不跳转
+    if (!firstRoute) return
     if (
-      unref(currentRoute).path === permissionStore.getAddRouters[0].path ||
-      unref(currentRoute).path === permissionStore.getAddRouters[0].redirect
+      unref(currentRoute).path === firstRoute.path ||
+      unref(currentRoute).path === firstRoute.redirect
     ) {
       addTags()
       return
     }
     // You can set another route
-    push(permissionStore.getAddRouters[0].path)
+    tryPush(firstRoute.path)
   }
 }
 
-// 关闭全部
-const closeAllTags = () => {
-  closeAll(() => {
-    toLastView()
-  })
+// 当前页的 tag 将被关闭时，先跳转到关闭后应显示的页面：
+// 关闭单个 tag（传入 adjacentTo）时为其右侧最近的、剩余且路由仍注册的 tag，没有时为左侧最近的（参考上游 e66532cf9）；
+// 批量关闭时与 toLastView 一致，为剩余且路由仍注册的 tag 的最后一个。
+// 都没有时为首个路由；没有剩余且已在首个路由时不跳转，返回 true 并由调用方保留当前页的 tag。
+// 跳转成功且已离开当前页返回 true；被守卫拒绝、被其它导航取代或出错返回 false，调用方不关闭任何 tag
+const leaveClosingView = async (
+  closing: RouteLocationNormalizedLoaded[],
+  adjacentTo?: RouteLocationNormalizedLoaded
+) => {
+  const { path, fullPath } = unref(currentRoute)
+  const views = unref(visitedViews)
+  const isTarget = (v: RouteLocationNormalizedLoaded) =>
+    !closing.some((item) => item.fullPath === v.fullPath) && isRegisteredView(v)
+  const index = adjacentTo ? views.findIndex((v) => v.fullPath === adjacentTo.fullPath) : -1
+  const latestView =
+    index > -1
+      ? views.slice(index + 1).find(isTarget) || views.slice(0, index).reverse().find(isTarget)
+      : views.filter(isTarget).slice(-1)[0]
+  const firstRoute = permissionStore.getAddRouters[0]
+  // 没有可跳转的 tag，也没有首个路由（动态路由尚未生成）时无处可去，按跳转失败处理
+  if (!latestView && !firstRoute) return false
+  if (!latestView && (path === firstRoute.path || path === firstRoute.redirect)) {
+    return true
+  }
+  const failure = await tryPush(latestView || firstRoute.path)
+  return !failure && unref(currentRoute).fullPath !== fullPath
+}
+
+// 关闭全部：当前页的 tag 不在关闭范围内时沿用原逻辑（先关闭再 toLastView）；
+// 否则先离开当前页，成功后只关闭操作开始时可关闭的 tag（不含跳转后所在页），避免删除跳转期间新增的 tag；
+// 跳转被拒绝、取代或出错时保留全部 tag 与缓存
+const closeAllTags = async () => {
+  const closing = getClosableViews(undefined, 'all')
+  if (!closing.some((v) => isActive(v))) {
+    closeAll(() => {
+      toLastView()
+    })
+    return
+  }
+  if (!(await leaveClosingView(closing))) return
+  closing.filter((v) => !isActive(v)).forEach((v) => closeCurrent(v))
 }
 
 type CloseRange = 'left' | 'right' | 'other' | 'all'
@@ -127,28 +188,28 @@ const hasClosableView = (view: RouteLocationNormalizedLoaded | undefined, range:
   return getClosableViews(view, range).length > 0
 }
 
-// 批量关闭（其它 / 左侧 / 右侧）以操作开始时选中的 tag 为基准（参考上游 e66532cf9）：
-// 当前页的 tag 会被关闭时，先跳转到该 tag，跳转成功且最终路由不在关闭范围内才关闭；
+// 批量关闭（其它 / 左侧 / 右侧）以触发操作的 tag 为基准：右键菜单为所属 tag，工具栏为当前页的 tag（参考上游 e66532cf9）。
+// 当前页的 tag 会被关闭时，先跳转到基准 tag，跳转成功且最终路由不在关闭范围内才关闭；
 // 跳转被守卫拒绝、被其它导航取代或出错时不关闭，保留当前页的 tag 与缓存。
 // 当前页没有 tag 或其 tag 不在关闭范围内时直接关闭，不导航
 const closeTagsAround = async (
   range: Exclude<CloseRange, 'all'>,
-  close: (callback?: Fn, view?: RouteLocationNormalizedLoaded) => void
+  close: (callback?: Fn, view?: RouteLocationNormalizedLoaded) => void,
+  anchor: RouteLocationNormalizedLoaded | undefined
 ) => {
-  const anchor = unref(selectedTag)
   const isClosing = (fullPath: string) => {
     return getClosableViews(anchor, range).some((v) => v.fullPath === fullPath)
   }
   if (anchor && isClosing(unref(currentRoute).fullPath)) {
-    const failure = await push(anchor).catch(() => true)
+    const failure = await tryPush(anchor)
     if (failure || isClosing(unref(currentRoute).fullPath)) return
   }
   close(undefined, anchor)
 }
 
 // 关闭其它
-const closeOthersTags = () => {
-  closeTagsAround('other', closeOther)
+const closeOthersTags = (view?: RouteLocationNormalizedLoaded) => {
+  closeTagsAround('other', closeOther, view)
 }
 
 // 重新加载
@@ -157,96 +218,36 @@ const refreshSelectedTag = async (view?: RouteLocationNormalizedLoaded) => {
 }
 
 // 关闭左侧
-const closeLeftTags = () => {
-  closeTagsAround('left', closeLeft)
+const closeLeftTags = (view?: RouteLocationNormalizedLoaded) => {
+  closeTagsAround('left', closeLeft, view)
 }
 
 // 关闭右侧
-const closeRightTags = () => {
-  closeTagsAround('right', closeRight)
+const closeRightTags = (view?: RouteLocationNormalizedLoaded) => {
+  closeTagsAround('right', closeRight, view)
 }
 
-// 滚动到选中的tag
+// 根元素：只在本组件内查找当前 tag（不使用 document 全局 class 查询）
+const tagsViewRef = ref<HTMLElement>()
+
+// 滚动到当前 tag：按可见性取“最近”位置（参考上游 e66532cf9 moveActiveIntoView 的 scrollIntoView nearest），
+// 已完整可见时不滚动；只滚动标签栏横向滚动容器，不连带滚动外层页面。系统“减少动态效果”时立即滚动
 const moveToCurrentTag = async () => {
   await nextTick()
-  for (const v of unref(visitedViews)) {
-    if (v.fullPath === unref(currentRoute).fullPath) {
-      moveToTarget(v)
-      break
-    }
-  }
-}
-
-const tagLinksRefs = useTemplateRefsList<RouterLinkProps>()
-
-const moveToTarget = (currentTag: RouteLocationNormalizedLoaded) => {
-  const wrap$ = unref(scrollbarRef)?.wrapRef
-  if (!wrap$) return
-  let firstTag: Nullable<RouterLinkProps> = null
-  let lastTag: Nullable<RouterLinkProps> = null
-
-  const tagList = unref(tagLinksRefs)
-  if (!tagList.length) return
-  // find first tag and last tag
-  if (tagList.length > 0) {
-    firstTag = tagList[0]
-    lastTag = tagList[tagList.length - 1]
-  }
-  if ((firstTag?.to as RouteLocationNormalizedLoaded).fullPath === currentTag.fullPath) {
-    // 直接滚动到0的位置
-    const { start } = useScrollTo({
-      el: wrap$!,
-      position: 'scrollLeft',
-      to: 0,
-      duration: 500
-    })
-    start()
-  } else if ((lastTag?.to as RouteLocationNormalizedLoaded).fullPath === currentTag.fullPath) {
-    // 滚动到最后的位置
-    const { start } = useScrollTo({
-      el: wrap$!,
-      position: 'scrollLeft',
-      to: wrap$!.scrollWidth - wrap$!.offsetWidth,
-      duration: 500
-    })
-    start()
-  } else {
-    // find preTag and nextTag
-    const currentIndex: number = tagList.findIndex(
-      (item) =>
-        (item?.to as RouteLocationNormalizedLoaded | undefined)?.fullPath === currentTag.fullPath
-    )
-    if (currentIndex < 0) return
-    const tgsRefs = document.getElementsByClassName(`${prefixCls}__item`)
-
-    const prevTag = tgsRefs[currentIndex - 1] as HTMLElement
-    const nextTag = tgsRefs[currentIndex + 1] as HTMLElement
-    if (!prevTag || !nextTag) return
-
-    // the tag's offsetLeft after of nextTag
-    const afterNextTagOffsetLeft = nextTag.offsetLeft + nextTag.offsetWidth + 4
-
-    // the tag's offsetLeft before of prevTag
-    const beforePrevTagOffsetLeft = prevTag.offsetLeft - 4
-
-    if (afterNextTagOffsetLeft > unref(scrollLeftNumber) + wrap$!.offsetWidth) {
-      const { start } = useScrollTo({
-        el: wrap$!,
-        position: 'scrollLeft',
-        to: afterNextTagOffsetLeft - wrap$!.offsetWidth,
-        duration: 500
-      })
-      start()
-    } else if (beforePrevTagOffsetLeft < unref(scrollLeftNumber)) {
-      const { start } = useScrollTo({
-        el: wrap$!,
-        position: 'scrollLeft',
-        to: beforePrevTagOffsetLeft,
-        duration: 500
-      })
-      start()
-    }
-  }
+  const wrap$ = unref(scrollbarRef)?.wrapRef as HTMLElement | undefined
+  const active$ = unref(tagsViewRef)?.querySelector<HTMLElement>(`.${prefixCls}__item.is-active`)
+  if (!wrap$ || !active$) return
+  const wrapRect = wrap$.getBoundingClientRect()
+  const activeRect = active$.getBoundingClientRect()
+  const offset =
+    activeRect.left < wrapRect.left
+      ? activeRect.left - wrapRect.left
+      : activeRect.right > wrapRect.right
+        ? activeRect.right - wrapRect.right
+        : 0
+  if (!offset) return
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  wrap$.scrollBy({ left: offset, behavior: reduceMotion ? 'auto' : 'smooth' })
 }
 
 // 是否是当前tag
@@ -254,18 +255,46 @@ const isActive = (route: RouteLocationNormalizedLoaded): boolean => {
   return route.fullPath === unref(currentRoute).fullPath
 }
 
+// 未扁平的路由树中，各路由名所在分支由自身向上最近的非空图标（没有时为 ''）；同名出现多次、分支不唯一的记为 null。
+// 动态路由注册时三级及以上会被扁平，route.matched 缺少中间目录，因此按原树计算；路由树变化时才重新遍历
+const branchIconMap = computed(() => {
+  const map = new Map<string, string | null>()
+  const walk = (routes: AppRouteRecordRaw[], parentIcon: string) => {
+    for (const route of routes) {
+      const icon = route.meta?.icon || parentIcon
+      const name = route.name
+      if (typeof name === 'string' && name) {
+        map.set(name, map.has(name) ? null : icon)
+      }
+      if (route.children?.length) walk(route.children, icon)
+    }
+  }
+  walk(unref(routers), '')
+  return map
+})
+
+// tag 图标：取自身到祖先最近的非空图标（参考上游 8a68d60bb）。已注册的路由按原树中唯一分支查找；
+// 查不到唯一分支时按实际 matched 由近到远查找，最后回退 meta.icon。没有 matched 的固定 tag 沿用自身图标
+const getTagIcon = (route: RouteLocationNormalizedLoaded): string | undefined => {
+  if (!route?.matched) return route?.meta?.icon
+  const name = typeof route.name === 'string' && hasRoute(route.name) ? route.name : undefined
+  const branchIcon = name ? unref(branchIconMap).get(name) : undefined
+  if (typeof branchIcon === 'string') return branchIcon || undefined
+  return (
+    [...route.matched].reverse().find((record) => record.meta?.icon)?.meta?.icon || route.meta?.icon
+  )
+}
+
 // 所有右键菜单组件的元素
 const itemRefs = useTemplateRefsList<ComponentRef<typeof ContextMenu & ContextMenuExpose>>()
 
-// 右键菜单状态改变的时候
+// 右键菜单打开时关闭其它 tag 的菜单。菜单命令与禁用状态直接取所属 tag（参考上游 e66532cf9 createContextMenu(view)），
+// 不再改写选中的 tag：selectedTag 始终为当前路由，供 setTitle 等按当前页定位
 const visibleChange = (visible: boolean, tagItem: RouteLocationNormalizedLoaded) => {
-  if (visible) {
-    for (const v of unref(itemRefs)) {
-      const elDropdownMenuRef = v.elDropdownMenuRef
-      if (tagItem.fullPath !== v.tagItem.fullPath) {
-        elDropdownMenuRef?.handleClose()
-        setSelectTag(tagItem)
-      }
+  if (!visible) return
+  for (const v of unref(itemRefs)) {
+    if (tagItem.fullPath !== v.tagItem.fullPath) {
+      v.elDropdownMenuRef?.handleClose()
     }
   }
 }
@@ -317,13 +346,15 @@ watch(
 
 <template>
   <div
+    ref="tagsViewRef"
     :id="prefixCls"
     :class="prefixCls"
     class="relative w-full flex bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
-    <!-- 工具栏为原生按钮，可键盘聚焦并带可访问名称（参考上游 e66532cf9） -->
+    <!-- 工具栏为原生按钮，可键盘聚焦并带可访问名称（参考上游 e66532cf9）；图标按钮同时以 title 悬停提示（参考上游 8a68d60） -->
     <button
       :aria-label="t('common.scrollTagsLeft')"
+      :title="t('common.scrollTagsLeft')"
       :class="[
         tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`,
         `${prefixCls}__tool-button`
@@ -359,16 +390,16 @@ watch(
             :schema="[
               {
                 icon: 'ep:refresh',
-                label: t('common.reload'),
-                disabled: selectedTag?.fullPath !== item.fullPath,
+                label: 'common.reload',
+                disabled: !item.name,
                 command: () => {
                   refreshSelectedTag(item)
                 }
               },
               {
                 icon: 'ep:close',
-                label: t('common.closeTab'),
-                disabled: !!visitedViews?.length && selectedTag?.meta.affix,
+                label: 'common.closeTab',
+                disabled: !!item.meta?.affix,
                 command: () => {
                   closeSelectedTag(item)
                 }
@@ -376,41 +407,32 @@ watch(
               {
                 divided: true,
                 icon: 'ep:d-arrow-left',
-                label: t('common.closeTheLeftTab'),
-                disabled:
-                  (!!visitedViews?.length &&
-                    (item.fullPath === visitedViews[0].fullPath ||
-                      selectedTag?.fullPath !== item.fullPath)) ||
-                  !hasClosableView(item, 'left'),
+                label: 'common.closeTheLeftTab',
+                disabled: !hasClosableView(item, 'left'),
                 command: () => {
-                  closeLeftTags()
+                  closeLeftTags(item)
                 }
               },
               {
                 icon: 'ep:d-arrow-right',
-                label: t('common.closeTheRightTab'),
-                disabled:
-                  (!!visitedViews?.length &&
-                    (item.fullPath === visitedViews[visitedViews.length - 1].fullPath ||
-                      selectedTag?.fullPath !== item.fullPath)) ||
-                  !hasClosableView(item, 'right'),
+                label: 'common.closeTheRightTab',
+                disabled: !hasClosableView(item, 'right'),
                 command: () => {
-                  closeRightTags()
+                  closeRightTags(item)
                 }
               },
               {
                 divided: true,
                 icon: 'ep:discount',
-                label: t('common.closeOther'),
-                disabled:
-                  selectedTag?.fullPath !== item.fullPath || !hasClosableView(item, 'other'),
+                label: 'common.closeOther',
+                disabled: !hasClosableView(item, 'other'),
                 command: () => {
-                  closeOthersTags()
+                  closeOthersTags(item)
                 }
               },
               {
                 icon: 'ep:minus',
-                label: t('common.closeAll'),
+                label: 'common.closeAll',
                 disabled: !hasClosableView(item, 'all'),
                 command: () => {
                   closeAllTags()
@@ -421,27 +443,38 @@ watch(
             @visible-change="visibleChange"
           >
             <div>
-              <router-link :ref="tagLinksRefs.set" v-slot="{ navigate }" :to="{ ...item }" custom>
+              <!-- 路由已被移除的 tag 按名称解析会抛错：link 改用 fullPath（解析不抛错，开发环境 devtools 会在创建时解析），
+                点击时不跳转，停留在当前路由 -->
+              <router-link
+                v-slot="{ href, navigate }"
+                :to="isRegisteredView(item) ? { ...item } : item.fullPath"
+                custom
+              >
+                <!-- 点击时重新检查路由是否仍注册：已移除时阻止默认行为，不走可能残留的旧 href -->
                 <div
                   :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
-                  @click="navigate"
+                  @click="isRegisteredView(item) ? navigate($event) : $event.preventDefault()"
                 >
-                  <Icon
-                    v-if="
-                      tagsViewIcon &&
-                      (item?.meta?.icon ||
-                        (item?.matched &&
-                          item.matched[0] &&
-                          item.matched[item.matched.length - 1].meta?.icon))
-                    "
-                    :icon="item?.meta?.icon || item.matched[item.matched.length - 1].meta.icon"
-                    :size="12"
-                    class="mr-5px"
-                  />
-                  {{
-                    t(item?.meta?.title as string) +
-                    (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
-                  }}
+                  <!-- 正文为真实链接，与关闭按钮并列（参考上游 e66532cf9）：只有路由仍注册才带 href；
+                    点击冒泡到外层由 navigate 导航（带修饰键时交给浏览器）。Enter 的 keydown 不冒泡到 ContextMenu 触发器，
+                    由链接原生激活触发 click -->
+                  <a
+                    :aria-current="isActive(item) ? 'page' : undefined"
+                    :class="`${prefixCls}__item--link`"
+                    :href="isRegisteredView(item) ? href : undefined"
+                    @keydown.enter.stop
+                  >
+                    <Icon
+                      v-if="tagsViewIcon && getTagIcon(item)"
+                      :icon="getTagIcon(item)"
+                      :size="12"
+                      class="mr-5px"
+                    />
+                    {{
+                      getRouteTitle(item?.meta) +
+                      (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
+                    }}
+                  </a>
                   <!-- 原生按钮便于键盘聚焦与读屏（参考上游 8a68d60bb）；固定标签不渲染。
                     Enter/Space 的 keydown 不冒泡到 ContextMenu 触发器（其会 preventDefault 并打开菜单），
                     由按钮原生激活触发一次 click -->
@@ -449,7 +482,7 @@ watch(
                     v-if="!item?.meta?.affix"
                     type="button"
                     :class="`${prefixCls}__item--close`"
-                    :aria-label="`${t('common.closeTab')}: ${t(item?.meta?.title as string)}${item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : ''}`"
+                    :aria-label="`${t('common.closeTab')}: ${getRouteTitle(item?.meta)}${item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : ''}`"
                     @click.prevent.stop="closeSelectedTag(item)"
                     @keydown.enter.space.stop
                   >
@@ -464,6 +497,7 @@ watch(
     </div>
     <button
       :aria-label="t('common.scrollTagsRight')"
+      :title="t('common.scrollTagsRight')"
       :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       type="button"
@@ -477,10 +511,11 @@ watch(
     </button>
     <button
       :aria-label="t('common.reload')"
+      :title="t('common.reload')"
       :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       type="button"
-      @click="refreshSelectedTag(selectedTag)"
+      @click="refreshSelectedTag(activeTag)"
     >
       <Icon
         :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
@@ -488,58 +523,55 @@ watch(
         icon="ep:refresh-right"
       />
     </button>
+    <!-- 工具栏“更多”作用于当前页的 tag（activeTag，参考上游 e66532cf9）：当前页没有 tag 时，
+      刷新仍刷新当前路由，关闭 / 左侧 / 右侧 / 其它禁用，关闭全部可用 -->
     <ContextMenu
       :schema="[
         {
           icon: 'ep:refresh',
-          label: t('common.reload'),
+          label: 'common.reload',
           command: () => {
-            refreshSelectedTag(selectedTag)
+            refreshSelectedTag(activeTag)
           }
         },
         {
           icon: 'ep:close',
-          label: t('common.closeTab'),
-          disabled: !!visitedViews?.length && selectedTag?.meta.affix,
+          label: 'common.closeTab',
+          disabled: !activeTag || !!activeTag.meta?.affix,
           command: () => {
-            closeSelectedTag(selectedTag!)
+            if (activeTag) closeSelectedTag(activeTag)
           }
         },
         {
           divided: true,
           icon: 'ep:d-arrow-left',
-          label: t('common.closeTheLeftTab'),
-          disabled:
-            (!!visitedViews?.length && selectedTag?.fullPath === visitedViews[0].fullPath) ||
-            !hasClosableView(selectedTag, 'left'),
+          label: 'common.closeTheLeftTab',
+          disabled: !hasClosableView(activeTag, 'left'),
           command: () => {
-            closeLeftTags()
+            closeLeftTags(activeTag)
           }
         },
         {
           icon: 'ep:d-arrow-right',
-          label: t('common.closeTheRightTab'),
-          disabled:
-            (!!visitedViews?.length &&
-              selectedTag?.fullPath === visitedViews[visitedViews.length - 1].fullPath) ||
-            !hasClosableView(selectedTag, 'right'),
+          label: 'common.closeTheRightTab',
+          disabled: !hasClosableView(activeTag, 'right'),
           command: () => {
-            closeRightTags()
+            closeRightTags(activeTag)
           }
         },
         {
           divided: true,
           icon: 'ep:discount',
-          label: t('common.closeOther'),
-          disabled: !hasClosableView(selectedTag, 'other'),
+          label: 'common.closeOther',
+          disabled: !activeTag || !hasClosableView(activeTag, 'other'),
           command: () => {
-            closeOthersTags()
+            closeOthersTags(activeTag)
           }
         },
         {
           icon: 'ep:minus',
-          label: t('common.closeAll'),
-          disabled: !hasClosableView(selectedTag, 'all'),
+          label: 'common.closeAll',
+          disabled: !hasClosableView(activeTag, 'all'),
           command: () => {
             closeAllTags()
           }
@@ -550,6 +582,7 @@ watch(
       <!-- ElDropdown 已为触发器提供 role=button / tabindex 及 Enter、Space 打开，这里补可访问名称 -->
       <span
         :aria-label="t('common.moreTabActions')"
+        :title="t('common.moreTabActions')"
         :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
         class="block h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       >
@@ -595,7 +628,7 @@ $prefix-cls: #{$namespace}-tags-view;
       left: 0;
       width: 100%;
       height: 100%;
-      border-left: 1px solid var(--el-border-color);
+      border-left: 1px solid var(--layout-border-color);
       content: '';
     }
 
@@ -606,7 +639,7 @@ $prefix-cls: #{$namespace}-tags-view;
         left: 0;
         width: 100%;
         height: 100%;
-        border-right: 1px solid var(--el-border-color);
+        border-right: 1px solid var(--layout-border-color);
         border-left: none;
         content: '';
       }
@@ -654,6 +687,20 @@ $prefix-cls: #{$namespace}-tags-view;
       .#{$prefix-cls}__item--close {
         pointer-events: auto;
         opacity: 1;
+      }
+    }
+
+    // 正文链接：外观与原标签文字一致，键盘聚焦时在内侧显示焦点框
+    &--link {
+      display: inline-flex;
+      height: 100%;
+      color: inherit;
+      text-decoration: none;
+      align-items: center;
+
+      &:focus-visible {
+        outline: 1px solid currentcolor;
+        outline-offset: -1px;
       }
     }
   }
@@ -754,5 +801,49 @@ $prefix-cls: #{$namespace}-tags-view;
       }
     }
   }
+}
+
+// 普通（非沉浸）标签的卡片外观（参考上游 e66532cf9 / 8a68d60bb TagsView 样式段）：
+// 圆角卡片、壳层分隔色边框，选中为主色浅底 + 主色字，选中的可关闭标签常显关闭按钮；
+// 尺寸、结构、事件与沉浸式标签均不变；放在 .dark 规则之后，明暗两套共用
+.#{$prefix-cls} {
+  &__item:not(.#{$prefix-cls}__item--immerse) {
+    color: var(--el-text-color-regular);
+    border: 1px solid var(--layout-border-color);
+    border-radius: 8px;
+    transition:
+      color var(--transition-time-02),
+      background-color var(--transition-time-02),
+      border-color var(--transition-time-02);
+
+    // 键盘聚焦标签内的链接或关闭按钮时与悬停一样高亮（参考上游 e66532cf9 &:focus-within）
+    &:hover,
+    &:focus-within {
+      color: var(--el-color-primary);
+    }
+
+    &.is-active {
+      color: var(--el-color-primary);
+      background-color: var(--el-color-primary-light-9);
+      border: 1px solid var(--el-color-primary-light-7);
+
+      .#{$prefix-cls}__item--close {
+        :deep(svg) {
+          color: currentcolor !important;
+        }
+      }
+    }
+
+    &.is-active:not(.#{$prefix-cls}__item--affix) .#{$prefix-cls}__item--close {
+      pointer-events: auto;
+      opacity: 1;
+    }
+  }
+}
+
+// 暗色下普通选中标签前景改用正文主色：主色浅底（light-9）在暗色为深色色阶，主色字对比不足；
+// 背景与边框仍沿用上游新版，沉浸式标签不受影响
+.dark .#{$prefix-cls}__item:not(.#{$prefix-cls}__item--immerse).is-active {
+  color: var(--el-text-color-primary);
 }
 </style>

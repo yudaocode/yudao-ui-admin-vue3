@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'ContentWrap' })
@@ -8,11 +7,19 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('content-wrap')
 
-defineProps({
-  title: propTypes.string.def(''),
-  message: propTypes.string.def(''),
-  bodyStyle: propTypes.object.def({ padding: '10px', overflow: 'hidden' })
-})
+withDefaults(
+  defineProps<{
+    title?: string
+    message?: string
+    bodyStyle?: Record<string, any>
+  }>(),
+  {
+    title: '',
+    message: '',
+    // 每个实例返回新的默认对象（与原 propTypes.object.def 的拷贝工厂一致）；默认内边距保持 10px
+    bodyStyle: () => ({ padding: '10px', overflow: 'hidden' })
+  }
+)
 </script>
 
 <template>

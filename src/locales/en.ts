@@ -2,13 +2,19 @@ export default {
   layout: {
     expandNavigation: 'Expand navigation',
     collapseNavigation: 'Collapse navigation',
+    closeNavigation: 'Close navigation menu',
+    mainNavigation: 'Main navigation',
     switchLanguage: 'Switch language',
     toggleDarkMode: 'Toggle dark mode',
+    switchLayout: 'Switch page layout',
+    layoutTitle: 'Page layout',
+    layoutHint: 'Applies immediately',
     enterFullscreen: 'Enter fullscreen',
     exitFullscreen: 'Exit fullscreen',
     menuSearch: 'Search menu',
     switchSize: 'Switch size',
-    message: 'Messages'
+    message: 'Messages',
+    openChat: 'Open chat'
   },
   common: {
     inputText: 'Please input',
@@ -183,6 +189,7 @@ export default {
   },
   router: {
     login: 'Login',
+    socialLogin: 'Social Login',
     home: 'Home',
     analysis: 'Analysis',
     workplace: 'Workplace'

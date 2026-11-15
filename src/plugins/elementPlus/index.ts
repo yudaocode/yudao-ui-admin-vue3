@@ -1,17 +1,9 @@
 import type { App } from 'vue'
-// 需要全局引入一些组件，如ElScrollbar，不然一些下拉项样式有问题
-import { ElLoading, ElScrollbar, ElButton } from 'element-plus'
 
-const plugins = [ElLoading]
-
-const components = [ElScrollbar, ElButton]
+// 与上游一致只全局安装 ElLoading（v-loading 指令及服务）；组件由模板按需解析并引入样式，
+// FormCreate 设计器运行时解析的 el-button 由 @form-create/element-ui/auto-import 在安装 form-create 时注册
+import { ElLoading } from 'element-plus'
 
 export const setupElementPlus = (app: App<Element>) => {
-  plugins.forEach((plugin) => {
-    app.use(plugin)
-  })
-
-  components.forEach((component) => {
-    app.component(component.name!, component)
-  })
+  app.use(ElLoading)
 }

@@ -7,14 +7,13 @@
 </template>
 
 <script setup lang="ts">
-import { propTypes } from '@/utils/propTypes'
 import { PREDEFINE_COLORS } from '@/utils/color'
 
 // 颜色输入框
 defineOptions({ name: 'ColorInput' })
 
 const props = defineProps({
-  modelValue: propTypes.string.def('')
+  modelValue: { type: String, default: '' }
 })
 const emit = defineEmits(['update:modelValue'])
 const color = computed({

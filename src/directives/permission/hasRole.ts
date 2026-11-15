@@ -1,8 +1,6 @@
 import type { App } from 'vue'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
-const { t } = useI18n() // 国际化
-
 export function hasRole(app: App<Element>) {
   app.directive('hasRole', (el, binding) => {
     const { wsCache } = useCache()
@@ -22,6 +20,8 @@ export function hasRole(app: App<Element>) {
         el.parentNode && el.parentNode.removeChild(el)
       }
     } else {
+      // 指令模块在 setupI18n 之前加载，翻译在抛错时再取，避免模块顶层绑定到原样返回 key 的函数
+      const { t } = useI18n()
       throw new Error(t('permission.hasRole'))
     }
   })

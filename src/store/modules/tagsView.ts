@@ -72,7 +72,11 @@ export const useTagsViewStore = defineStore('tagsView', {
         if (!needCache) {
           continue
         }
-        const name = item.name as string
+        // 无名称（undefined / 空字符串，如兜底 404 路由）的路由无法被 KeepAlive 按名称匹配，不加入缓存列表（参考上游 8a68d60）
+        const name = item.name
+        if (typeof name !== 'string' || !name) {
+          continue
+        }
         cacheMap.add(name)
       }
       if (Array.from(this.cachedViews).sort().toString() === Array.from(cacheMap).sort().toString())
@@ -200,6 +204,8 @@ export const useTagsViewStore = defineStore('tagsView', {
       for (const v of this.visitedViews) {
         if (isTarget(v)) {
           v.meta.title = title
+          // 沿用历史契约：setTitle 的标题与静态路由一样经 t 展示，不再沿用后端菜单原文标记
+          v.meta.titleSource = undefined
           break
         }
       }

@@ -55,8 +55,7 @@
 // 拖拽组件
 import VueDraggable from 'vuedraggable'
 import { useVModel } from '@vueuse/core'
-import { any, array } from 'vue-types'
-import { propTypes } from '@/utils/propTypes'
+import type { PropType } from 'vue'
 import { cloneDeep } from 'lodash-es'
 
 // 拖拽组件封装
@@ -65,13 +64,13 @@ defineOptions({ name: 'Draggable' })
 // 定义属性
 const props = defineProps({
   // 绑定值
-  modelValue: array<any>().isRequired,
+  modelValue: { type: Array as PropType<any[]>, required: true },
   // 空的元素：点击添加按钮时，创建元素并添加到列表；默认为空对象
-  emptyItem: any<unknown>().def({}),
+  emptyItem: { type: null, default: () => ({}) },
   // 数量限制：默认为0，表示不限制
-  limit: propTypes.number.def(0),
+  limit: { type: Number, default: 0 },
   // 最小数量：默认为1
-  min: propTypes.number.def(1)
+  min: { type: Number, default: 1 }
 })
 // 定义事件
 const emit = defineEmits(['update:modelValue'])

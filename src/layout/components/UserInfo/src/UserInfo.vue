@@ -41,10 +41,13 @@ const loginOut = async () => {
       cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
-    await userStore.loginOut()
-    tagsViewStore.delAllViews()
-    replace('/login?redirect=/index')
-  } catch {}
+  } catch {
+    return
+  }
+  // 登出接口失败时本地登录态已清理，同样关闭标签并回到登录页（参考上游 c7f8db52d）
+  await userStore.loginOut().catch(() => {})
+  tagsViewStore.delAllViews()
+  replace('/login?redirect=/index')
 }
 const toProfile = async () => {
   push('/user/profile')
@@ -55,7 +58,7 @@ const toDocument = () => {
 </script>
 
 <template>
-  <ElDropdown class="custom-hover" :class="prefixCls" trigger="click">
+  <ElDropdown class="header-action" :class="prefixCls" trigger="click">
     <div class="flex items-center">
       <ElAvatar :src="avatar" alt="" class="w-[calc(var(--logo-height)-25px)] rounded-[50%]" />
       <span class="pl-[5px] text-14px text-[var(--top-header-text-color)] <lg:hidden">

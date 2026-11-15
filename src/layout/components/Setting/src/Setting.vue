@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus'
-import { useClipboard, useCssVar } from '@vueuse/core'
+import { useClipboard } from '@vueuse/core'
 
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
-import { setCssVar, trim } from '@/utils'
+import { setCssVar } from '@/utils'
 import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import ColorRadioPicker from './components/ColorRadioPicker.vue'
@@ -23,15 +23,22 @@ const { drawerVisible } = useSetting()
 // 主题色相关
 const systemTheme = ref(appStore.getTheme.elColorPrimary)
 
+// 显式选择主色：主色记为已自定义；已自定义菜单色时按新主色重新推导菜单选中色（原行为），
+// 未自定义菜单色时默认菜单选中色由 var.css 随主色变化，不把菜单记为自定义
 const setSystemTheme = (color: string) => {
   setCssVar('--el-color-primary', color)
   appStore.setTheme({ elColorPrimary: color })
-  const leftMenuBgColor = useCssVar('--left-menu-bg-color', document.documentElement)
-  setMenuTheme(trim(unref(leftMenuBgColor) || ''))
+  const leftMenuBgColor = appStore.getTheme.leftMenuBgColor
+  if (appStore.getCustomThemeParts.includes('menu') && leftMenuBgColor) {
+    setMenuTheme(leftMenuBgColor)
+  }
 }
 
+// 头部 / 菜单色块只回显用户显式选过的颜色；未自定义时不选中任何色块（默认颜色随明暗变化）
 // 头部主题相关
-const headerTheme = ref(appStore.getTheme.topHeaderBgColor || '')
+const headerTheme = ref(
+  appStore.getCustomThemeParts.includes('header') ? appStore.getTheme.topHeaderBgColor || '' : ''
+)
 
 // 头部、菜单主题计算统一由 app store 提供（参考上游 59d4ed4dd），这里转调，便于其它页面复用
 const setHeaderTheme = (color: string) => {
@@ -39,29 +46,16 @@ const setHeaderTheme = (color: string) => {
 }
 
 // 菜单主题相关
-const menuTheme = ref(appStore.getTheme.leftMenuBgColor || '')
+const menuTheme = ref(
+  appStore.getCustomThemeParts.includes('menu') ? appStore.getTheme.leftMenuBgColor || '' : ''
+)
 
 const setMenuTheme = (color: string) => {
   appStore.setMenuTheme(color)
 }
 
-if (isHeaderNavLayout(layout.value) && !appStore.getIsDark) {
-  headerTheme.value = '#fff'
-  setHeaderTheme('#fff')
-}
-
-// 监听layout变化，重置一些主题色
-watch(
-  () => layout.value,
-  (n) => {
-    if (isHeaderNavLayout(n) && !appStore.getIsDark) {
-      headerTheme.value = '#fff'
-      setHeaderTheme('#fff')
-    } else {
-      setMenuTheme(unref(menuTheme))
-    }
-  }
-)
+// 挂载、切换布局不再自动写入头部 / 菜单颜色（只有显式选色才改主题），
+// 顶部导航布局下菜单跟随头部色由 app store 的 setLayout / setCssVarTheme 渲染
 
 // 拷贝
 const copyConfig = async () => {
@@ -154,9 +148,11 @@ const clear = () => {
   const { wsCache } = useCache()
   wsCache.delete(CACHE_KEY.LAYOUT)
   wsCache.delete(CACHE_KEY.THEME)
+  wsCache.delete(CACHE_KEY.THEME_CUSTOM_PARTS)
   wsCache.delete(CACHE_KEY.IS_DARK)
   wsCache.delete(CACHE_KEY.CURRENT_SIZE)
   wsCache.delete(CACHE_KEY.FIXED_MENU)
+  wsCache.delete(CACHE_KEY.COLLAPSE)
   window.location.reload()
 }
 </script>
@@ -181,6 +177,7 @@ const clear = () => {
       <ColorRadioPicker
         v-model="systemTheme"
         :schema="[
+          '#5b5bd6',
           '#409eff',
           '#009688',
           '#536dfe',

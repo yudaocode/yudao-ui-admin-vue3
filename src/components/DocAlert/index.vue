@@ -1,24 +1,20 @@
 <template>
   <el-alert v-if="getEnable()" type="success" show-icon>
     <template #title>
-      <div @click="goToUrl">{{ '【' + title + '】文档地址：' + url }}</div>
+      <!-- 原生链接：可键盘聚焦、Enter 打开，新窗口不持有 window.opener -->
+      <a :href="url" class="doc-alert__link" rel="noopener noreferrer" target="_blank">
+        {{ '【' + title + '】文档地址：' + url }}
+      </a>
     </template>
   </el-alert>
 </template>
 <script setup lang="tsx">
-import { propTypes } from '@/utils/propTypes'
-
 defineOptions({ name: 'DocAlert' })
 
-const props = defineProps({
-  title: propTypes.string,
-  url: propTypes.string
+defineProps({
+  title: { type: String },
+  url: { type: String }
 })
-
-/** 跳转 URL 链接 */
-const goToUrl = () => {
-  window.open(props.url)
-}
 
 /** 是否开启 */
 const getEnable = () => {
@@ -30,5 +26,12 @@ const getEnable = () => {
   margin-bottom: 10px;
   cursor: pointer;
   border: 1px solid green;
+}
+
+/* 保持原文字样式：继承标题颜色、无下划线，整行可点击 */
+.doc-alert__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 </style>

@@ -83,11 +83,15 @@ export const useUserStore = defineStore('admin-user', {
       userInfo.user.nickname = nickname
       wsCache.set(CACHE_KEY.USER, userInfo)
     },
+    // 登出接口失败（如网络异常、服务不可用）时也清理本地登录态，错误仍抛给调用方（参考上游 c7f8db52d）
     async loginOut() {
-      await loginOut()
-      removeToken()
-      deleteUserCache() // 删除用户缓存
-      this.resetState()
+      try {
+        await loginOut()
+      } finally {
+        removeToken()
+        deleteUserCache() // 删除用户缓存
+        this.resetState()
+      }
     },
     resetState() {
       this.permissions = new Set<string>()

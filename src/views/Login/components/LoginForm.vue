@@ -31,6 +31,7 @@
           <el-input
             v-model="loginData.loginForm.username"
             :placeholder="t('login.usernamePlaceholder')"
+            autocomplete="username"
             :prefix-icon="iconAvatar"
           />
         </el-form-item>
@@ -40,6 +41,7 @@
           <el-input
             v-model="loginData.loginForm.password"
             :placeholder="t('login.passwordPlaceholder')"
+            autocomplete="current-password"
             :prefix-icon="iconLock"
             show-password
             type="password"
@@ -146,7 +148,6 @@ import { useIcon } from '@/hooks/web/useIcon'
 
 import * as authUtil from '@/utils/auth'
 import { buildSocialRedirectUri } from '@/utils/social'
-import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
 import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
 
@@ -161,7 +162,6 @@ const formLogin = ref()
 const { validForm } = useFormValid(formLogin)
 const { setLoginState, getLoginState } = useLoginState()
 const { currentRoute, push, resolve } = useRouter()
-const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
@@ -284,7 +284,10 @@ const handleLogin = async (params: any) => {
     if (redirect.value.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      await push({ path: redirect.value || permissionStore.addRouters[0].path })
+      // 整串交给路由解析，原样保留 query、hash（{ path } 形式会丢弃 query 并重复编码 hash）；
+      // 与扫码登录一致，只接受站内绝对路径
+      const target = redirect.value
+      await push(target.startsWith('/') && !target.startsWith('//') ? target : '/')
     }
   } finally {
     loginPending = false

@@ -31,6 +31,12 @@ export const useRenderMenuItem = () =>
                 (onlyOneChild?.meta?.params || meta.params) as Record<string, any>
               )
 
+          // 收为单项时（参考上游 e66532cf9）：唯一子级未配置图标（空串/null/undefined）则回退父级图标；
+          // 标题、titleSource 等其余 meta 仍取子级，新建对象，不修改路由
+          const onlyOneChildMeta = onlyOneChild
+            ? { ...onlyOneChild.meta, icon: onlyOneChild.meta?.icon || meta.icon }
+            : meta
+
           if (
             !children.length ||
             (oneShowingChild &&
@@ -40,7 +46,7 @@ export const useRenderMenuItem = () =>
             return (
               <ElMenuItem index={resolvedOnlyOneChildPath}>
                 {{
-                  default: () => renderMenuTitle(onlyOneChild ? onlyOneChild?.meta : meta)
+                  default: () => renderMenuTitle(onlyOneChildMeta)
                 }}
               </ElMenuItem>
             )

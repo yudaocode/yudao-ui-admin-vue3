@@ -1,6 +1,6 @@
 <script lang="tsx">
 import { ElBreadcrumb, ElBreadcrumbItem } from 'element-plus'
-import { ref, watch, computed, unref, defineComponent, TransitionGroup } from 'vue'
+import { ref, watch, computed, unref, defineComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { filterBreadcrumb } from './helper'
@@ -10,6 +10,7 @@ import type { RouteLocationNormalizedLoaded, RouteMeta } from 'vue-router'
 import { Icon } from '@/components/Icon'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+import { getRouteTitle, isBackendTitle } from '@/utils/routeTitle'
 
 const { getPrefixCls } = useDesign()
 
@@ -20,12 +21,42 @@ const appStore = useAppStore()
 // 面包屑图标
 const breadcrumbIcon = computed(() => appStore.getBreadcrumbIcon)
 
+// 原始标题相同（且同为后端原文或同为语言 key）才算同名；空标题不参与
+const isSameTitle = (a: AppRouteRecordRaw, b: AppRouteRecordRaw) =>
+  !!a.meta?.title &&
+  a.meta.title === b.meta?.title &&
+  isBackendTitle(a.meta) === isBackendTitle(b.meta)
+
+// 是否有可点击的跳转目标（与面包屑可点击规则一致）
+const hasRedirect = (v: AppRouteRecordRaw) => !!v.redirect && v.redirect !== 'noredirect'
+
+// redirect 是否就指向下一级（字符串路径，或只含 path / name 的对象）
+const redirectsTo = (v: AppRouteRecordRaw, target: AppRouteRecordRaw) => {
+  const redirect = v.redirect
+  if (typeof redirect === 'string') return redirect === target.path
+  if (redirect && typeof redirect === 'object') {
+    // 带 query / hash / params 等其它字段（即使为空值）视为独立的导航目的，不算重合
+    if (Object.keys(redirect).some((key) => key !== 'path' && key !== 'name')) return false
+    // 与 vue-router 解析顺序一致：name 非空时按 name 跳转（忽略 path），否则才按 path
+    if ('name' in redirect && redirect.name) return redirect.name === target.name
+    return 'path' in redirect && redirect.path === target.path
+  }
+  return false
+}
+
+// 相邻同名层级只显示一次（参考上游 e66532cf9）：去掉前一项，最后一项始终保留。
+// 与上游无条件去重不同：前一项有指向其它位置的跳转时保留，避免丢失祖先导航
+const removeDuplicateParents = (list: AppRouteRecordRaw[]) =>
+  list.filter((v, index) => {
+    const next = list[index + 1]
+    if (!next || !isSameTitle(v, next)) return true
+    return hasRedirect(v) && !redirectsTo(v, next)
+  })
+
 export default defineComponent({
   name: 'Breadcrumb',
   setup() {
     const { currentRoute } = useRouter()
-
-    const { t } = useI18n()
 
     const levelList = ref<AppRouteRecordRaw[]>([])
 
@@ -45,19 +76,31 @@ export default defineComponent({
     }
 
     const renderBreadcrumb = () => {
-      const breadcrumbList = treeToList<AppRouteRecordRaw[]>(unref(levelList))
-      return breadcrumbList.map((v) => {
-        const disabled = !v.redirect || v.redirect === 'noredirect'
-        // 路由未配置 meta 或 title 时回退为空，避免 t(undefined)
+      // meta.breadcrumb 为 false 的路由不在面包屑中显示（参考上游 e66532cf9）
+      const breadcrumbList = removeDuplicateParents(
+        treeToList<AppRouteRecordRaw[]>(unref(levelList)).filter(
+          (v) => v.meta?.breadcrumb !== false
+        )
+      )
+      return breadcrumbList.map((v, index) => {
+        // 仅非最后一项且配置了 redirect 的路由可点击；其余不设置 to，
+        // 避免显示为链接、点击时跳到丢失 query 的当前路径（参考上游 e66532cf9）
+        const canNavigate =
+          index < breadcrumbList.length - 1 && !!v.redirect && v.redirect !== 'noredirect'
+        // 路由未配置 meta 或 title 时回退为空
         const meta = (v.meta ?? {}) as RouteMeta
-        const title = t(meta.title || '')
+        const title = getRouteTitle(meta)
+        // 渲染结构与上游一致：key 在 name 缺失时回退 path（参考上游 e66532cf9）；图标（右间距 5px）与标题直接作为 __inner（已是 flex 居中）的子节点
         return (
-          <ElBreadcrumbItem to={{ path: disabled ? '' : v.path }} key={v.name}>
+          <ElBreadcrumbItem
+            to={canNavigate ? { path: v.path } : undefined}
+            key={String(v.name ?? v.path)}
+          >
             {meta.icon && breadcrumbIcon.value ? (
-              <div class="flex items-center">
-                <Icon icon={meta.icon} class="mr-[2px]" svgClass="inline-block"></Icon>
+              <>
+                <Icon icon={meta.icon} class="mr-[5px]"></Icon>
                 {title}
-              </div>
+              </>
             ) : (
               title
             )}
@@ -79,11 +122,10 @@ export default defineComponent({
       }
     )
 
+    // 面包屑不再做切换动画，路由变化时直接显示（参考上游 eceb2fb0a）
     return () => (
       <ElBreadcrumb separator="/" class={`${prefixCls} flex items-center h-full ml-[10px]`}>
-        <TransitionGroup appear enter-active-class="animate__animated animate__fadeInRight">
-          {renderBreadcrumb()}
-        </TransitionGroup>
+        {renderBreadcrumb()}
       </ElBreadcrumb>
     )
   }
@@ -119,8 +161,6 @@ $prefix-cls: #{$elNamespace}-breadcrumb;
 
   :deep(.#{$prefix-cls}__item):last-child {
     .#{$prefix-cls}__inner {
-      display: flex;
-      align-items: center;
       color: var(--el-text-color-placeholder);
 
       &:hover {

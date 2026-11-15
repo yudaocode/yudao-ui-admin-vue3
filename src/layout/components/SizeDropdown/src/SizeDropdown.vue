@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 import { ElementPlusSize } from '@/types/elementPlus'
 
@@ -11,9 +10,7 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('size-dropdown')
 
-defineProps({
-  color: propTypes.string.def('')
-})
+withDefaults(defineProps<{ color?: string }>(), { color: '' })
 
 const { t } = useI18n()
 

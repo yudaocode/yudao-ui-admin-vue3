@@ -12,7 +12,7 @@ import {
   setToken
 } from '@/utils/auth'
 import errorCode from './errorCode'
-import { isCanceledByRequestCancellation, throwIfRequestCanceled } from './requestCancellation'
+import { throwIfRequestCanceled } from './requestCancellation'
 
 import { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
@@ -119,10 +119,26 @@ service.interceptors.response.use(
   async (response: AxiosResponse<any>) => {
     let { data } = response
     const config = response.config
+    const { t } = useI18n()
+    // 本处理函数主动抛出的错误不会进入下方的错误拦截器：与其一样提示后再抛出（参考上游 c7f8db52d：
+    // 响应转换出错同样经 onError 提示），被取消的请求不提示
+    const withMessage = (error: Error) => {
+      // 取消优先：等待（如解析错误 blob）期间请求已被取消时不提示，不当作普通错误。
+      // request 封装登记的取消改抛取消错误（沿用 throwIfRequestCanceled）；
+      // 调用方自管的 signal / cancelToken 已取消时原样抛出、不提示（与改动前一致）
+      throwIfRequestCanceled(config)
+      if (config.signal?.aborted || config.cancelToken?.reason) {
+        return error
+      }
+      if (!axios.isCancel(error)) {
+        ElMessage.error(error.message || t('sys.api.errorMessage'))
+      }
+      return error
+    }
     throwIfRequestCanceled(config)
     if (!data) {
       // 返回“[HTTP]请求没有返回值”;
-      throw new Error()
+      throw withMessage(new Error())
     }
 
     // 检查是否需要解密响应数据
@@ -136,22 +152,24 @@ service.interceptors.response.use(
         data = ApiEncrypt.decryptResponse(data)
       } catch (error) {
         console.error('响应数据解密失败:', error)
-        throw new Error('响应数据解密失败: ' + (error as Error).message)
+        throw withMessage(new Error('响应数据解密失败: ' + (error as Error).message))
       }
     }
 
-    const { t } = useI18n()
     // 未设置状态码则默认成功状态
-    // 二进制数据则直接返回，例如说 Excel 导出
-    if (
-      response.request.responseType === 'blob' ||
-      response.request.responseType === 'arraybuffer'
-    ) {
+    // 二进制数据则直接返回，例如说 Excel 导出。按请求配置的 responseType 判断（参考上游 c7f8db52d），
+    // 不依赖 XHR 对象；配置未设置时回退读取 XHR 的 responseType
+    const responseType = config.responseType || response.request?.responseType
+    if (responseType === 'blob' || responseType === 'arraybuffer') {
       // 注意：如果导出的响应为 json，说明可能失败了，不直接返回进行下载
       if (response.data.type !== 'application/json') {
         return response.data
       }
-      data = await new Response(response.data).json()
+      try {
+        data = await new Response(response.data).json()
+      } catch (error) {
+        throw withMessage(error as Error)
+      }
       throwIfRequestCanceled(config)
     }
     const code = data.code ?? result_code
@@ -238,8 +256,9 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
-    // request.cancelRequest / cancelAllRequest 主动取消的请求（含刷新令牌后的回放）不提示，原样拒绝；调用方自管 signal 的取消仍按原逻辑提示
-    if (isCanceledByRequestCancellation(error)) {
+    // 请求被取消（request.cancelRequest / cancelAllRequest，含刷新令牌后的回放；以及调用方自管 signal / cancelToken 的中止）时不提示，
+    // 原样拒绝，由调用方自行处理（参考上游 c7f8db52d：isCancel 的错误不弹提示）；网络错误、超时等仍按下方逻辑提示
+    if (axios.isCancel(error)) {
       return Promise.reject(error)
     }
     console.log('err' + error) // for debug
@@ -258,8 +277,13 @@ service.interceptors.response.use(
 )
 
 const refreshToken = async () => {
-  axios.defaults.headers.common['tenant-id'] = getTenantId()
-  return await axios.post(base_url + '/system/auth/refresh-token?refreshToken=' + getRefreshToken())
+  // tenant-id 只随本次刷新请求发送，不写入 axios.defaults：避免遗留到之后的裸 axios 请求和新建的 axios 实例
+  // （如 createRequest 创建的通用实例会按 Axios 标准继承全局 defaults）
+  return await axios.post(
+    base_url + '/system/auth/refresh-token?refreshToken=' + getRefreshToken(),
+    undefined,
+    { headers: { 'tenant-id': getTenantId() } }
+  )
 }
 const handleAuthorized = () => {
   const { t } = useI18n()

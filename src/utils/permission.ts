@@ -1,8 +1,6 @@
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 import { hasPermission } from '@/directives/permission/hasPermi'
 
-const { t } = useI18n() // 国际化
-
 /**
  * 字符权限校验
  * @param {Array} value 校验值
@@ -29,6 +27,8 @@ export function checkRole(value: string[]) {
     })
     return !!hasRole
   } else {
+    // 翻译在报错时再取：模块顶层获取可能早于 setupI18n，只能拿到原样返回 key 的函数（与 hasPermi / hasRole 指令一致）
+    const { t } = useI18n()
     console.error(t('permission.hasRole'))
     return false
   }

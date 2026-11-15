@@ -7,14 +7,12 @@
   <AppLinkSelectDialog ref="dialogRef" @change="handleLinkSelected" />
 </template>
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
-
 // APP 链接输入框
 defineOptions({ name: 'AppLinkInput' })
 // 定义属性
 const props = defineProps({
   // 当前选中的链接
-  modelValue: propTypes.string.def('')
+  modelValue: { type: String, default: '' }
 })
 // 当前的链接
 const appLink = ref('')

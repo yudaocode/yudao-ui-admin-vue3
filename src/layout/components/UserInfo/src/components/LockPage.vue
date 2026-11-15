@@ -37,7 +37,7 @@ async function unLock() {
   if (!password.value || loading.value) {
     return
   }
-  let pwd = password.value
+  const pwd = password.value
   try {
     loading.value = true
     const res = await lockStore.unLock(pwd)
@@ -104,7 +104,7 @@ function handleShowForm(show = false) {
         <div :class="`${prefixCls}-entry-content`">
           <div class="flex flex-col items-center">
             <img :src="avatar" alt="" class="w-70px h-70px rounded-[50%]" />
-            <span class="text-14px my-10px text-[var(--logo-title-text-color)]">
+            <span class="text-14px my-10px text-white">
               {{ userName }}
             </span>
           </div>

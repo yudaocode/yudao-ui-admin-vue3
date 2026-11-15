@@ -15,7 +15,6 @@
 <script lang="ts" setup>
 import { useDesign } from '@/hooks/web/useDesign'
 
-import { propTypes } from '@/utils/propTypes'
 import { useI18n } from 'vue-i18n'
 import CopperModal from './CopperModal.vue'
 import avatar from '@/assets/imgs/avatar.gif'
@@ -23,10 +22,10 @@ import avatar from '@/assets/imgs/avatar.gif'
 defineOptions({ name: 'CropperAvatar' })
 
 const props = defineProps({
-  width: propTypes.string.def('200px'),
-  value: propTypes.string.def(''),
-  showBtn: propTypes.bool.def(true),
-  btnText: propTypes.string.def('')
+  width: { type: String, default: '200px' },
+  value: { type: String, default: '' },
+  showBtn: { type: Boolean, default: true },
+  btnText: { type: String, default: '' }
 })
 
 const emit = defineEmits(['update:value', 'change'])

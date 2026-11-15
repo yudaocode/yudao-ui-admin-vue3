@@ -1,4 +1,4 @@
-import { ElementPlusSize } from './elementPlus'
+import type { ElementPlusSize } from '@/types/elementPlus'
 export interface ConfigGlobalTypes {
   size?: ElementPlusSize
 }

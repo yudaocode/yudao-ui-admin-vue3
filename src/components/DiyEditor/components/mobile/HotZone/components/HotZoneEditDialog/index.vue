@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { HotZoneItemProperty } from '@/components/DiyEditor/components/mobile/HotZone/config'
-import { array, string } from 'vue-types'
+import type { PropType } from 'vue'
 import {
   CONTROL_DOT_LIST,
   CONTROL_TYPE_ENUM,
@@ -62,8 +62,8 @@ defineOptions({ name: 'HotZoneEditDialog' })
 
 // 定义属性
 const props = defineProps({
-  modelValue: array<HotZoneItemProperty>(),
-  imgUrl: string().def('')
+  modelValue: { type: Array as PropType<HotZoneItemProperty[]> },
+  imgUrl: { type: String, default: '' }
 })
 const emit = defineEmits(['update:modelValue'])
 const formData = ref<HotZoneItemProperty[]>([])

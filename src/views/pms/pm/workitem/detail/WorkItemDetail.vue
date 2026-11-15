@@ -62,7 +62,7 @@
         class="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_300px] border-t border-solid border-[var(--el-border-color-lighter)]"
       >
         <!-- 工作项内容与协作信息 -->
-        <main class="min-w-0 overflow-y-auto px-32px py-24px">
+        <div class="min-w-0 overflow-y-auto px-32px py-24px">
           <section class="mb-28px">
             <div v-if="editable" class="mb-18px flex items-center gap-8px">
               <el-button v-if="editable" link type="primary" @click="openEditForm">
@@ -136,7 +136,7 @@
               </el-tab-pane>
             </el-tabs>
           </section>
-        </main>
+        </div>
 
         <!-- 工作项属性 -->
         <aside

@@ -1,6 +1,7 @@
 import { Layout } from '@/utils/routerHelper'
 
-const { t } = useI18n()
+// 静态路由 meta.title 直接写语言 key（参考上游 2e5656055），由菜单、页签、面包屑、页面标题展示时再翻译，
+// 随语言切换更新，不依赖模块加载时 i18n 是否已初始化；中文原文标题原样展示
 /**
  * redirect: noredirect        当设置 noredirect 的时候该路由在面包屑导航中不可被点击
  * name:'router-name'          设定路由的名字，一定要填写不然使用<keep-alive>时会出现各种问题
@@ -62,7 +63,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/Home/Index.vue'),
         name: 'Index',
         meta: {
-          title: t('router.home'),
+          title: 'router.home',
           icon: 'ep:home-filled',
           noCache: false,
           affix: true
@@ -87,7 +88,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           noTagsView: false,
           icon: 'ep:user',
-          title: t('common.profile'),
+          title: 'common.profile',
           viewKey: 'Profile' // 社交绑定回调后会去掉地址中的 code 等参数，使用稳定的页面实例标识，避免重建页面
         }
       },
@@ -206,7 +207,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     name: 'Login',
     meta: {
       hidden: true,
-      title: t('router.login'),
+      title: 'router.login',
       noTagsView: true
     }
   },
@@ -226,7 +227,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     name: 'SSOLogin',
     meta: {
       hidden: true,
-      title: t('router.login'),
+      title: 'router.login',
       noTagsView: true
     }
   },
@@ -236,7 +237,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     name: 'SocialLogin',
     meta: {
       hidden: true,
-      title: t('router.socialLogin'),
+      title: 'router.socialLogin',
       noTagsView: true
     }
   },

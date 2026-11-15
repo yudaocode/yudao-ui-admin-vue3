@@ -17,7 +17,7 @@
       />
     </el-select>
   </ElDialog>
-  <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
+  <div v-else class="header-action" @click.stop="showTopSearch = !showTopSearch">
     <!-- 原生 button 便于键盘聚焦与读屏；不单独绑定点击，激活后冒泡到外层统一切换，只切换一次 -->
     <button
       :aria-expanded="showTopSearch"
@@ -49,13 +49,13 @@
 </template>
 
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
+import { getRouteTitle } from '@/utils/routeTitle'
 defineProps({
   isModal: {
     type: Boolean,
     default: true
   },
-  color: propTypes.string.def('')
+  color: { type: String, default: '' }
 })
 
 const { t } = useI18n()
@@ -70,14 +70,20 @@ const options = computed(() => {
   if (!value.value) {
     return []
   }
-  const list = routers.filter((item: any) => {
-    if (item.meta.title?.indexOf(value.value) > -1 || item.path.indexOf(value.value) > -1) {
-      return true
-    }
-  })
-  return list.map((item) => {
+  // 按原始标题（静态路由的语言 key，兼容原有搜索）、展示标题（静态路由翻译后、后端菜单原文）及路径搜索，
+  // 按展示标题显示
+  const list = routers
+    .map((item) => ({ item, title: getRouteTitle(item.meta) }))
+    .filter(({ item, title }) => {
+      return (
+        (item.meta.title ?? '').indexOf(value.value) > -1 ||
+        title.indexOf(value.value) > -1 ||
+        item.path.indexOf(value.value) > -1
+      )
+    })
+  return list.map(({ item, title }) => {
     return {
-      label: `${item.meta.title}${item.path}`,
+      label: `${title}${item.path}`,
       value: item.path
     }
   })
@@ -130,7 +136,7 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-// :where 不增加优先级，只重置原生 button 默认样式，图标仍在外层 custom-hover 中居中，保留 focus outline
+// :where 不增加优先级，只重置原生 button 默认样式，图标仍在外层 header-action 中居中，保留 focus outline
 :where(.router-search-trigger) {
   display: inline-flex;
   padding: 0;

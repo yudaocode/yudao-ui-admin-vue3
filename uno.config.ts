@@ -4,8 +4,10 @@ import transformerVariantGroup from '@unocss/transformer-variant-group'
 export default defineConfig({
   // ...UnoCSS options
   rules: [
+    // 顶栏操作项悬停区域：header-action 为上游名称（参考上游 uno.config shortcuts，e66532cf9），custom-hover 保留为兼容别名。
+    // 样式沿用本地：过渡时长用 --transition-time-02（系统“减少动态效果”时为 0s），不加上游 pt-1px（本地已修正 1px 偏移）
     [
-      /^custom-hover$/,
+      /^(header-action|custom-hover)$/,
       ([], { rawSelector }) => {
         const selector = e(rawSelector)
         return `
@@ -39,7 +41,7 @@ ${selector}:before {
   left: 0;
   width: 1px;
   height: 100%;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -57,7 +59,7 @@ ${selector}:after {
   right: 0;
   width: 1px;
   height: 100%;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -75,7 +77,7 @@ ${selector}:before {
   left: 0;
   width: 100%;
   height: 1px;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -93,7 +95,7 @@ ${selector}:after {
   left: 0;
   width: 100%;
   height: 1px;
-  background-color: var(--el-border-color);
+  background-color: var(--layout-border-color);
   z-index: 3;
 }
 `
@@ -105,5 +107,11 @@ ${selector}:after {
   transformers: [transformerVariantGroup()],
   shortcuts: {
     'wh-full': 'w-full h-full'
+  },
+  // 与上游一致额外扫描 .ts 文件中的原子类（参考上游 608bf50e1）；其余为 UnoCSS 66 默认扫描范围，未改动
+  content: {
+    pipeline: {
+      include: [/\.(vue|svelte|[jt]sx|vine.ts|mdx?|astro|elm|php|phtml|marko|html|ts)($|\?)/]
+    }
   }
 })

@@ -123,7 +123,7 @@ function formatOrderStatus(order: any) {
 
       span {
         &:hover {
-          color: var(--left-menu-bg-active-color);
+          color: var(--el-color-primary);
           text-decoration: underline;
         }
       }

@@ -1,6 +1,7 @@
 import { resolve } from 'path'
 import Vue from '@vitejs/plugin-vue'
 import VueJsx from '@vitejs/plugin-vue-jsx'
+import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 // @ts-ignore
 import ElementPlus from 'unplugin-element-plus/vite'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -35,6 +36,14 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
   const plugins = [
     Vue(),
     VueJsx(),
+    // 构建期预编译 src/locales 语言包，并设置 vue-i18n 特性开关（参考上游 vite.config VueI18nPlugin）。
+    // 与上游一致显式声明 runtimeOnly、compositionOnly（摇掉 legacy API），取值与插件默认相同；
+    // fullInstall 沿用默认 true，dropMessageCompiler 沿用默认 false（保留运行时编译，未预编译的文案仍可正常翻译）
+    VueI18nPlugin({
+      runtimeOnly: true,
+      compositionOnly: true,
+      include: [pathResolve('src/locales/**')]
+    }),
     UnoCSS(),
     // 为显式 import 的 Element Plus 组件注入按需样式；全量样式模式下不需要
     !allElementPlusStyle && ElementPlus({}),
@@ -54,7 +63,6 @@ export function createVitePlugins(isBuild = false, env: Record<string, string> =
           '@/hooks/web/useI18n': ['useI18n'],
           '@/hooks/web/useMessage': ['useMessage'],
           '@/hooks/web/useTable': ['useTable'],
-          '@/hooks/web/useCrudSchemas': ['useCrudSchemas'],
           '@/utils/formRules': ['required'],
           '@/utils/dict': ['DICT_TYPE']
         }
