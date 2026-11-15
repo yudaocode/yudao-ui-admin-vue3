@@ -21,10 +21,10 @@ export function hasPermi(app: App<Element>) {
 }
 
 /** 判断权限的方法 function */
-// 模块求值早于 setupStore，需显式传入 store
-const userStore = useUserStoreWithOut()
 const all_permission = '*:*:*'
 export const hasPermission = (permission: string[]) => {
+  // 调用时再获取 store：模块可能在 setupStore 之前加载，此时还没有激活的 Pinia
+  const userStore = useUserStoreWithOut()
   return (
     userStore.permissions.has(all_permission) ||
     permission.some((permission) => userStore.permissions.has(permission))

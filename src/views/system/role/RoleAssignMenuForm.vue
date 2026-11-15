@@ -73,14 +73,14 @@ const treeNodeAll = ref(false) // 全选/全不选
 const open = async (row: RoleApi.RoleVO) => {
   dialogVisible.value = true
   resetForm()
-  // 加载 Menu 列表。注意，必须放在前面，不然下面 setChecked 没数据节点
-  menuOptions.value = handleTree(await MenuApi.getSimpleMenusList())
   // 设置数据
   formData.id = row.id
   formData.name = row.name
   formData.code = row.code
   formLoading.value = true
   try {
+    // 加载 Menu 列表。注意，必须放在前面，不然下面 setChecked 没数据节点
+    menuOptions.value = handleTree(await MenuApi.getSimpleMenusList())
     formData.menuIds = await PermissionApi.getRoleMenuList(row.id)
     // 设置选中
     formData.menuIds.forEach((menuId: number) => {
