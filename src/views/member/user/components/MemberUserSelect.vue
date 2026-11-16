@@ -98,7 +98,12 @@ const resolveItemById = async (ids: number[]) => {
     selectedItems.value = []
     return
   }
-  if (ids.every((id) => selectedItems.value.some((item) => item.id === id))) {
+  // 已全部缓存时，按当前编号同步缓存，剔除已移除的会员，避免打开弹窗时仍勾选
+  const cachedItems = ids
+    .map((id) => selectedItems.value.find((item) => item.id === id))
+    .filter((item): item is MemberApi.UserVO => !!item)
+  if (cachedItems.length === ids.length) {
+    selectedItems.value = cachedItems
     return
   }
   try {

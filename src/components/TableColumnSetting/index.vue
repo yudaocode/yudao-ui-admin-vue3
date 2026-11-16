@@ -14,7 +14,7 @@
         :key="column.prop"
         class="h-48px flex items-center border-b border-[var(--el-border-color-lighter)] px-4px"
       >
-        <el-checkbox :label="column.prop" class="!mr-0 !h-full !w-full">
+        <el-checkbox :value="column.prop" class="!mr-0 !h-full !w-full">
           {{ column.label }}
         </el-checkbox>
       </div>

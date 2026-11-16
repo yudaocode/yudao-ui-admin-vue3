@@ -17,6 +17,7 @@ const props = defineProps({
   alt: propTypes.string.def(''),
   circled: propTypes.bool.def(false),
   realTimePreview: propTypes.bool.def(true),
+  // 只返回原图坐标、不生成裁剪图片；坐标按未旋转、未斜切的图片换算
   coordinatesOnly: propTypes.bool.def(false),
   aspectRatio: { type: Number, default: 1 },
   transformable: propTypes.bool.def(true),
@@ -136,7 +137,8 @@ async function croppered() {
   }
 }
 
-// 将选区坐标转换为原图坐标
+// 将选区坐标转换为原图坐标：取选区与图片的交集，无交集时返回空区域
+// 注意：按图片显示区域等比换算，适用于未旋转、未斜切的图片（缩放、平移不影响）
 function getSourceImageCoordinates(selection: HTMLElement) {
   const cropperImage = cropper.value?.getCropperImage()
   if (!cropperImage) return { x: 0, y: 0, width: 0, height: 0 }
@@ -149,13 +151,24 @@ function getSourceImageCoordinates(selection: HTMLElement) {
   }
   const scaleX = naturalWidth / imageRect.width
   const scaleY = naturalHeight / imageRect.height
-  const x = Math.max(0, Math.round((selectionRect.left - imageRect.left) * scaleX))
-  const y = Math.max(0, Math.round((selectionRect.top - imageRect.top) * scaleY))
+  // 选区与图片显示区域的交集，四个方向都裁剪
+  const left = Math.max(selectionRect.left, imageRect.left)
+  const top = Math.max(selectionRect.top, imageRect.top)
+  const right = Math.min(selectionRect.left + selectionRect.width, imageRect.left + imageRect.width)
+  const bottom = Math.min(
+    selectionRect.top + selectionRect.height,
+    imageRect.top + imageRect.height
+  )
+  if (right <= left || bottom <= top) {
+    return { x: 0, y: 0, width: 0, height: 0 }
+  }
+  const x = Math.min(naturalWidth - 1, Math.round((left - imageRect.left) * scaleX))
+  const y = Math.min(naturalHeight - 1, Math.round((top - imageRect.top) * scaleY))
   return {
     x,
     y,
-    width: Math.min(naturalWidth - x, Math.max(1, Math.round(selectionRect.width * scaleX))),
-    height: Math.min(naturalHeight - y, Math.max(1, Math.round(selectionRect.height * scaleY)))
+    width: Math.min(naturalWidth - x, Math.max(1, Math.round((right - left) * scaleX))),
+    height: Math.min(naturalHeight - y, Math.max(1, Math.round((bottom - top) * scaleY)))
   }
 }
 

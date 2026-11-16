@@ -15,7 +15,7 @@ const props = defineProps({
     type: String,
     required: true
   },
-  // 以下渲染选项同 markdown-it，默认关闭；CMS 编辑预览按保存时的渲染选项显式开启
+  // 以下渲染选项同 markdown-it，默认关闭；调用方按保存时的渲染选项开启，使预览与保存结果一致
   html: {
     type: Boolean,
     default: false
