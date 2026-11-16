@@ -10,9 +10,8 @@ WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 
-# 依赖清单、workspace 配置（allowBuilds / patchedDependencies）及补丁，按锁文件安装
+# 依赖清单、workspace 配置（allowBuilds），按锁文件安装
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY patches ./patches
 # 安装源默认 npm 官方 registry，可用 --build-arg PNPM_REGISTRY=<公开镜像地址> 覆盖
 ARG PNPM_REGISTRY=https://registry.npmjs.org
 # 仅安装步骤限制解包 worker、内存与并发峰值（只作用于本条 RUN，不设为 ENV，不影响运行时 Vite）
