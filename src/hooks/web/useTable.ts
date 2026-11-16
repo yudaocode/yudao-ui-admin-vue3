@@ -1,7 +1,8 @@
 import download from '@/utils/download'
 import { Table } from '@/components/Table'
 import type { TableExpose } from '@/components/Table'
-import { ElMessage, ElMessageBox, ElTable } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import {
   computed,
   getCurrentScope,
@@ -112,9 +113,9 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
   const tableRef = ref<typeof Table & TableExpose>()
 
   // ElTable实例
-  const elTableRef = ref<ComponentRef<typeof ElTable>>()
+  const elTableRef = ref<TableInstance>()
 
-  const register = (ref: typeof Table & TableExpose, elRef: ComponentRef<typeof ElTable>) => {
+  const register = (ref: typeof Table & TableExpose, elRef: TableInstance) => {
     tableRef.value = ref
     elTableRef.value = elRef
   }

@@ -133,7 +133,7 @@ const dialogTitle = ref('选择优惠劵') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 字典表格数据
+const list = ref<CouponTemplateApi.CouponTemplateVO[]>([]) // 字典表格数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,

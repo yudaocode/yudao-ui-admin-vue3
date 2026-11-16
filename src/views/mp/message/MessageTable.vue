@@ -125,6 +125,8 @@
 </template>
 
 <script lang="ts" setup>
+import type { PropType } from 'vue'
+import type { MpMessageVO } from '@/api/mp/message'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
 import WxLocation from '@/views/mp/components/wx-location'
@@ -135,7 +137,7 @@ import { MsgType } from '@/views/mp/components/wx-msg/types'
 
 const props = defineProps({
   list: {
-    type: Array,
+    type: Array as PropType<MpMessageVO[]>,
     required: true
   },
   loading: {

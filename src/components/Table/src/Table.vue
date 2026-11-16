@@ -8,7 +8,7 @@ import {
   ElEmpty,
   ElCard
 } from 'element-plus'
-import type { ComponentSize, ElTooltipProps } from 'element-plus'
+import type { ComponentSize, ElTooltipProps, TableInstance } from 'element-plus'
 import { defineComponent, PropType, ref, computed, unref, watch, onMounted } from 'vue'
 import type { CSSProperties, VNode } from 'vue'
 import { DEFAULT_FILTER_COLUMN, getColumnKey, normalizeColumnFixed, setIndex } from './helper'
@@ -237,7 +237,7 @@ export default defineComponent({
   },
   emits: ['update:pageSize', 'update:currentPage', 'register', 'refresh', 'selection-change'],
   setup(props, { attrs, emit, slots, expose }) {
-    const elTableRef = ref<ComponentRef<typeof ElTable>>()
+    const elTableRef = ref<TableInstance>()
 
     // 注册：第二个参数为实际的 ElTable 实例，与芋道 useTable 的 register 一致
     onMounted(() => {

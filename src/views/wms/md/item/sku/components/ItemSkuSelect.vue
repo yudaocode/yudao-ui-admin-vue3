@@ -153,6 +153,7 @@
 
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import { ItemSkuApi, ItemSkuVO } from '@/api/wms/md/item/sku'
 import { formatDimensionText, formatPrice, formatWeight } from '@/views/wms/utils/format'
 
@@ -171,7 +172,7 @@ const disabledSelectedIds = ref<Set<number>>(new Set()) // 已在业务明细中
 const multiple = ref(true) // 是否允许多选
 const preselectDisabled = ref(true) // 是否回显已禁用的 SKU
 const syncingSingleSelection = ref(false) // 单选模式同步表格勾选状态中
-const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
+const tableRef = ref<TableInstance>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
 
 /** 获得默认的查询参数 */

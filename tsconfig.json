@@ -21,7 +21,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "element-plus/es": ["./types/element-plus-compat.ts"]
     },
     "types": ["vite/client"]
   },

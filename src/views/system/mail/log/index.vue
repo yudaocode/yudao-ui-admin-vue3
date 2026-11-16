@@ -191,7 +191,7 @@ defineOptions({ name: 'SystemMailLog' })
 
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const list = ref<MailLogApi.MailLogVO[]>([]) // 列表的数据
 const queryFormRef = ref() // 搜索的表单
 const queryParams = reactive({
   pageNo: 1,

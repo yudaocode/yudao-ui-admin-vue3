@@ -220,7 +220,7 @@ function resetQuery() {
 }
 
 /** 表格排序操作 */
-function handleSortChange(params: { prop: string; order: string | null }) {
+function handleSortChange(params: { prop: string | null; order: string | null }) {
   queryParams.sortingFields = params.order ? [buildSortingField(params)] : []
   handleQuery()
 }

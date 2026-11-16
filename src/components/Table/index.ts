@@ -1,5 +1,5 @@
 import Table from './src/Table.vue'
-import type { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import type { TableColumn, TableSetProps } from './src/types'
 import TableSelectForm from './src/TableSelectForm.vue'
 
@@ -19,7 +19,7 @@ export interface TableExpose {
   addColumn: (column: TableColumn, index?: number) => void
   delColumn: (field: string) => void
   selections: Recordable[]
-  elTableRef: ComponentRef<typeof ElTable>
+  elTableRef: TableInstance
 }
 
 export { Table, TableSelectForm }
