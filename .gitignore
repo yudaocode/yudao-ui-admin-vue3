@@ -31,5 +31,6 @@ Thumbs.db
 
 # Generated / local tooling
 auto-*.d.ts
-output/
-.playwright-cli/
+output
+.playwright-cli
+.playwright-mcp

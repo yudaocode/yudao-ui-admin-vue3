@@ -54,6 +54,10 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item label="SMTP 读取超时" prop="timeout">
+        <el-input-number v-model="formData.timeout" :min="0" :max="65535" />
+        <span class="ml-10px text-gray-400">单位：毫秒，0 表示不限制</span>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -82,7 +86,8 @@ const formData = ref<MailAccountApi.MailAccountVO>({
   host: '',
   port: 465,
   sslEnable: true,
-  starttlsEnable: false
+  starttlsEnable: false,
+  timeout: 0
 })
 const formRules = reactive({
   mail: [
@@ -94,7 +99,8 @@ const formRules = reactive({
   host: [{ required: true, message: 'SMTP 服务器域名不能为空', trigger: 'blur' }],
   port: [{ required: true, message: 'SMTP 服务器端口不能为空', trigger: 'blur' }],
   sslEnable: [{ required: true, message: '是否开启 SSL 不能为空', trigger: 'blur' }],
-  starttlsEnable: [{ required: true, message: '是否开启 STARTTLS 不能为空', trigger: 'blur' }]
+  starttlsEnable: [{ required: true, message: '是否开启 STARTTLS 不能为空', trigger: 'blur' }],
+  timeout: [{ required: true, message: 'SMTP 读取超时不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -152,7 +158,8 @@ const resetForm = () => {
     host: '',
     port: 465,
     sslEnable: true,
-    starttlsEnable: false
+    starttlsEnable: false,
+    timeout: 0
   }
   formRef.value?.resetFields()
 }
