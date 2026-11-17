@@ -1,4 +1,4 @@
-<!-- AI 短剧管理：项目、生成任务 -->
+<!-- AI 短剧制作管理：项目、生成任务 -->
 <template>
   <doc-alert title="AI 短剧制作" url="https://doc.iocoder.cn/ai/drama/" />
 
@@ -13,10 +13,10 @@
 </template>
 
 <script setup lang="ts">
-import ProjectList from './components/ProjectList.vue'
-import TaskList from './components/TaskList.vue'
+import ProjectList from './ProjectList.vue'
+import TaskList from './TaskList.vue'
 
-/** AI 短剧管理 */
+/** AI 短剧制作管理 */
 defineOptions({ name: 'AiDramaManager' })
 
 const activeTab = ref('project')

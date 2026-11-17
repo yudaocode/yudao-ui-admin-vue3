@@ -6,6 +6,9 @@
         <el-form-item label="项目名称" prop="name">
           <el-input v-model="formData.name" maxlength="64" show-word-limit />
         </el-form-item>
+        <el-form-item label="项目简介" prop="description">
+          <el-input v-model="formData.description" maxlength="500" show-word-limit />
+        </el-form-item>
         <el-form-item label="故事想法" prop="idea">
           <el-input
             v-model="formData.idea"
@@ -17,10 +20,63 @@
           />
         </el-form-item>
         <el-form-item label="画风" prop="style">
-          <el-input v-model="formData.style" placeholder="例如：电影感写实、日系动漫、国风水墨" maxlength="255" />
+          <el-radio-group v-model="formData.style">
+            <el-radio-button
+              v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_STYLE)"
+              :key="dict.value"
+              :value="dict.value"
+            >
+              {{ dict.label }}
+            </el-radio-button>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="画幅" prop="aspectRatio">
-          <el-radio-group v-model="formData.aspectRatio">
+        <el-form-item label="美学技能" prop="aestheticSkillId">
+          <el-select
+            v-model="formData.aestheticSkillId"
+            placeholder="不使用"
+            clearable
+            class="!w-full"
+          >
+            <el-option
+              v-for="item in skillList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id!"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="导演技能" prop="directorSkillId">
+          <el-select
+            v-model="formData.directorSkillId"
+            placeholder="不使用"
+            clearable
+            class="!w-full"
+          >
+            <el-option
+              v-for="item in skillList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id!"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="分镜技能" prop="storyboardSkillIds">
+          <el-select
+            v-model="formData.storyboardSkillIds"
+            placeholder="不使用；按选择的顺序生效"
+            multiple
+            class="!w-full"
+          >
+            <el-option
+              v-for="item in skillList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id!"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="画幅" prop="composeAspectRatio">
+          <el-radio-group v-model="formData.composeAspectRatio">
             <el-radio-button v-for="item in DRAMA_ASPECT_RATIOS" :key="item" :value="item">
               {{ item }}
             </el-radio-button>
@@ -29,7 +85,9 @@
         <el-form-item>
           <div class="w-full flex justify-end">
             <!-- 保存、生成剧本互斥：新建时两者都会创建项目，避免重复创建 -->
-            <el-button type="primary" :loading="saving" :disabled="generating" @click="handleSave">保存</el-button>
+            <el-button type="primary" :loading="saving" :disabled="generating" @click="handleSave">
+              保存
+            </el-button>
           </div>
         </el-form-item>
       </el-form>
@@ -50,7 +108,13 @@
             class="!w-full"
           />
         </div>
-        <el-button type="primary" class="w-full" :loading="generating" :disabled="saving" @click="handleGenerate">
+        <el-button
+          type="primary"
+          class="w-full"
+          :loading="generating"
+          :disabled="saving"
+          @click="handleGenerate"
+        >
           {{ detail?.script?.content ? '重新生成剧本' : '生成剧本' }}
         </el-button>
         <el-button
@@ -66,9 +130,11 @@
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { DramaProjectApi, DramaProjectDetailVO } from '@/api/ai/drama/project'
 import { DramaScriptApi } from '@/api/ai/drama/script'
-import { AiDramaStepEnum, AiModelTypeEnum } from '@/views/ai/utils/constants'
+import { SkillApi, SkillVO } from '@/api/ai/skill'
+import { AiDramaStepEnum, AiDramaStyleEnum, AiModelTypeEnum } from '@/views/ai/utils/constants'
 import { DRAMA_ASPECT_RATIOS } from '@/views/ai/utils/drama'
 import ModelSelect from '@/views/ai/model/model/components/ModelSelect.vue'
 
@@ -76,21 +142,26 @@ import ModelSelect from '@/views/ai/model/model/components/ModelSelect.vue'
 defineOptions({ name: 'AiDramaIdeaStep' })
 
 const props = defineProps<{ detail?: DramaProjectDetailVO }>()
-const emit = defineEmits<{ refresh: []; next: [step: number]; created: [id: number, step: number] }>()
+const emit = defineEmits<{ refresh: []; next: [step: number]; created: [id: number] }>()
 const message = useMessage() // 消息弹窗
 
 const formRef = ref()
 const project = props.detail?.project
 const formData = reactive({
   name: project?.name || '',
+  description: project?.description,
   idea: project?.idea,
-  style: project?.style,
-  aspectRatio: project?.aspectRatio || '9:16'
+  style: project?.style ?? AiDramaStyleEnum.SCRIPT_TONE,
+  aestheticSkillId: project?.aestheticSkillId,
+  directorSkillId: project?.directorSkillId,
+  storyboardSkillIds: project?.storyboardSkillIds || [],
+  composeAspectRatio: project?.composeAspectRatio || '9:16'
 })
 const formRules = reactive({
   name: [{ required: true, message: '项目名称不能为空', trigger: 'blur' }],
   idea: [{ required: true, message: '故事想法不能为空', trigger: 'blur' }]
 })
+const skillList = ref<SkillVO[]>([]) // 启用的技能
 const chatModelId = ref<number>()
 const saving = ref(false)
 const generating = ref(false)
@@ -118,7 +189,7 @@ const handleSave = async () => {
       emit('refresh')
     } else {
       message.success('创建成功')
-      emit('created', id, AiDramaStepEnum.IDEA)
+      emit('created', id)
     }
   } finally {
     saving.value = false
@@ -143,15 +214,20 @@ const handleGenerate = async () => {
     if (project) {
       emit('next', AiDramaStepEnum.SCRIPT)
     } else {
-      emit('created', id, AiDramaStepEnum.SCRIPT)
+      emit('created', id)
     }
   } catch {
     // 新建时项目已创建、剧本生成失败：进入该项目，避免再次点击时重复创建
     if (!project && id) {
-      emit('created', id, AiDramaStepEnum.IDEA)
+      emit('created', id)
     }
   } finally {
     generating.value = false
   }
 }
+
+/** 初始化 **/
+onMounted(async () => {
+  skillList.value = await SkillApi.getSkillSimpleList()
+})
 </script>

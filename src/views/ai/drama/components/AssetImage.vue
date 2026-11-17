@@ -1,4 +1,4 @@
-<!-- AI 短剧：资产图片，没有图片时按状态显示占位 -->
+<!-- AI 短剧：资产图片，没有图片时按状态显示占位；项目表单与短剧制作管理共用 -->
 <template>
   <el-image
     v-if="url"
@@ -18,7 +18,11 @@
       <Icon icon="ep:loading" class="is-loading" :size="18" />
       <span>生成中</span>
     </template>
-    <el-tooltip v-else-if="status === AiDramaStatusEnum.FAIL" :content="errorMessage || '生成失败'" placement="top">
+    <el-tooltip
+      v-else-if="status === AiDramaStatusEnum.FAIL"
+      :content="errorMessage || '生成失败'"
+      placement="top"
+    >
       <span class="text-[var(--el-color-danger)]">生成失败</span>
     </el-tooltip>
     <template v-else>
@@ -34,7 +38,10 @@ import { AiDramaStatusEnum, isAiDramaRunning } from '@/views/ai/utils/constants'
 /** AI 短剧：资产图片 */
 defineOptions({ name: 'AiDramaAssetImage' })
 
-withDefaults(defineProps<{ url?: string; status?: number; errorMessage?: string; size?: string }>(), {
-  size: '96px'
-})
+withDefaults(
+  defineProps<{ url?: string; status?: number; errorMessage?: string; size?: string }>(),
+  {
+    size: '96px'
+  }
+)
 </script>

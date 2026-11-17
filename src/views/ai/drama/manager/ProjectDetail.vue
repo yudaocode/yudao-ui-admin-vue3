@@ -1,4 +1,4 @@
-<!-- AI 短剧管理：项目详情（只读） -->
+<!-- AI 短剧制作管理：项目详情（只读） -->
 <template>
   <Dialog v-model="dialogVisible" title="短剧项目详情" width="960px">
     <div v-loading="loading">
@@ -9,12 +9,14 @@
           <el-descriptions-item label="用户">
             {{ detail.project.userNickname || detail.project.userId }}
           </el-descriptions-item>
-          <el-descriptions-item label="画风">{{
-            detail.project.style || '-'
+          <el-descriptions-item label="画风">
+            <dict-tag :type="DICT_TYPE.AI_DRAMA_STYLE" :value="detail.project.style!" />
+          </el-descriptions-item>
+          <el-descriptions-item label="画幅">{{
+            detail.project.composeAspectRatio
           }}</el-descriptions-item>
-          <el-descriptions-item label="画幅">{{ detail.project.aspectRatio }}</el-descriptions-item>
-          <el-descriptions-item label="当前步骤">
-            <dict-tag :type="DICT_TYPE.AI_DRAMA_STEP" :value="detail.project.status" />
+          <el-descriptions-item label="项目状态">
+            <dict-tag :type="DICT_TYPE.AI_DRAMA_PROJECT_STATUS" :value="detail.project.status" />
           </el-descriptions-item>
           <el-descriptions-item label="故事想法" :span="3">
             <span class="whitespace-pre-wrap break-all">{{ detail.project.idea || '-' }}</span>
@@ -90,7 +92,7 @@
                 <AssetImage
                   v-for="appearance in character.appearances"
                   :key="appearance.id"
-                  :url="getSelectedCandidateUrl(appearance.candidates, appearance.selectedIndex)"
+                  :url="getSelectedImageUrl(appearance.imageUrls, appearance.selectedIndex)"
                   :status="appearance.status"
                   :error-message="appearance.errorMessage"
                   size="80px"
@@ -99,9 +101,7 @@
             </div>
             <el-empty v-if="!detail.characters.length" description="暂无角色" />
           </el-tab-pane>
-          <el-tab-pane
-            :label="`场景与道具（${detail.locations.length + detail.visualAssets.length}）`"
-          >
+          <el-tab-pane :label="`场景与道具（${detail.locations.length + propList.length}）`">
             <div class="flex flex-wrap gap-12px">
               <div
                 v-for="location in detail.locations"
@@ -109,7 +109,7 @@
                 class="w-100px text-center text-12px"
               >
                 <AssetImage
-                  :url="getSelectedCandidateUrl(location.candidates, location.selectedIndex)"
+                  :url="getSelectedImageUrl(location.imageUrls, location.selectedIndex)"
                   :status="location.status"
                   :error-message="location.errorMessage"
                   size="100px"
@@ -117,7 +117,7 @@
                 <div class="truncate">场景：{{ location.name }}</div>
               </div>
               <div
-                v-for="asset in detail.visualAssets"
+                v-for="asset in propList"
                 :key="`v${asset.id}`"
                 class="w-100px text-center text-12px"
               >
@@ -131,16 +131,16 @@
               </div>
             </div>
             <el-empty
-              v-if="!detail.locations.length && !detail.visualAssets.length"
+              v-if="!detail.locations.length && !propList.length"
               description="暂无场景与道具"
             />
           </el-tab-pane>
           <el-tab-pane :label="`镜头（${detail.storyboards.length}）`">
             <el-table :data="detail.storyboards" max-height="400" :show-overflow-tooltip="true">
-              <el-table-column label="场次" prop="sceneNo" width="60" align="center" />
+              <el-table-column label="镜头" prop="sceneNo" width="60" align="center" />
               <el-table-column label="标题" prop="title" min-width="120" />
               <el-table-column label="时长" prop="duration" width="70" align="center" />
-              <el-table-column label="画面描述" prop="videoPrompt" min-width="200" />
+              <el-table-column label="画面描述" prop="sceneText" min-width="200" />
               <el-table-column label="状态" width="100" align="center">
                 <template #default="{ row }">
                   <dict-tag
@@ -183,15 +183,17 @@
 import { DICT_TYPE } from '@/utils/dict'
 import { DramaProjectApi, DramaProjectDetailVO } from '@/api/ai/drama/project'
 import { AiDramaStatusEnum } from '@/views/ai/utils/constants'
-import { formatDramaDuration, getSelectedCandidateUrl } from '@/views/ai/utils/drama'
-import AssetImage from '@/views/ai/drama/project/components/AssetImage.vue'
+import { formatDramaDuration, getDramaProps, getSelectedImageUrl } from '@/views/ai/utils/drama'
+import AssetImage from '../components/AssetImage.vue'
 
-/** AI 短剧管理：项目详情 */
+/** AI 短剧制作管理：项目详情 */
 defineOptions({ name: 'AiDramaProjectDetail' })
 
 const dialogVisible = ref(false)
 const loading = ref(false)
 const detail = ref<DramaProjectDetailVO>()
+/** 当前的道具：不含关键帧、历史版本 */
+const propList = computed(() => getDramaProps(detail.value?.visualAssets))
 
 const open = async (id: number) => {
   dialogVisible.value = true
@@ -204,6 +206,4 @@ const open = async (id: number) => {
   }
 }
 defineExpose({ open })
-
-// DONE @AI：交 detail 还是 dialog？（按 yudao 习惯叫 detail，如 ApiAccessLogDetail.vue，改为 ProjectDetail.vue；同理 PublicDetailDialog → PublicDetail，XxxFormDialog → XxxForm，ComposeDialog → ComposeForm）
 </script>

@@ -1,4 +1,4 @@
-<!-- AI 短剧管理：生成任务（出图、镜头视频、成片合成） -->
+<!-- AI 短剧制作管理：生成任务（出图、镜头视频、成片合成） -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -66,7 +66,7 @@
       </el-form-item>
     </el-form>
     <div class="mt-15px text-12px text-[var(--el-text-color-secondary)]">
-      按模型筛选时，仅道具出图、镜头视频记录了模型
+      按模型筛选时，不含成片合成（合成不使用模型）
     </div>
   </ContentWrap>
 
@@ -169,7 +169,7 @@ import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import ModelSelect from '@/views/ai/model/model/components/ModelSelect.vue'
 import { AiDramaStatusEnum, isAiDramaRunning } from '@/views/ai/utils/constants'
 
-/** AI 短剧管理：生成任务 */
+/** AI 短剧制作管理：生成任务 */
 defineOptions({ name: 'AiDramaTaskList' })
 
 const STORYBOARD_TASK_TYPE = 4 // 镜头视频：唯一支持同步的任务类型
@@ -254,7 +254,5 @@ const handleAction = async (action: keyof typeof ACTIONS, row: DramaTaskVO) => {
 /** 初始化 **/
 onMounted(() => {
   getList()
-  // DONE @AI：modelselect？（模型筛选改用 ModelSelect；它只支持单一 type，任务涉及绘画、视频两类，不传 type 加载全部模型，并通过 loaded 回填模型名）
 })
-// DONE @AI：一般这种叫 list ，还是 manager？（按 yudao 列表组件命名改为 TaskList.vue，ProjectManager 同步改为 ProjectList.vue）
 </script>

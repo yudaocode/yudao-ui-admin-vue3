@@ -212,7 +212,7 @@ export const isAiDramaRunning = (status?: number) =>
   status === AiDramaStatusEnum.SAVING
 
 /**
- * AI 短剧项目步骤的枚举
+ * AI 短剧工作台步骤的枚举：只在前端使用，不保存到项目
  */
 export const AiDramaStepEnum = {
   IDEA: 1, // 故事想法
@@ -222,12 +222,40 @@ export const AiDramaStepEnum = {
 }
 
 /**
+ * AI 短剧项目状态的枚举
+ */
+export const AiDramaProjectStatusEnum = {
+  DRAFT: 10, // 草稿
+  SCRIPT_CHANGED: 20, // 剧本已修改：需要重新分析资产、拆分分镜
+  STORYBOARD_READY: 30 // 分镜已就绪
+}
+
+/**
+ * AI 短剧画风的枚举
+ */
+export const AiDramaStyleEnum = {
+  SCRIPT_TONE: 1 // 随剧本基调
+}
+
+/**
  * AI 短剧音频类型的枚举
  */
 export const AiDramaAudioTypeEnum = {
   SAMPLE: 1, // 角色样音
-  SAMPLE_SELECTED: 2, // 选用的样音
-  NARRATION: 3 // 旁白
+  NARRATION: 2, // 旁白
+  DIALOGUE: 3, // 对白
+  BGM: 4, // 配乐
+  REFERENCE: 5 // 参考音频
+}
+
+/**
+ * AI 短剧视觉资产类型的枚举
+ */
+export const AiDramaVisualAssetKindEnum = {
+  PROP: 1, // 道具
+  SHOT_FRAME: 2, // 关键帧
+  ARCHIVED_PROP: 3, // 道具的历史版本
+  ARCHIVED_SHOT_FRAME: 4 // 关键帧的历史版本
 }
 
 /**

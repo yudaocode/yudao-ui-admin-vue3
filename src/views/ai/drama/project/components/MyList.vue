@@ -11,10 +11,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="当前步骤" prop="status">
+      <el-form-item label="项目状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="全部" clearable class="!w-160px">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_STEP)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_PROJECT_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -47,11 +47,15 @@
           <el-link type="primary" @click="emit('edit', row.id)">{{ row.name }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="画风" prop="style" min-width="140" />
-      <el-table-column label="画幅" prop="aspectRatio" align="center" width="80" />
-      <el-table-column label="当前步骤" align="center" width="110">
+      <el-table-column label="画风" align="center" width="120">
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.AI_DRAMA_STEP" :value="row.status" />
+          <dict-tag :type="DICT_TYPE.AI_DRAMA_STYLE" :value="row.style" />
+        </template>
+      </el-table-column>
+      <el-table-column label="画幅" prop="composeAspectRatio" align="center" width="80" />
+      <el-table-column label="项目状态" align="center" width="110">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.AI_DRAMA_PROJECT_STATUS" :value="row.status" />
         </template>
       </el-table-column>
       <!-- DONE @AI：折行了；（prettier 为 strict 空白模式，内容紧贴标签时只能在 > 处断行；内容改为单独一行，搜索、重置按钮同理；短剧 form、manager 的同类写法一并调整） -->

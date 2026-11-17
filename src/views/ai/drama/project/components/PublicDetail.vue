@@ -10,10 +10,16 @@
         ></video>
         <el-descriptions :column="2" border label-width="90px" class="mt-12px">
           <el-descriptions-item label="作者">{{ detail.userNickname || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="时长">{{ formatDramaDuration(detail.composeDuration) }}</el-descriptions-item>
-          <el-descriptions-item label="画风">{{ detail.style || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="时长">{{
+            formatDramaDuration(detail.composeDuration)
+          }}</el-descriptions-item>
+          <el-descriptions-item label="画风">
+            <dict-tag v-if="detail.style" :type="DICT_TYPE.AI_DRAMA_STYLE" :value="detail.style" />
+            <span v-else>-</span>
+          </el-descriptions-item>
           <el-descriptions-item label="画幅 / 镜头">
-            {{ detail.aspectRatio || '-' }} / {{ detail.storyboardCount ? `${detail.storyboardCount} 个` : '-' }}
+            {{ detail.aspectRatio || '-' }} /
+            {{ detail.storyboardCount ? `${detail.storyboardCount} 个` : '-' }}
           </el-descriptions-item>
           <el-descriptions-item label="剧情大纲" :span="2">
             <span class="whitespace-pre-wrap break-all">{{ detail.outline || '-' }}</span>
@@ -52,6 +58,7 @@
 
 <script setup lang="ts">
 import { DramaProjectApi, DramaPublicVO } from '@/api/ai/drama/project'
+import { DICT_TYPE } from '@/utils/dict'
 import { formatDramaDuration } from '@/views/ai/utils/drama'
 
 /** AI 短剧：公开项目详情 */

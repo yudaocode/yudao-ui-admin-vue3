@@ -1,4 +1,4 @@
-<!-- AI 短剧：项目表单，新建、查看、编辑共用；按 想法 → 剧本 → 资产 → 分镜与成片 分步；独立路由，刷新后按项目的当前步骤恢复 -->
+<!-- AI 短剧：项目表单，新建、查看、编辑共用；按 想法 → 剧本 → 资产 → 分镜与成片 分步；步骤只在前端，进入时按项目进度推断 -->
 <template>
   <ContentWrap>
     <div class="flex items-center justify-between gap-12px">
@@ -7,16 +7,30 @@
         <span class="truncate text-16px font-600">
           {{ isCreate ? '新建短剧' : detail?.project.name || '加载中' }}
         </span>
-        <el-tag v-if="detail" size="small" type="info">{{ detail.project.aspectRatio }}</el-tag>
+        <template v-if="detail">
+          <el-tag size="small" type="info">{{ detail.project.composeAspectRatio }}</el-tag>
+          <dict-tag :type="DICT_TYPE.AI_DRAMA_PROJECT_STATUS" :value="detail.project.status" />
+        </template>
         <span v-if="running" class="text-12px text-[var(--el-text-color-secondary)]">
           生成中，自动刷新
         </span>
       </div>
-      <el-button v-if="!isCreate" :loading="loading" @click="loadDetail">
-        <Icon icon="ep:refresh" class="mr-5px" /> 刷新
-      </el-button>
+      <div v-if="!isCreate" class="flex items-center gap-8px">
+        <el-button :type="canvasVisible ? 'primary' : 'default'" plain @click="handleCanvasToggle">
+          <Icon icon="ep:share" class="mr-5px" /> {{ canvasVisible ? '返回分步' : '画布' }}
+        </el-button>
+        <el-button :loading="loading" @click="loadDetail">
+          <Icon icon="ep:refresh" class="mr-5px" /> 刷新
+        </el-button>
+      </div>
     </div>
-    <el-steps :active="stepIndex" finish-status="success" simple class="mt-12px">
+    <el-steps
+      v-if="!canvasVisible"
+      :active="stepIndex"
+      finish-status="success"
+      simple
+      class="mt-12px"
+    >
       <el-step
         v-for="(item, index) in STEPS"
         :key="item.value"
@@ -30,6 +44,12 @@
   <div v-loading="loading && !detail">
     <!-- 新建：只有第 1 步，保存后进入该项目 -->
     <IdeaStep v-if="isCreate" @created="handleCreated" />
+    <DramaCanvas
+      v-else-if="detail && canvasVisible"
+      ref="canvasRef"
+      :detail="detail"
+      @refresh="loadDetail"
+    />
     <template v-else-if="detail">
       <IdeaStep
         v-if="step === AiDramaStepEnum.IDEA"
@@ -58,12 +78,16 @@
 import { parseId } from '@/utils/id'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DramaProjectApi, DramaProjectDetailVO } from '@/api/ai/drama/project'
+import { DICT_TYPE } from '@/utils/dict'
 import { AiDramaStepEnum } from '@/views/ai/utils/constants'
-import { hasDramaRunning } from '@/views/ai/utils/drama'
+import { getDramaStep, hasDramaRunning } from '@/views/ai/utils/drama'
 import IdeaStep from './IdeaStep.vue'
 import ScriptStep from './ScriptStep.vue'
 import AssetStep from './AssetStep.vue'
 import StoryboardStep from './StoryboardStep.vue'
+
+// 画布：点击「画布」时再加载
+const DramaCanvas = defineAsyncComponent(() => import('../canvas/index.vue'))
 
 /** AI 短剧：项目表单 */
 defineOptions({ name: 'AiDramaProject' })
@@ -88,13 +112,13 @@ const step = ref<number>(AiDramaStepEnum.IDEA)
 const stepIndex = computed(() => STEPS.findIndex((item) => item.value === step.value))
 const running = computed(() => hasDramaRunning(detail.value))
 
-/** 加载项目详情：首次加载时按项目的当前步骤恢复 */
+/** 加载项目详情：首次加载时按项目的进度推断步骤 */
 const loadDetail = async () => {
   loading.value = true
   try {
     const data = await DramaProjectApi.getProjectDetailMy(projectId!)
     if (!detail.value) {
-      step.value = data.project.status || AiDramaStepEnum.IDEA
+      step.value = getDramaStep(data)
     }
     detail.value = data
   } finally {
@@ -102,10 +126,9 @@ const loadDetail = async () => {
   }
 }
 
-/** 切换步骤：记录到项目，刷新、下次进入时恢复 */
+/** 切换步骤：只在前端切换，并刷新详情 */
 const goStep = async (value: number) => {
   step.value = value
-  await DramaProjectApi.updateProjectStatusMy(projectId!, value)
   await loadDetail()
 }
 
@@ -120,6 +143,23 @@ const handleStepChange = (index: number) => {
   goStep(STEPS[index].value)
 }
 
+/** 切换画布、分步：画布有未保存的修改时确认 */
+const canvasVisible = ref(false)
+const canvasRef = ref()
+const handleCanvasToggle = async () => {
+  if (canvasVisible.value && canvasRef.value?.dirty) {
+    try {
+      await message.confirm('画布有未保存的修改，确认离开？')
+    } catch {
+      return
+    }
+  }
+  canvasVisible.value = !canvasVisible.value
+  if (!canvasVisible.value) {
+    await loadDetail()
+  }
+}
+
 /** 返回项目列表 */
 const { delView } = useTagsViewStore() // 视图操作
 const { push, currentRoute } = useRouter() // 路由
@@ -128,17 +168,10 @@ const close = () => {
   push({ name: 'AiDrama' })
 }
 
-/** 新建完成：记录要进入的步骤，关闭新建页，进入该项目 */
-const handleCreated = async (id: number, value: number) => {
-  try {
-    if (value !== AiDramaStepEnum.IDEA) {
-      await DramaProjectApi.updateProjectStatusMy(id, value)
-    }
-  } finally {
-    // 记录步骤失败时，也进入已创建的项目，不留在新建页
-    delView(unref(currentRoute))
-    await push({ name: 'AiDramaProject', params: { id } })
-  }
+/** 新建完成：关闭新建页，进入该项目；进入后按项目进度推断步骤 */
+const handleCreated = async (id: number) => {
+  delView(unref(currentRoute))
+  await push({ name: 'AiDramaProject', params: { id } })
 }
 
 // 生成中时轮询；静默刷新，不显示加载中
@@ -173,5 +206,5 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopPolling()
 })
-// DONE @AI：按道理来说，应该是 project/index，project/form/index 这样的格式呀？（列表移到 drama/project/index.vue，工作台移到 drama/project/form/index.vue，四个步骤组件同目录，弹窗等组件在 drama/project/components；菜单组件路径同步改为 ai/drama/project/index.vue；路由地址 /ai/drama/project/:id、路由名不变）
+// DONE @AI：按道理来说，应该是 project/index，project/form/index 这样的格式呀？（列表移到 drama/project/index.vue，工作台移到 drama/project/form/index.vue，四个步骤组件及其弹窗、抽屉同目录（同 mall/product/spu/form），与短剧管理共用的 AssetImage 在 drama/components；菜单组件路径同步改为 ai/drama/project/index.vue；路由地址 /ai/drama/project/:id、路由名不变）
 </script>

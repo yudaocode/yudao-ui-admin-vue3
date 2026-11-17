@@ -8,22 +8,54 @@
       <el-form-item label="场景设定">
         <el-input v-model="formData.description" type="textarea" :rows="3" maxlength="2000" />
       </el-form-item>
-      <el-form-item label="出图提示词">
-        <el-input v-model="formData.prompt" type="textarea" :rows="3" placeholder="为空时使用场景设定" maxlength="2000" />
+      <el-form-item label="可站位置">
+        <el-select
+          v-model="formData.availableSlots"
+          multiple
+          filterable
+          allow-create
+          default-first-option
+          placeholder="例如：门口、窗边；输入后回车添加"
+          class="!w-full"
+        />
+      </el-form-item>
+      <el-form-item label="有群演">
+        <el-switch v-model="formData.crowd" />
+      </el-form-item>
+      <el-form-item v-if="formData.crowd" label="群演描述">
+        <el-input
+          v-model="formData.crowdDescription"
+          placeholder="人数、服饰、位置、姿态"
+          maxlength="500"
+        />
       </el-form-item>
       <el-form-item label="参考图">
-        <UploadImg v-model="formData.referenceImageUrl" height="96px" width="96px" :file-size="10" />
+        <UploadImg
+          v-model="formData.referenceImageUrl"
+          height="96px"
+          width="96px"
+          :file-size="10"
+        />
       </el-form-item>
-      <el-form-item v-if="currentLocation?.candidates?.length" label="选用候选">
+      <el-form-item v-if="currentLocation?.imageUrls?.length" label="选用候选">
         <div class="flex flex-wrap gap-8px">
           <div
-            v-for="(candidate, index) in currentLocation.candidates"
-            :key="index"
-            class="cursor-pointer rounded-6px p-2px"
-            :class="formData.selectedIndex === index ? 'outline outline-2 outline-[var(--el-color-primary)]' : ''"
-            @click="candidate.url && (formData.selectedIndex = index)"
+            v-for="(url, index) in currentLocation.imageUrls"
+            :key="url + index"
+            class="relative cursor-pointer rounded-6px p-2px"
+            :class="
+              formData.selectedIndex === index
+                ? 'outline outline-2 outline-[var(--el-color-primary)]'
+                : ''
+            "
+            @click="formData.selectedIndex = index"
           >
-            <AssetImage :url="candidate.url" :status="candidate.url ? undefined : currentLocation.status" size="80px" />
+            <AssetImage :url="url" size="80px" />
+            <Icon
+              icon="ep:circle-close-filled"
+              class="absolute right-4px top-4px text-[var(--el-color-danger)]"
+              @click.stop="handleDeleteCandidate(index)"
+            />
           </div>
         </div>
       </el-form-item>
@@ -37,7 +69,7 @@
 
 <script setup lang="ts">
 import { DramaAssetApi, DramaLocationVO } from '@/api/ai/drama/asset'
-import AssetImage from './AssetImage.vue'
+import AssetImage from '../../components/AssetImage.vue'
 
 /** AI 短剧：场景表单 */
 defineOptions({ name: 'AiDramaLocationForm' })
@@ -55,7 +87,9 @@ const formData = reactive({
   id: undefined as number | undefined,
   name: '',
   description: '',
-  prompt: '',
+  crowd: false,
+  crowdDescription: '',
+  availableSlots: [] as string[],
   referenceImageUrl: '',
   selectedIndex: undefined as number | undefined
 })
@@ -68,11 +102,24 @@ const open = (location?: DramaLocationVO) => {
   formData.id = location?.id
   formData.name = location?.name || ''
   formData.description = location?.description || ''
-  formData.prompt = location?.prompt || ''
+  formData.crowd = !!location?.crowd
+  formData.crowdDescription = location?.crowdDescription || ''
+  formData.availableSlots = location?.availableSlots || []
   formData.referenceImageUrl = location?.referenceImageUrl || ''
   formData.selectedIndex = location?.selectedIndex
 }
 defineExpose({ open })
+
+/** 删除一张候选图：删除前的候选图记为上一版，可撤销 */
+const handleDeleteCandidate = async (index: number) => {
+  try {
+    await message.delConfirm('删除这张候选图后，可通过「撤销」恢复，是否继续？')
+    await DramaAssetApi.deleteLocationCandidate(formData.id!, index)
+    formData.selectedIndex = undefined
+    message.success('删除成功')
+    emit('success')
+  } catch {}
+}
 
 const submitForm = async () => {
   await formRef.value.validate()

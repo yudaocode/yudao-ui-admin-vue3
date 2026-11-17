@@ -5,6 +5,7 @@ import type {
   DramaAudioVO,
   DramaCharacterVO,
   DramaLocationVO,
+  DramaMotionReferenceVO,
   DramaVisualAssetVO
 } from '@/api/ai/drama/asset'
 import type { DramaStoryboardVO } from '@/api/ai/drama/storyboard'
@@ -15,19 +16,24 @@ export interface DramaProjectVO {
   userId: number // 用户编号
   userNickname?: string // 用户昵称
   name: string // 项目名称
+  description?: string // 项目简介
   idea?: string // 故事想法
-  style?: string // 画风
-  aspectRatio: string // 画幅：项目的设置，用于生成镜头视频
+  style?: number // 画风，参见 AiDramaStyleEnum
+  aestheticSkillId?: number // 美学技能编号
+  directorSkillId?: number // 导演技能编号
+  storyboardSkillIds?: number[] // 分镜技能编号，按顺序生效
+  status: number // 项目状态，参见 AiDramaProjectStatusEnum
+  publicStatus: boolean // 是否公开
+  composeAspectRatio?: string // 画幅：生成镜头视频、成片使用
   composeTransitionType?: number // 转场类型，参见 AiDramaTransitionTypeEnum
   composeTransitionDurationSeconds?: number // 转场时长（秒）
-  status: number // 当前步骤，参见 AiDramaStepEnum
-  publicStatus: boolean // 是否公开
   composeStatus?: number // 成片状态，参见 AiDramaStatusEnum；为空表示未合成
+  composeProgress?: number // 合成进度（0-100）
   composeFileUrl?: string // 成片地址
   composeDuration?: number // 成片时长（秒）
-  composeAspectRatio?: string // 成片画幅：成片实际使用的
   composeStoryboardCount?: number // 成片镜头数：成片实际拼接的
   composeErrorMessage?: string // 合成失败原因
+  composeFinishTime?: Date // 成片完成时间
   storyboardCount?: number // 镜头数
   storyboardSuccessCount?: number // 视频已完成的镜头数
   createTime?: Date // 创建时间
@@ -38,16 +44,20 @@ export interface DramaProjectVO {
 export interface DramaProjectSaveReqVO {
   id?: number
   name: string
+  description?: string
   idea?: string
-  style?: string
-  aspectRatio?: string
+  style?: number
+  aestheticSkillId?: number
+  directorSkillId?: number
+  storyboardSkillIds?: number[]
+  composeAspectRatio?: string
 }
 
 // AI 短剧公开项目 VO
 export interface DramaPublicVO {
   id: number
   name: string
-  style?: string
+  style?: number // 画风，参见 AiDramaStyleEnum
   aspectRatio?: string // 画幅：成片实际使用的
   composeFileUrl: string
   composeDuration?: number
@@ -77,8 +87,9 @@ export interface DramaProjectDetailVO {
   script?: DramaScriptVO
   characters: DramaCharacterVO[]
   locations: DramaLocationVO[]
-  visualAssets: DramaVisualAssetVO[]
-  narrations: DramaAudioVO[]
+  visualAssets: DramaVisualAssetVO[] // 道具、关键帧，以及它们的历史版本
+  audios: DramaAudioVO[] // 不属于角色的音频：旁白、配乐、参考音频等
+  motionReferences: DramaMotionReferenceVO[] // 动作参考视频
   storyboards: DramaStoryboardVO[]
 }
 
@@ -90,9 +101,6 @@ export const DramaProjectApi = {
   },
   updateProjectMy: async (data: DramaProjectSaveReqVO) => {
     return await request.put({ url: `/ai/drama/project/update-my`, data })
-  },
-  updateProjectStatusMy: async (id: number, status: number) => {
-    return await request.put({ url: `/ai/drama/project/update-status-my`, data: { id, status } })
   },
   deleteProjectMy: async (id: number) => {
     return await request.delete({ url: `/ai/drama/project/delete-my?id=${id}` })

@@ -1,4 +1,4 @@
-<!-- AI 短剧管理：项目列表 -->
+<!-- AI 短剧制作管理：项目列表 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -21,15 +21,15 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="当前步骤" prop="status">
+      <el-form-item label="项目状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择当前步骤"
+          placeholder="请选择项目状态"
           clearable
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_STEP)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_PROJECT_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -100,11 +100,15 @@
       <el-table-column label="编号" align="center" prop="id" width="90" fixed="left" />
       <el-table-column label="项目名称" prop="name" min-width="160" />
       <el-table-column label="用户" align="center" prop="userNickname" min-width="120" />
-      <el-table-column label="画风" prop="style" min-width="120" />
-      <el-table-column label="画幅" align="center" prop="aspectRatio" width="80" />
-      <el-table-column label="当前步骤" align="center" prop="status" width="110">
+      <el-table-column label="画风" align="center" prop="style" width="120">
         <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.AI_DRAMA_STEP" :value="row.status" />
+          <dict-tag :type="DICT_TYPE.AI_DRAMA_STYLE" :value="row.style" />
+        </template>
+      </el-table-column>
+      <el-table-column label="画幅" align="center" prop="composeAspectRatio" width="80" />
+      <el-table-column label="项目状态" align="center" prop="status" width="110">
+        <template #default="{ row }">
+          <dict-tag :type="DICT_TYPE.AI_DRAMA_PROJECT_STATUS" :value="row.status" />
         </template>
       </el-table-column>
       <el-table-column label="镜头" align="center" width="90">
@@ -203,7 +207,7 @@ import { AiDramaStatusEnum, isAiDramaRunning } from '@/views/ai/utils/constants'
 import { DRAMA_ASPECT_RATIOS, formatDramaDuration } from '@/views/ai/utils/drama'
 import ProjectDetail from './ProjectDetail.vue'
 
-/** AI 短剧管理：项目 */
+/** AI 短剧制作管理：项目 */
 defineOptions({ name: 'AiDramaProjectList' })
 
 const message = useMessage() // 消息弹窗

@@ -1,5 +1,4 @@
 <!-- AI 短剧：项目列表、公开广场；新建、编辑项目跳转到独立路由的项目表单 -->
-<!-- DONE @AI：一般我的项目、公开广场；是一个组件里，还是会拆分小的 vue 组件；多个功能都看看噢；（参照 AI 视频 index + components/VideoList、短剧管理 manager + components/ProjectList、TaskList：页面只保留页签和新建按钮，列表拆为 components/MyList.vue、PublicList.vue，各自管理查询、分页） -->
 <template>
   <doc-alert title="AI 短剧制作" url="https://doc.iocoder.cn/ai/drama/" />
 
