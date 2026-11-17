@@ -108,6 +108,8 @@ export interface SimpleFlowNode {
   timeoutHandler?: TimeoutHandler
   // 审批任务拒绝处理
   rejectHandler?: RejectHandler
+  // 退回后的审批方式
+  returnApproveMode?: ReturnApproveMode
   // 审批人为空的处理
   assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
@@ -303,6 +305,18 @@ export enum RejectHandlerType {
    * 驳回到指定节点
    */
   RETURN_USER_TASK = 2
+}
+// 退回后的审批推进方式
+export enum ReturnApproveMode {
+  /**
+   * 重新依次审批
+   */
+  RESTART = 1,
+
+  /**
+   * 从当前节点审批
+   */
+  RESUME_SOURCE = 2
 }
 // 用户任务超时处理类型枚举
 export enum TimeoutHandlerType {

@@ -42,11 +42,27 @@ export enum TaskStatusEnum {
   /**
    * 审批通过中
    */
-  APPROVING = 7
+  APPROVING = 7,
+  /**
+   * 已退回，等待处理人修改
+   *
+   * */
+  WAIT_REVISION = 8
 }
 
 export const getTaskTodoPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/todo-page', params })
+}
+
+export const getRevisionPage = async (params: { pageNo: number; pageSize: number }) => {
+  return await request.get({ url: '/bpm/task/revision-page', params })
+}
+
+export const resubmitTask = async (data: {
+  taskId: string
+  variables: Record<string, unknown>
+}) => {
+  return await request.put({ url: '/bpm/task/resubmit', data })
 }
 
 export const getTaskDonePage = async (params: any) => {

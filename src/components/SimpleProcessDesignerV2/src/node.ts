@@ -10,6 +10,7 @@ import {
   NodeType,
   ApproveMethodType,
   RejectHandlerType,
+  ReturnApproveMode,
   NODE_DEFAULT_NAME,
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
@@ -138,6 +139,7 @@ export type UserTaskFormType = {
   formDept?: string // 表单内部门字段
   approveRatio?: number
   rejectHandlerType?: RejectHandlerType
+  returnApproveMode?: ReturnApproveMode
   returnNodeId?: string
   timeoutHandlerEnable?: boolean
   timeoutHandlerType?: number
@@ -201,6 +203,7 @@ export function useNodeForm(nodeType: NodeType) {
       approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
       approveRatio: 100,
       rejectHandlerType: RejectHandlerType.FINISH_PROCESS,
+      returnApproveMode: ReturnApproveMode.RESTART,
       assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
       returnNodeId: '',
       timeoutHandlerEnable: false,

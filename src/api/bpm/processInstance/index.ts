@@ -34,6 +34,9 @@ export type ApprovalTaskInfo = {
   id: number
   ownerUser: User
   assigneeUser: User
+  revisionTargetNode?: string
+  revisionTargetNodeName?: string
+  revisionAssigneeUser?: User
   status: number
   reason: string
   attachments?: string[]
