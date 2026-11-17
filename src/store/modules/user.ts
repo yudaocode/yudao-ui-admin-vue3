@@ -3,8 +3,18 @@ import { defineStore } from 'pinia'
 import { getAccessToken, removeToken } from '@/utils/auth'
 import { CACHE_KEY, useCache, deleteUserCache } from '@/hooks/web/useCache'
 import { getInfo, loginOut } from '@/api/login'
+import { resetRouter } from '@/router'
+import { usePermissionStoreWithOut } from './permission'
 
 const { wsCache } = useCache()
+
+// 会话代号：每次清理会话（登出）时递增。异步加载开始时记下代号，返回时代号已变，说明期间已登出
+// （可能已有其他用户重新登录），结果作废，不再写入用户信息、注册路由或清理登录状态
+let sessionEpoch = 0
+
+export const getSessionEpoch = (): number => sessionEpoch
+
+export const isCurrentSession = (epoch: number): boolean => epoch === sessionEpoch
 
 interface UserVO {
   id: number
@@ -53,6 +63,7 @@ export const useUserStore = defineStore('admin-user', {
         this.resetState()
         return null
       }
+      const epoch = getSessionEpoch()
       let userInfo = wsCache.get(CACHE_KEY.USER)
       if (!userInfo) {
         userInfo = await getInfo()
@@ -61,6 +72,10 @@ export const useUserStore = defineStore('admin-user', {
         try {
           userInfo = await getInfo()
         } catch (error) {}
+      }
+      // 加载期间已登出（可能已有其他用户登录）：丢弃旧结果，不写入状态与缓存
+      if (!isCurrentSession(epoch)) {
+        throw new Error('登录会话已结束，丢弃过期的用户信息')
       }
       this.permissions = new Set(userInfo.permissions || []) // 兜底为 [] https://t.zsxq.com/xCJew
       this.roles = userInfo.roles
@@ -88,10 +103,18 @@ export const useUserStore = defineStore('admin-user', {
       try {
         await loginOut()
       } finally {
-        removeToken()
-        deleteUserCache() // 删除用户缓存
-        this.resetState()
+        this.clearSession()
       }
+    },
+    // 清理本地会话：token、用户缓存与状态、菜单状态，并重置为初始静态路由表；
+    // 递增会话代号，使进行中的加载（用户信息、菜单路由）结果作废
+    clearSession() {
+      sessionEpoch++
+      removeToken()
+      deleteUserCache() // 删除用户缓存
+      this.resetState()
+      usePermissionStoreWithOut().$reset()
+      resetRouter()
     },
     resetState() {
       this.permissions = new Set<string>()

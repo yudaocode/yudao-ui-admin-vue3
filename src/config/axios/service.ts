@@ -14,7 +14,7 @@ import {
 import errorCode from './errorCode'
 import { throwIfRequestCanceled } from './requestCancellation'
 
-import { resetRouter } from '@/router'
+import router, { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
 import { ApiEncrypt } from '@/utils/encrypt'
 
@@ -180,11 +180,11 @@ service.interceptors.response.use(
     } else if (code === 401) {
       // 如果未认证，并且未进行刷新令牌，说明可能是访问令牌过期了
       if (!isRefreshToken) {
-        isRefreshToken = true
-        // 1. 如果获取不到刷新令牌，则只能执行登出操作
+        // 1. 如果获取不到刷新令牌，则只能执行登出操作。不进入刷新状态，否则之后的 401 请求会一直排队等待
         if (!getRefreshToken()) {
           return handleAuthorized()
         }
+        isRefreshToken = true
         // 2. 进行刷新访问令牌
         try {
           const refreshTokenRes = await refreshToken()
@@ -284,13 +284,13 @@ const refreshToken = async () => {
     { headers: { 'tenant-id': getTenantId() } }
   )
 }
+// 登录类页面（账号登录、第三方登录回调）：未认证时不弹出重新登录提示
+const loginPagePaths = ['/login', '/social-login']
+
 const handleAuthorized = () => {
   const { t } = useI18n()
-  if (!isRelogin.show) {
-    // 如果已经到登录页面则不进行弹窗提示
-    if (window.location.href.includes('login')) {
-      return
-    }
+  // 按当前路由判断是否在登录页，不按地址包含 login 判断，避免 /system/login-log 等业务页被误判而不提示
+  if (!isRelogin.show && !loginPagePaths.includes(router.currentRoute.value.path)) {
     isRelogin.show = true
     ElMessageBox.confirm(t('sys.api.timeoutMessage'), t('common.confirmTitle'), {
       showCancelButton: false,

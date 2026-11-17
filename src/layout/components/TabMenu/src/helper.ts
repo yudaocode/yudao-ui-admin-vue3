@@ -1,13 +1,18 @@
-import { getAllParentPath } from '@/layout/components/Menu/src/helper'
 import type { RouteMeta } from 'vue-router'
 import { isUrl } from '@/utils/is'
 import { cloneDeep } from 'lodash-es'
+import { findPath } from '@/utils/tree'
 
 export type TabMapTypes = {
   [key: string]: string[]
 }
 
 export const tabPathMap = reactive<TabMapTypes>({})
+
+export const getAllParentPath = <T = Recordable>(treeData: T[], path: string) => {
+  const menuList = findPath(treeData, (n) => n.path === path) as AppRouteRecordRaw[]
+  return (menuList || []).map((item) => item.path)
+}
 
 export const initTabMap = (routes: AppRouteRecordRaw[]) => {
   for (const v of routes) {

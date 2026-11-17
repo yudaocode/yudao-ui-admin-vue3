@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
       args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:24-bookworm-slim}
+        NODE_IMAGE: ${NODE_IMAGE:-node:22-bookworm-slim}
         PNPM_REGISTRY: ${PNPM_REGISTRY:-https://registry.npmjs.org}
     ports:
       - '127.0.0.1:${DEV_PORT:-5173}:80'

@@ -44,8 +44,8 @@ const redirectsTo = (v: AppRouteRecordRaw, target: AppRouteRecordRaw) => {
   return false
 }
 
-// 相邻同名层级只显示一次（参考上游 e66532cf9）：去掉前一项，最后一项始终保留。
-// 与上游无条件去重不同：前一项有指向其它位置的跳转时保留，避免丢失祖先导航
+// 相邻同名层级只显示一次：去掉前一项，最后一项始终保留。
+// 不做无条件去重：前一项有指向其它位置的跳转时保留，避免丢失祖先导航
 const removeDuplicateParents = (list: AppRouteRecordRaw[]) =>
   list.filter((v, index) => {
     const next = list[index + 1]
@@ -76,7 +76,7 @@ export default defineComponent({
     }
 
     const renderBreadcrumb = () => {
-      // meta.breadcrumb 为 false 的路由不在面包屑中显示（参考上游 e66532cf9）
+      // meta.breadcrumb 为 false 的路由不在面包屑中显示
       const breadcrumbList = removeDuplicateParents(
         treeToList<AppRouteRecordRaw[]>(unref(levelList)).filter(
           (v) => v.meta?.breadcrumb !== false
@@ -84,13 +84,13 @@ export default defineComponent({
       )
       return breadcrumbList.map((v, index) => {
         // 仅非最后一项且配置了 redirect 的路由可点击；其余不设置 to，
-        // 避免显示为链接、点击时跳到丢失 query 的当前路径（参考上游 e66532cf9）
+        // 避免显示为链接、点击时跳到丢失 query 的当前路径
         const canNavigate =
           index < breadcrumbList.length - 1 && !!v.redirect && v.redirect !== 'noredirect'
         // 路由未配置 meta 或 title 时回退为空
         const meta = (v.meta ?? {}) as RouteMeta
         const title = getRouteTitle(meta)
-        // 渲染结构与上游一致：key 在 name 缺失时回退 path（参考上游 e66532cf9）；图标（右间距 5px）与标题直接作为 __inner（已是 flex 居中）的子节点
+        // 渲染结构：key 在 name 缺失时回退 path；图标（右间距 5px）与标题直接作为 __inner（已是 flex 居中）的子节点
         return (
           <ElBreadcrumbItem
             to={canNavigate ? { path: v.path } : undefined}
@@ -122,7 +122,7 @@ export default defineComponent({
       }
     )
 
-    // 面包屑不再做切换动画，路由变化时直接显示（参考上游 eceb2fb0a）
+    // 面包屑不再做切换动画，路由变化时直接显示
     return () => (
       <ElBreadcrumb separator="/" class={`${prefixCls} flex items-center h-full ml-[10px]`}>
         {renderBreadcrumb()}

@@ -69,7 +69,7 @@ export default defineComponent({
             onClick={refresh}
             onKeydown={onKeyActivate(refresh)}
           >
-            {/* 悬停时图标变为主题色（参考上游 0eefce32a、747c26fbc） */}
+            {/* 悬停时图标变为主题色 */}
             <Icon icon="ant-design:sync-outlined" hoverColor="var(--el-color-primary)" />
           </div>
 

@@ -41,7 +41,7 @@ export const useI18n = (
   const tFn: I18nGlobalTranslation = (key: string, ...arg: any[]) => {
     if (!key) return ''
     if (!key.includes('.') && !namespace) return key
-    // 只放宽 t 的重载签名检查，不再整行 @ts-ignore（参考上游 9eb87ad13）
+    // 只放宽 t 的重载签名检查，不再整行 @ts-ignore
     return (t as any)(getKey(namespace, key), ...(arg as I18nTranslationRestParameters))
   }
   return {

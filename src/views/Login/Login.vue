@@ -12,7 +12,10 @@
         <span class="brand-name">{{ underlineToHump(appStore.getTitle) }}</span>
       </div>
       <div class="login-tools">
-        <ThemeSwitch />
+        <ThemeSwitch
+          :model-value="appStore.getIsDark"
+          @update:model-value="appStore.setIsDark($event)"
+        />
         <span class="tool-divider" aria-hidden="true"></span>
         <LocaleDropdown color="var(--login-tool-color)" />
       </div>
@@ -93,8 +96,13 @@ import {
   SSOLoginVue,
   ForgetPasswordForm
 } from './components'
+import { LoginStateEnum, useLoginState } from './components/useLogin'
 
 defineOptions({ name: 'Login' })
+
+// 登录状态为模块级共享：每次进入登录页先回到账号登录，避免登出后仍停留在上次的注册、找回密码等表单。
+// SSO 授权页由 SSOLogin 子组件在其后切换为 SSO 状态
+useLoginState().setLoginState(LoginStateEnum.LOGIN)
 
 const { t } = useI18n()
 const appStore = useAppStore()

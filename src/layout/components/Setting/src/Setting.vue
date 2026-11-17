@@ -40,7 +40,7 @@ const headerTheme = ref(
   appStore.getCustomThemeParts.includes('header') ? appStore.getTheme.topHeaderBgColor || '' : ''
 )
 
-// 头部、菜单主题计算统一由 app store 提供（参考上游 59d4ed4dd），这里转调，便于其它页面复用
+// 头部、菜单主题计算统一由 app store 提供，这里转调，便于其它页面复用
 const setHeaderTheme = (color: string) => {
   appStore.setHeaderTheme(color)
 }
@@ -166,7 +166,10 @@ const clear = () => {
     <div class="text-center">
       <!-- 主题 -->
       <ElDivider>{{ t('setting.theme') }}</ElDivider>
-      <ThemeSwitch />
+      <ThemeSwitch
+        :model-value="appStore.getIsDark"
+        @update:model-value="appStore.setIsDark($event)"
+      />
 
       <!-- 布局 -->
       <ElDivider>{{ t('setting.layout') }}</ElDivider>

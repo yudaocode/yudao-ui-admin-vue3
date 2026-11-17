@@ -20,7 +20,7 @@ export const CACHE_KEY = {
   LAYOUT: 'layout',
   CURRENT_SIZE: 'currentSize',
   FIXED_MENU: 'fixedMenu',
-  // 侧栏折叠状态（仅桌面端写入，参考上游 c7f8db52d app store persist collapse）
+  // 侧栏折叠状态（仅桌面端写入）
   COLLAPSE: 'collapse',
   DICT_CACHE: 'dictCache',
   // 登录表单

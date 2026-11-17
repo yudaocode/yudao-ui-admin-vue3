@@ -68,7 +68,7 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
     currentRow: null
   })
 
-  // 列表请求代次：只有最新一次 getList 可写入列表、总数及 loading，旧的慢请求不覆盖新结果（参考上游 c7f8db52d useCrud）
+  // 列表请求代次：只有最新一次 getList 可写入列表、总数及 loading，旧的慢请求不覆盖新结果
   let listRequest = 0
   // 最近一次 getList 的 Promise：删除后由页码 watch 发起的刷新，供 delData 等待
   let listPromise: Promise<void> | undefined
@@ -146,7 +146,7 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
     if (disposed) return
     ElMessage.success(t('common.delSuccess'))
 
-    // 删除后当前页超出总页数时，收敛到删除后的最后一页（参考上游 c7f8db52d useCrud remove）
+    // 删除后当前页超出总页数时，收敛到删除后的最后一页
     const lastPage = Math.max(
       1,
       Math.ceil(Math.max(0, tableObject.total - uniqueIds.length) / tableObject.pageSize)
@@ -207,12 +207,12 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
       const table = await getTable()
       return (table?.selections || []) as T[]
     },
-    // 获取 ElTable 实例（参考上游 94800b012）；未注册时返回 undefined
+    // 获取 ElTable 实例；未注册时返回 undefined
     getElTableExpose: async () => {
       await getTable()
       return unref(elTableRef)
     },
-    // 按当前页码与查询参数重新获取数据（参考上游 882f162ff）
+    // 按当前页码与查询参数重新获取数据
     refresh: (): Promise<void> => {
       return methods.getList()
     },

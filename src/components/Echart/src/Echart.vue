@@ -18,15 +18,15 @@ const prefixCls = getPrefixCls('echart')
 
 const appStore = useAppStore()
 
-// props 声明写法与上游一致（withDefaults + 类型声明）；接口保持芋道 options / width / height / notMerge
+// props 使用 withDefaults + 类型声明；接口保持芋道 options / width / height / notMerge
 const props = withDefaults(
   defineProps<{
     options: EChartsOption
-    // 默认铺满容器（参考上游 f977fdb05d），flex 等父容器中不会因无内容而宽度为 0
+    // 默认铺满容器，flex 等父容器中不会因无内容而宽度为 0
     width?: number | string
-    // 默认高度 300（参考上游 e66532cf9），数字按 px 处理
+    // 默认高度 300，数字按 px 处理
     height?: number | string
-    // 默认整体替换配置（参考上游 notMerge=true），配置更新时图例选中、区域缩放等交互状态重置为配置初值；
+    // 默认整体替换配置（notMerge=true），配置更新时图例选中、区域缩放等交互状态重置为配置初值；
     // 显式传 false 时按 ECharts 普通合并，保留已有组件与交互状态
     notMerge?: boolean
   }>(),
@@ -41,11 +41,11 @@ const theme = computed(() => {
   return echartTheme
 })
 
-// ECharts 内置主题：暗色 'dark'、浅色 'default'（参考上游 e66532cf9 init(el, isDark ? 'dark' : undefined)）
+// ECharts 内置主题：暗色 'dark'、浅色 'default'
 const echartThemeName = computed(() => (unref(isDark) ? 'dark' : 'default'))
 
 // 浅拷贝后再设置 darkMode，不原地修改父组件传入的 options
-// 背景默认透明（参考上游 e66532cf9），调用方设置了背景时以调用方为准
+// 背景默认透明，调用方设置了背景时以调用方为准
 const options = computed(() => {
   const option = {
     ...props.options,
@@ -63,7 +63,7 @@ let echartRef: Nullable<echarts.ECharts> = null
 
 const contentEl = ref<Element>()
 
-// 观察图表容器自身尺寸（参考上游 e66532cf9）
+// 观察图表容器自身尺寸
 let resizeObserver: ResizeObserver | undefined
 
 const styles = computed(() => {
@@ -302,7 +302,7 @@ const restoreInteractionState = (
   })
 }
 
-// 明暗切换：保留实例，用 ECharts 原生 setTheme 切换内置主题（参考上游 e66532cf9 watch isDark）。
+// 明暗切换：保留实例，用 ECharts 原生 setTheme 切换内置主题。
 // setTheme 只按首次 setOption 的配置重建，先以累计配置不合并地重设（延迟渲染），使重建依据完整，
 // 再切换主题，只渲染一次；最后恢复交互状态
 const switchTheme = (chart: echarts.ECharts, themeName: string) => {

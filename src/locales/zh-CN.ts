@@ -12,6 +12,7 @@ export default {
     enterFullscreen: '全屏',
     exitFullscreen: '退出全屏',
     menuSearch: '菜单搜索',
+    menuSearchPlaceholder: '请输入菜单内容',
     switchSize: '切换尺寸',
     message: '站内信',
     openChat: '打开即时通讯'

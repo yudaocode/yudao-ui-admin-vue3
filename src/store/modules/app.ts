@@ -14,7 +14,7 @@ const { wsCache } = useCache()
 
 /**
  * 主题分为主色、菜单、头部三部分：用户显式设置过的部分（customThemeParts）按已保存颜色以内联变量渲染；
- * 未设置的部分不写内联，由 var.css 按明暗提供默认值（参考上游 e66532cf9 var.css，上游已无 JS 主题引擎）
+ * 未设置的部分不写内联，由 var.css 按明暗提供默认值
  */
 export type ThemePart = 'primary' | 'menu' | 'header'
 
@@ -67,7 +67,7 @@ const resolveCustomThemeParts = (): ThemePart[] => {
   return [...THEME_PARTS]
 }
 
-// 按菜单背景色推导菜单主题（原 setMenuTheme 规则，由 Setting 移入，参考上游 59d4ed4dd）
+// 按菜单背景色推导菜单主题（原 setMenuTheme 规则，由 Setting 移入）
 const getMenuThemeByColor = (color: string): Recordable => {
   const primaryColor = useCssVar('--el-color-primary', document.documentElement)
   const isDarkColor = colorIsDark(color)
@@ -150,9 +150,9 @@ export const useAppStore = defineStore('app', {
 
       breadcrumb: true, // 面包屑
       breadcrumbIcon: true, // 面包屑图标
-      // 折叠菜单：刷新后恢复桌面端上次的折叠状态（参考上游 c7f8db52d 持久化 collapse），只认布尔 true
+      // 折叠菜单：刷新后恢复桌面端上次的折叠状态，只认布尔 true
       collapse: wsCache.get(CACHE_KEY.COLLAPSE) === true,
-      uniqueOpened: false, // 是否只保持一个子菜单的展开（默认值对齐最新上游 config/app.ts）
+      uniqueOpened: false, // 是否只保持一个子菜单的展开
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
       search: true, // 搜索图标
@@ -396,7 +396,6 @@ export const useAppStore = defineStore('app', {
       }
       this.layout = normalizedLayout
       // 移动端强制的 sidebar-nav 只用于显示，不写入缓存，回到桌面端由 restoreLayout 恢复用户选择的布局
-      // （参考上游 6b10db306 Layout：移动端仅覆盖显示布局，不改用户设置）
       if (!this.mobile) {
         wsCache.set(CACHE_KEY.LAYOUT, this.layout)
       }
@@ -480,12 +479,12 @@ export const useAppStore = defineStore('app', {
         removeCssVar('--top-tool-dark-bg-color')
       }
     },
-    // 按头部背景色设置头部主题（显式选色，由 Setting 移入，参考上游 59d4ed4dd）；
+    // 按头部背景色设置头部主题（显式选色，由 Setting 移入）；
     // 顶部导航布局下菜单显示跟随头部色由 setCssVarTheme 渲染，不改写已保存的菜单色
     setHeaderTheme(color: string) {
       this.setTheme(getHeaderThemeByColor(color))
     },
-    // 按菜单背景色设置菜单主题（显式选色，由 Setting 移入，参考上游 59d4ed4dd）
+    // 按菜单背景色设置菜单主题（显式选色，由 Setting 移入）
     setMenuTheme(color: string) {
       this.setTheme(getMenuThemeByColor(color))
     },

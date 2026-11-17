@@ -116,7 +116,7 @@ export default defineComponent({
       return sourceRouters.map(getRootOnlyMenuRoute)
     })
 
-    // 二级菜单标题（参考上游 6b10db306 v-layout__secondary-title）：标题来源与顶栏一级菜单一致（含首个可见子项回退、后端原文）
+    // 二级菜单标题：标题来源与顶栏一级菜单一致（含首个可见子项回退、后端原文）
     const secondaryTitle = computed(() => {
       if (props.secondaryTitle !== undefined) {
         return props.secondaryTitle
@@ -559,7 +559,10 @@ export default defineComponent({
             {overflowRoutes.map((route) => (
               <li
                 key={getOverflowMenuIndex(route)}
-                class="el-menu-item"
+                class={[
+                  'el-menu-item',
+                  { 'is-active': getOverflowMenuIndex(route) === unref(activeMenu) }
+                ]}
                 role="menuitem"
                 onClick={() => menuSelect(getOverflowMenuIndex(route))}
               >
@@ -756,7 +759,7 @@ $prefix-cls: #{$namespace}-menu;
   }
 }
 
-// 二级菜单标题（参考上游 6b10db306 Layout.vue v-layout__secondary-title）：46px 标题行 + 主色圆点
+// 二级菜单标题：46px 标题行 + 主色圆点
 .#{$prefix-cls}__secondary-title {
   height: 46px;
   padding: 0 18px;
@@ -802,10 +805,10 @@ $prefix-cls: #{$namespace}-menu;
   display: block;
 }
 
-// 菜单 pill 外观（参考上游 e66532cf9 Menu.vue 样式段）：
+// 菜单 pill 外观：
 // 用伪元素在菜单项内侧绘制圆角底色，菜单项宽度、内边距与点击区域不受 pill 影响；
 // 颜色全部取自菜单 / 头部主题变量，已保存的自定义主题继续生效
-// 密度对齐上游 e66532cf9（可见 44px、间距 3px 10px）：行高 50px、pill 上下内缩 3px，点击区域仍为整行 50px
+// 密度（可见 44px、间距 3px 10px）：行高 50px、pill 上下内缩 3px，点击区域仍为整行 50px
 .#{$prefix-cls}.#{$prefix-cls}__vertical {
   :deep(.#{$elNamespace}-menu) {
     --el-menu-item-height: 50px;
@@ -845,9 +848,26 @@ $prefix-cls: #{$namespace}-menu;
       }
     }
 
-    // 内联子菜单区域保留浅色底
+    // 内联子菜单区域保留浅色底；子项 44px 行加 6px 间距，pill 不再上下内缩，避免与间距叠加
     .#{$elNamespace}-menu--inline {
+      --el-menu-item-height: 44px;
+      --el-menu-sub-item-height: 44px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 6px;
       background-color: var(--left-menu-bg-light-color) !important;
+
+      // 展开动画的 max-height 取不含 padding 的内容高度，过渡期间按 content-box 计算，避免末尾跳动
+      &.#{$elNamespace}-collapse-transition-enter-active {
+        box-sizing: content-box;
+      }
+
+      .#{$elNamespace}-sub-menu__title::before,
+      .#{$elNamespace}-menu-item::before {
+        inset: 0 10px;
+      }
     }
   }
 
@@ -879,10 +899,22 @@ $prefix-cls: #{$namespace}-menu;
     & > .#{$elNamespace}-sub-menu.is-active > .#{$elNamespace}-sub-menu__title::before {
       background-color: var(--left-menu-collapse-bg-active-color);
     }
+
+    // 图标 22px，需覆盖 Icon 的内联字号
+    .#{$namespace}-icon {
+      flex: none;
+      width: 22px;
+      height: 22px;
+      font-size: 22px !important;
+
+      .iconify {
+        font-size: 22px !important;
+      }
+    }
   }
 }
 
-// 水平菜单：pill 上下内缩至 38px（上游 e66532cf9），底部高亮线隐藏（边框宽度保留，不改变菜单项宽度与 More 溢出计算）
+// 水平菜单：pill 上下内缩至 38px，底部高亮线隐藏（边框宽度保留，不改变菜单项宽度与 More 溢出计算）
 .#{$prefix-cls}.#{$prefix-cls}__horizontal {
   :deep(.#{$elNamespace}-menu--horizontal) {
     & > .#{$elNamespace}-menu-item,
@@ -998,10 +1030,10 @@ $prefix-cls: #{$namespace}-menu-popper;
   }
 }
 
-// 弹层圆角、边框与阴影，菜单项圆角（参考上游 e66532cf9 popper 样式）；背景与文字颜色仍取主题变量
+// 弹层圆角、边框与阴影，菜单项圆角；背景与文字颜色仍取主题变量
 .#{$prefix-cls}--vertical,
 .#{$prefix-cls}--horizontal {
-  // 弹层菜单项高度 40px（上游 e66532cf9 popper），垂直 / 横向弹层统一
+  // 弹层菜单项高度 40px，垂直 / 横向弹层统一
   --el-menu-item-height: 40px;
   --el-menu-sub-item-height: 40px;
   --el-menu-horizontal-sub-item-height: 40px;
@@ -1033,6 +1065,18 @@ $prefix-cls: #{$namespace}-menu-popper;
         transparent
       ) !important;
     }
+  }
+}
+
+// 横向弹层选中项：600 字重 + 主色浅底；自定义 More 弹层在组件内，需高于组件内 header 选中规则
+.#{$prefix-cls}--horizontal .el-menu--popup .el-menu-item.is-active,
+.#{$namespace}-menu-overflow-fallback.#{$prefix-cls}--horizontal
+  .el-menu.el-menu--popup
+  .el-menu-item.is-active {
+  &,
+  &:hover {
+    font-weight: 600;
+    background-color: var(--el-color-primary-light-9) !important;
   }
 }
 </style>

@@ -10,7 +10,7 @@ import {
 } from 'vue'
 
 /**
- * 可选的通用 CRUD 状态 hook（参考上游 c7f8db52d packages/hooks/useCrud，类型名 CrudMutation 参考 14d2bec7b）
+ * 可选的通用 CRUD 状态 hook
  *
  * - 与现有 useTable 相互独立，不替换业务中直接使用的 el-table
  * - service 的分页参数为 pageIndex / pageSize，芋道接口的 pageNo 由 service 自行适配，例如：

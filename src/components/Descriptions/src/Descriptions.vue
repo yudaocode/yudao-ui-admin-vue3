@@ -20,7 +20,7 @@ const props = defineProps({
   title: { type: String, default: '' },
   message: { type: String, default: '' },
   collapse: { type: Boolean, default: true },
-  // 默认两列（与上游 49e415d27 的 column 默认值一致）；传 1 可恢复单列
+  // 默认两列；传 1 可恢复单列
   columns: { type: Number, default: 2 },
   schema: {
     type: Array as PropType<DescriptionsSchema[]>,
@@ -30,10 +30,9 @@ const props = defineProps({
     type: Object as PropType<any>,
     default: () => ({})
   },
-  // 普通字段值为 null / undefined 时显示的占位文字，默认 '-'（与上游 83b09f09f 一致）；传 '' 可恢复空白显示
+  // 普通字段值为 null / undefined 时显示的占位文字，默认 '-'；传 '' 可恢复空白显示
   emptyText: { type: String, default: '-' },
-  // 内容区内边距：上游 82245ee6d 直接删除了默认内边距，芋道保留默认 20px，改为按需传入实现同样的紧凑显示
-  // 本属性为芋道适配（非上游新增）：0 表示无内边距，数字按 px，字符串原样；未传保持默认 p-20px
+  // 内容区内边距：按需传入实现紧凑显示。0 表示无内边距，数字按 px，字符串原样；未传保持默认 p-20px
   contentPadding: {
     type: [Number, String] as PropType<number | string>,
     default: undefined

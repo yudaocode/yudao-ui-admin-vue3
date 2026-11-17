@@ -39,7 +39,10 @@
             <span class="text-20px font-bold">{{ underlineToHump(appStore.getTitle) }}</span>
           </div>
           <div class="flex items-center justify-end space-x-10px h-48px">
-            <ThemeSwitch />
+            <ThemeSwitch
+              :model-value="appStore.getIsDark"
+              @update:model-value="appStore.setIsDark($event)"
+            />
             <LocaleDropdown class="dark:text-white lt-xl:text-white" />
           </div>
         </div>
@@ -155,17 +158,23 @@ import { underlineToHump } from '@/utils'
 import { clearSocialCallback, getSocialCallback } from '@/utils/social'
 
 import { ElLoading } from 'element-plus'
+// 仅本页使用 animate.css 的进场动画，局部引入，不再全局加载
+import 'animate.css'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import { useAppStore } from '@/store/modules/app'
 import { useIcon } from '@/hooks/web/useIcon'
-import { usePermissionStore } from '@/store/modules/permission'
 
 import * as LoginApi from '@/api/login'
 import * as authUtil from '@/utils/auth'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
-import { LoginStateEnum, useFormValid, useLoginState } from './components/useLogin'
+import {
+  LoginStateEnum,
+  resolveLoginRedirect,
+  useFormValid,
+  useLoginState
+} from './components/useLogin'
 import LoginFormTitle from './components/LoginFormTitle.vue'
 import router from '@/router'
 
@@ -183,7 +192,6 @@ const formLogin = ref<any>()
 const { validForm } = useFormValid(formLogin)
 const { getLoginState } = useLoginState()
 const { push } = useRouter()
-const permissionStore = usePermissionStore()
 const loginLoading = ref(false)
 const verify = ref()
 const captchaType = ref('blockPuzzle') // blockPuzzle 滑块 clickWord 点击文字 pictureWord 文字验证码
@@ -273,8 +281,8 @@ const tryLogin = async () => {
     const res = await LoginApi.socialLogin(socialType, socialCode, socialState)
     authUtil.setToken(res)
 
-    // redirect 可能带 query、hash，所以使用字符串跳转
-    router.push(socialRedirect || '/')
+    // redirect 可能带 query、hash，所以使用字符串跳转；只接受站内绝对路径
+    router.push(resolveLoginRedirect(socialRedirect))
   } catch (err) {}
 }
 
@@ -326,7 +334,8 @@ const handleLogin = async (params) => {
     if (redirect.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      push(redirect || permissionStore.addRouters[0].path)
+      // 与账号登录一致：整串交给路由解析，原样保留 query、hash；只接受站内绝对路径
+      push(resolveLoginRedirect(redirect))
     }
   } finally {
     loginPending = false

@@ -53,7 +53,7 @@ const layouts = computed<LayoutOption[]>(() => [
 
 <template>
   <div :class="prefixCls" class="grid grid-cols-3 gap-14px">
-    <!-- 布局选项为原生 button（参考上游 LayoutSwitcher 选项），可键盘选择并带选中状态 -->
+    <!-- 布局选项为原生 button，可键盘选择并带选中状态 -->
     <button
       v-for="item in layouts"
       :key="item.type"

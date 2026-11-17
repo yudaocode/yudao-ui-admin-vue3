@@ -12,6 +12,7 @@ export default {
     enterFullscreen: 'Enter fullscreen',
     exitFullscreen: 'Exit fullscreen',
     menuSearch: 'Search menu',
+    menuSearchPlaceholder: 'Enter menu title or path',
     switchSize: 'Switch size',
     message: 'Messages',
     openChat: 'Open chat'

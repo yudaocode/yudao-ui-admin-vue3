@@ -13,7 +13,7 @@ interface ErrorMap {
 
 const { t } = useI18n()
 
-// 文案随语言切换更新：不刷新页面切换语言后，错误页提示与按钮也使用新语言（参考上游 c7f8db52d）
+// 文案随语言切换更新：不刷新页面切换语言后，错误页提示与按钮也使用新语言
 const errorMap = computed<Record<string, ErrorMap>>(() => ({
   '404': {
     url: pageError,
@@ -32,7 +32,7 @@ const errorMap = computed<Record<string, ErrorMap>>(() => ({
   }
 }))
 
-// 原生运行时 props 声明（上游已移除 propTypes），保留取值范围的运行时校验与默认 404
+// 原生运行时 props 声明，保留取值范围的运行时校验与默认 404
 const props = defineProps({
   type: {
     type: String,

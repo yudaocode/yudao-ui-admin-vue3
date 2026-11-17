@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { deleteUserCache } from '@/hooks/web/useCache'
 import { useLockStore } from '@/store/modules/lock'
 import { useNow } from '@/hooks/web/useNow'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -49,11 +48,9 @@ async function unLock() {
 
 // 返回登录
 async function goLogin() {
+  // 登出时统一清理 token、用户缓存与本会话的动态路由（接口失败时同样清理）
   await userStore.loginOut().catch(() => {})
-  // 登出后清理
-  deleteUserCache() // 清空用户缓存
   tagsViewStore.delAllViews()
-  // resetRouter() // 重置静态路由表
   lockStore.resetLockInfo()
   replace('/login')
 }

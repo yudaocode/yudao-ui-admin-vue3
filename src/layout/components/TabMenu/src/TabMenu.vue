@@ -281,7 +281,7 @@ export default defineComponent({
       }
     }
 
-    // 扩展菜单的二级标题：当前展开的一级入口标题（参考上游 6b10db306 secondary-title）
+    // 扩展菜单的二级标题：当前展开的一级入口标题
     const extraMenuTitle = computed(() => {
       const activeTab = unref(tabRouters).find(
         (route) => getFullTabPath(route) === unref(tabActive)
@@ -319,16 +319,16 @@ export default defineComponent({
         onMouseleave={mouseleave}
       >
         <ElScrollbar class="!h-[calc(100%-var(--tab-menu-collapse-height))]">
-          {/* 一级导航语义地标（参考上游 PrimaryNav）；顶部混合导航下此列为二级入口，不重复“主导航”名称 */}
+          {/* 一级导航语义地标；顶部混合导航下此列为二级入口，不重复“主导航”名称 */}
           <nav aria-label={unref(headerMixed) ? undefined : t('layout.mainNavigation')}>
             {() => {
               return unref(tabRouters).map((v) => {
                 const fullTabPath = getFullTabPath(v)
                 const item = getTabItem(v)
                 const active = isActive(fullTabPath)
-                // 原生 button（参考上游 PrimaryNav 一级导航），可键盘聚焦、Enter/Space 触发；
-                // 收起时只显示图标，以 aria-label 提供可访问名称，并以 title 悬停提示标题（参考上游 PrimaryNav title；
-                // 展开时标题已可见，不重复提示）；以完整路径作 key，重排时焦点不错位到其它路由
+                // 原生 button，可键盘聚焦、Enter/Space 触发；
+                // 收起时只显示图标，以 aria-label 提供可访问名称，并以 title 悬停提示标题
+                // （展开时标题已可见，不重复提示）；以完整路径作 key，重排时焦点不错位到其它路由
                 return (
                   <button
                     key={fullTabPath}
@@ -443,9 +443,9 @@ $prefix-cls: #{$namespace}-tab-menu;
     background-color: var(--left-menu-bg-active-color);
   }
 
-  // 一级入口 pill + 选中主色指示条（参考上游 PrimaryNav rail，6b10db306）：
+  // 一级入口 pill + 选中主色指示条：
   // 用伪元素绘制，按钮尺寸与点击区域不变；颜色全部取自菜单主题变量，已保存的自定义主题继续生效
-  // 展开宽度 72px 时 pill 宽 56px（上游 e66532cf9 rail item）
+  // 展开宽度 72px 时 pill 宽 56px
   &__item {
     isolation: isolate;
 

@@ -82,7 +82,7 @@ export default defineComponent({
     )
     const showBreadcrumb = computed(() => !isHorizontalMenuLayout(layout.value))
 
-    // 快捷切换布局、暗黑模式（参考上游 6b10db306 / e66532cf9 顶部工具栏）：与设置抽屉共用 6 种布局与 ThemeSwitch；
+    // 快捷切换布局、暗黑模式：与设置抽屉共用 6 种布局与 ThemeSwitch；
     // 随全局设置一起隐藏（布局切换后的头部配色重置由设置组件监听）；移动端固定垂直布局，仍走设置抽屉
     const showQuickActions = computed(() => !hideSetting && !mobile.value)
 
@@ -231,7 +231,7 @@ export default defineComponent({
         <div ref={rightRef} class="h-full flex items-center">
           <FmsAccountSetSwitch />
           {hasTenantVisitPermission.value ? <TenantVisit /> : undefined}
-          {/* 项目配置、IM 入口为原生 button，可键盘聚焦并带可访问名称（参考上游 LayoutSwitcher 触发器） */}
+          {/* 项目配置、IM 入口为原生 button，可键盘聚焦并带可访问名称 */}
           {hideSetting ? undefined : (
             <button
               type="button"
@@ -256,7 +256,11 @@ export default defineComponent({
                 color="var(--top-header-text-color)"
                 available={quickActionsFit.value}
               ></LayoutSwitcher>
-              <ThemeSwitch class={['header-action', `${prefixCls}__theme-switch`]}></ThemeSwitch>
+              <ThemeSwitch
+                modelValue={appStore.getIsDark}
+                {...{ 'onUpdate:modelValue': (value: boolean) => appStore.setIsDark(value) }}
+                class={['header-action', `${prefixCls}__theme-switch`]}
+              ></ThemeSwitch>
             </div>
           ) : undefined}
           {screenfull.value ? (
