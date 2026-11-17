@@ -2,6 +2,12 @@
   <div
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
   >
+    <span
+      v-if="runningTask?.status === TaskApi.TaskStatusEnum.WAIT_REVISION"
+      class="text-orange-500"
+    >
+      已退回，等待退回目标处理人修改。
+    </span>
     <!-- 【通过】按钮 -->
     <el-popover
       :visible="popOverVisible.approve"

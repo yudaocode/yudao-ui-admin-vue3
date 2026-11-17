@@ -121,6 +121,7 @@
         <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
+            v-if="!revisionTaskId"
             ref="operationButtonRef"
             :process-instance="processInstance"
             :process-definition="processDefinition"
@@ -130,6 +131,11 @@
             :writable-fields="writableFields"
             @success="refresh"
           />
+          <div v-else class="h-50px flex items-center">
+            <el-button type="primary" :loading="resubmitLoading" @click="handleResubmit">
+              重新提交
+            </el-button>
+          </div>
         </div>
       </el-scrollbar>
     </div>
@@ -147,6 +153,7 @@ import { useFormCreate } from '@/plugins/formCreate'
 import { registerComponent } from '@/utils/routerHelper'
 import type { Api as FormCreateApi } from '@form-create/element-ui'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
@@ -175,6 +182,12 @@ const props = defineProps<{
   activityId?: string //流程活动编号，用于抄送查看
 }>()
 const message = useMessage() // 消息弹窗
+const route = useRoute()
+const router = useRouter()
+const revisionTaskId = ref<string | undefined>(
+  route.query.revision === 'true' ? props.taskId : undefined
+)
+const resubmitLoading = ref(false)
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
@@ -314,6 +327,24 @@ const refresh = () => {
   getDetail()
   // 重新获取评论
   commentListRef.value?.getList()
+}
+
+const handleResubmit = async () => {
+  if (!revisionTaskId.value || !fApi.value) return
+  resubmitLoading.value = true
+  try {
+    await fApi.value.validate()
+    const values = fApi.value.formData()
+    const variables = Object.fromEntries(writableFields.map((field) => [field, values[field]]))
+    await TaskApi.resubmitTask({ taskId: revisionTaskId.value, variables })
+    message.success('重新提交成功，等待审批人继续审批')
+    revisionTaskId.value = undefined
+    // 清除 URL 中的 revision 标记，避免刷新页面后再次进入“待修改”模式
+    router.replace({ query: { ...route.query, revision: undefined } })
+    refresh()
+  } finally {
+    resubmitLoading.value = false
+  }
 }
 
 /** 处理打印 */

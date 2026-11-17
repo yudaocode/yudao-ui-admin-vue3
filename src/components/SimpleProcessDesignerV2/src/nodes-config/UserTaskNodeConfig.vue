@@ -287,6 +287,21 @@
             </div>
 
             <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
+              <el-divider content-position="left">退回后审批配置</el-divider>
+              <el-form-item>
+                <div>
+                  <el-radio-group v-model="configForm.returnApproveMode">
+                    <el-radio :value="ReturnApproveMode.RESTART">重新依次审批</el-radio>
+                    <el-radio :value="ReturnApproveMode.RESUME_SOURCE">从当前节点审批</el-radio>
+                  </el-radio-group>
+                  <div class="text-12px text-gray-500">
+                    从当前节点审批时，退回目标节点最近一次的审批人修改后，继续当前节点审批。
+                  </div>
+                </div>
+              </el-form-item>
+            </div>
+
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
               <el-divider content-position="left">审批人超时未处理时</el-divider>
               <el-form-item label="启用开关" prop="timeoutHandlerEnable">
                 <el-switch
@@ -486,6 +501,7 @@ import {
   ApproveMethodType,
   TimeUnitType,
   RejectHandlerType,
+  ReturnApproveMode,
   TIMEOUT_HANDLER_TYPES,
   TIME_UNIT_TYPES,
   REJECT_HANDLER_TYPES,
@@ -687,6 +703,8 @@ const saveConfig = async () => {
     type: configForm.value.rejectHandlerType!,
     returnNodeId: configForm.value.returnNodeId
   }
+  currentNode.value.returnApproveMode =
+    configForm.value.returnApproveMode ?? ReturnApproveMode.RESTART
   // 设置超时处理
   currentNode.value.timeoutHandler = {
     enable: configForm.value.timeoutHandlerEnable!,
@@ -762,6 +780,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   }
   // 2.3 设置审批拒绝处理
   configForm.value.rejectHandlerType = node.rejectHandler?.type
+  configForm.value.returnApproveMode = node.returnApproveMode ?? ReturnApproveMode.RESTART
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
   const matchNodeList = []
   emits('find:returnTaskNodes', matchNodeList)
@@ -926,7 +945,6 @@ function useTimeoutHandler() {
     cTimeoutMaxRemindCount
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
