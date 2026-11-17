@@ -13,7 +13,7 @@ export function hasPermi(app: App<Element>) {
         el.parentNode && el.parentNode.removeChild(el)
       }
     } else {
-      // 指令模块在 setupI18n 之前加载，翻译在抛错时再取，避免模块顶层绑定到原样返回 key 的函数（参考上游 c7f8db52d）
+      // 指令模块在 setupI18n 之前加载，翻译在抛错时再取，避免模块顶层绑定到原样返回 key 的函数
       const { t } = useI18n()
       throw new Error(t('permission.hasPermission'))
     }

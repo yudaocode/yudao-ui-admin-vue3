@@ -4,7 +4,7 @@ import { useLocaleStoreWithOut } from '@/store/modules/locale'
 const setI18nLanguage = (locale: LocaleType) => {
   const localeStore = useLocaleStoreWithOut()
 
-  // i18n 固定为组合式实例（legacy: false），直接设置 locale（参考上游 c7f8db52d）
+  // i18n 固定为组合式实例（legacy: false），直接设置 locale
   i18n.global.locale.value = locale
   localeStore.setCurrentLocale({
     lang: locale

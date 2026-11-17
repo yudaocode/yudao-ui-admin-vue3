@@ -1,6 +1,4 @@
 <template>
-  <!-- 登录页外壳与 ambient 装饰参考上游 c7f8db52d / e66532cf9 / 8a68d60bb；
-    六个认证组件（账号/手机/扫码/注册/SSO/找回密码）及其租户、验证码、社交登录逻辑原样保留 -->
   <main :class="[prefixCls, { 'is-dark': appStore.getIsDark }]">
     <div class="ambient ambient--cyan" aria-hidden="true"></div>
     <div class="ambient ambient--pink" aria-hidden="true"></div>
@@ -602,7 +600,7 @@ $prefix-cls: #{$namespace}-login;
   }
 }
 
-// 六类表单的控件外观（参考上游 c7f8db52d LoginForm / RegisterForm 样式）：只在外壳内调整输入框、按钮、复选框外观与 46px 高度，
+// 六类表单的控件外观：只在外壳内调整输入框、按钮、复选框外观与 46px 高度，
 // 表单组件、校验与认证逻辑不变；禁用、校验失败状态与带后缀按钮的输入组圆角沿用 Element Plus
 .form-card {
   :deep(.el-input__wrapper) {

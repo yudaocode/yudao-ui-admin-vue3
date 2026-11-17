@@ -120,12 +120,11 @@ service.interceptors.response.use(
     let { data } = response
     const config = response.config
     const { t } = useI18n()
-    // 本处理函数主动抛出的错误不会进入下方的错误拦截器：与其一样提示后再抛出（参考上游 c7f8db52d：
-    // 响应转换出错同样经 onError 提示），被取消的请求不提示
+    // 本处理函数主动抛出的错误不会进入下方的错误拦截器：与其一样提示后再抛出，被取消的请求不提示
     const withMessage = (error: Error) => {
       // 取消优先：等待（如解析错误 blob）期间请求已被取消时不提示，不当作普通错误。
       // request 封装登记的取消改抛取消错误（沿用 throwIfRequestCanceled）；
-      // 调用方自管的 signal / cancelToken 已取消时原样抛出、不提示（与改动前一致）
+      // 调用方自管的 signal / cancelToken 已取消时原样抛出、不提示
       throwIfRequestCanceled(config)
       if (config.signal?.aborted || config.cancelToken?.reason) {
         return error
@@ -157,7 +156,7 @@ service.interceptors.response.use(
     }
 
     // 未设置状态码则默认成功状态
-    // 二进制数据则直接返回，例如说 Excel 导出。按请求配置的 responseType 判断（参考上游 c7f8db52d），
+    // 二进制数据则直接返回，例如说 Excel 导出。按请求配置的 responseType 判断，
     // 不依赖 XHR 对象；配置未设置时回退读取 XHR 的 responseType
     const responseType = config.responseType || response.request?.responseType
     if (responseType === 'blob' || responseType === 'arraybuffer') {
@@ -257,7 +256,7 @@ service.interceptors.response.use(
   },
   (error: AxiosError) => {
     // 请求被取消（request.cancelRequest / cancelAllRequest，含刷新令牌后的回放；以及调用方自管 signal / cancelToken 的中止）时不提示，
-    // 原样拒绝，由调用方自行处理（参考上游 c7f8db52d：isCancel 的错误不弹提示）；网络错误、超时等仍按下方逻辑提示
+    // 原样拒绝，由调用方自行处理；网络错误、超时等仍按下方逻辑提示
     if (axios.isCancel(error)) {
       return Promise.reject(error)
     }

@@ -6,14 +6,14 @@ import { DEFAULT_LOCALE, isLocale, localeOptions, localeRegistry } from '@/confi
 
 const { wsCache } = useCache()
 
-// 默认语言，也是 i18n 缺失文案时的回退语言（参考上游 c7f8db52d）；定义已收敛到语言注册表，这里继续导出以兼容既有导入
+// 默认语言，也是 i18n 缺失文案时的回退语言；这里再导出以兼容既有导入
 export { DEFAULT_LOCALE }
 
-// Element Plus 语言对象取自语言注册表（参考上游 c7f8db52d）；不支持的语言返回 undefined
+// Element Plus 语言对象取自语言注册表；不支持的语言返回 undefined
 const getElementLocale = (lang: unknown) =>
   isLocale(lang) ? localeRegistry[lang].elementLocale : undefined
 
-// 缓存的语言不在支持列表内（如旧版本或同域其它应用写入的值）时回退到默认语言（参考上游 c7f8db52d）
+// 缓存的语言不在支持列表内（如旧版本或同域其它应用写入的值）时回退到默认语言
 const getCachedLocale = (): LocaleType => {
   const lang = wsCache.get(CACHE_KEY.LANG)
   return isLocale(lang) ? lang : DEFAULT_LOCALE

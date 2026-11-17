@@ -194,7 +194,7 @@ const socialList = [
   { icon: 'ant-design:alipay-circle-filled', type: 0 }
 ]
 
-// 登录进行中的同步锁：Enter 与点击、验证码 success 重复回调只触发一次登录（参考上游 97e7660e2）；
+// 登录进行中的同步锁：Enter 与点击、验证码 success 重复回调只触发一次登录；
 // 不复用 loginLoading，避免社交登录失败未复位 loginLoading 时阻塞账号登录
 let loginPending = false
 // 获取验证码

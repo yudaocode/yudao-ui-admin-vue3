@@ -3,7 +3,7 @@ import { createRequire } from 'module'
 import { dirname, extname, join, resolve } from 'path'
 import type { Plugin, ResolvedConfig } from 'vite'
 
-// 离线图标子集（参考上游 49a1f54c9 / 7e9c4a610 的在线、离线开关，实现方式不同）：
+// 离线图标子集：
 // 仅 VITE_USE_ONLINE_ICON=false 时，构建期扫描 src 中以字面量出现的 `prefix:name`（兼容 vi- 前缀）
 // 及 VITE_OFFLINE_ICONS 显式配置的名称，从 @iconify/json 中取出这些图标组成子集，由 virtual:offline-icons
 // 输出给 src/plugins/svgIcon 同步注册。不使用 Uno presetIcons，避免整集合打包与业务图标改名。
@@ -12,7 +12,7 @@ import type { Plugin, ResolvedConfig } from 'vite'
 const VIRTUAL_ID = 'virtual:offline-icons'
 const RESOLVED_VIRTUAL_ID = '\0' + VIRTUAL_ID
 
-// 上游图标名前缀，与 Icon.vue 的解析规则一致
+// 图标名前缀，与 Icon.vue 的解析规则一致
 const ICON_PREFIX = 'vi-'
 
 // 已由 src/plugins/svgIcon 全量注册的集合，不再重复打包（两处需保持一致）

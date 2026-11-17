@@ -1,5 +1,5 @@
 /**
- * 与 UI 无关的通用 Axios 请求工厂（移植自上游 packages/request，参考 c7f8db52d、eceb2fb0a）
+ * 与 UI 无关的通用 Axios 请求工厂
  *
  * 可选模块：只依赖 axios，不引入 Vue / store / router / Element Plus；未被导入时不进入构建产物。
  * 请直接从 '@/config/axios/createRequest' 导入，它不经 '@/config/axios' 再导出。
@@ -13,7 +13,7 @@
  * 4. 取消登记按实例独立：本实例的 cancelRequest / cancelAllRequest 与默认请求互不影响。
  *    调用方传入的 signal 会联动到本实例内部的 AbortController（仅限本实例，与默认请求的约定无关）。
  *
- * 本地修正（不再与上游逐行一致）：等待 beforeRequest 期间也可取消，取消后立即拒绝且不发送请求。
+ * 等待 beforeRequest 期间也可取消，取消后立即拒绝且不发送请求。
  * 等待期间按原始 config 的取消键登记、跟随原始 signal；发送前再按 beforeRequest 返回的 config 重新登记。
  * 配置 beforeRequest 时 getRequestKey 会对原始与返回的 config 各调用一次，应为纯函数。
  */
@@ -28,7 +28,7 @@ import axios, {
 type MaybePromise<Value> = Value | Promise<Value>
 
 // 等待 value 完成；期间 signal 中止则立即以 CanceledError 拒绝，不再等待 value，其后的结果或异常被忽略
-// （本地修正，与默认请求 requestCancellation 的“取消即拒绝”一致）
+// （与默认请求 requestCancellation 的“取消即拒绝”一致）
 const untilAborted = <Value>(value: MaybePromise<Value>, signal: AbortSignal) =>
   new Promise<Value>((resolve, reject) => {
     const onAbort = () => reject(new CanceledError())
@@ -124,7 +124,7 @@ export const createRequest = (options: CreateRequestOptions = {}): RequestClient
 
     let prepared: RequestConfig<Data> = config
     if (options.beforeRequest) {
-      // 本地修正（上游等待 beforeRequest 期间未登记，期间的取消会被漏掉，请求仍会发出）：
+      // 等待 beforeRequest 期间也登记，否则期间的取消会被漏掉、请求仍会发出：
       // 等待期间按原始 config 解析的键登记并跟随原始 signal，cancelRequest(该键) / cancelAllRequest / signal 中止
       // 会立即以 CanceledError 拒绝且不再发送；beforeRequest 只调用一次，取消后其结果或异常被忽略
       bind(resolveKey(config), config.signal as AbortSignal | undefined)
@@ -137,7 +137,7 @@ export const createRequest = (options: CreateRequestOptions = {}): RequestClient
       }
     }
 
-    // 发送阶段按 beforeRequest 返回的 config 重新解析取消键、跟随其 signal（与上游一致）
+    // 发送阶段按 beforeRequest 返回的 config 重新解析取消键、跟随其 signal
     try {
       bind(resolveKey(prepared), prepared.signal as AbortSignal | undefined)
     } catch (error) {

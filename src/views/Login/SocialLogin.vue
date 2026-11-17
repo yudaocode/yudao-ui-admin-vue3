@@ -208,7 +208,7 @@ const loginData = reactive({
   }
 })
 
-// 登录进行中的同步锁：Enter 与点击、验证码 success 重复回调只触发一次登录（参考上游 97e7660e2）；
+// 登录进行中的同步锁：Enter 与点击、验证码 success 重复回调只触发一次登录；
 // 不复用 loginLoading，避免其它流程未复位 loginLoading 时阻塞账号登录
 let loginPending = false
 // 获取验证码

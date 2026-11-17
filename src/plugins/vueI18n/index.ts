@@ -1,10 +1,9 @@
 import type { App } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { useLocaleStoreWithOut } from '@/store/modules/locale'
-// 语言包与默认语言取自语言注册表（参考上游 c7f8db52d）；语言包仍为静态引入，切换语言无需加载 chunk
+// 语言包与默认语言取自语言注册表；语言包仍为静态引入，切换语言无需加载 chunk
 import { DEFAULT_LOCALE, localeMessages } from '@/config/locale'
 
-// 组合式模式（legacy: false）只读取以下选项，与上游 createAppI18n 一致（参考上游 c7f8db52d）
 const createAppI18n = (locale: LocaleType) =>
   createI18n({
     legacy: false,
@@ -17,10 +16,10 @@ const createAppI18n = (locale: LocaleType) =>
     fallbackWarn: false
   })
 
-// 组合式 i18n 实例（类型与上游 c7f8db52d 一致），供 @/hooks/web/useI18n、useLocale 在组件外使用
+// 组合式 i18n 实例，供 @/hooks/web/useI18n、useLocale 在组件外使用
 export let i18n: ReturnType<typeof createAppI18n>
 
-// 语言包为静态引入，安装过程无异步步骤，与上游一样同步执行
+// 语言包为静态引入，安装过程无异步步骤，同步执行
 export const setupI18n = (app: App<Element>) => {
   const localeStore = useLocaleStoreWithOut()
   const lang = localeStore.getCurrentLocale.lang

@@ -83,7 +83,7 @@ export const useUserStore = defineStore('admin-user', {
       userInfo.user.nickname = nickname
       wsCache.set(CACHE_KEY.USER, userInfo)
     },
-    // 登出接口失败（如网络异常、服务不可用）时也清理本地登录态，错误仍抛给调用方（参考上游 c7f8db52d）
+    // 登出接口失败（如网络异常、服务不可用）时也清理本地登录态，错误仍抛给调用方
     async loginOut() {
       try {
         await loginOut()
