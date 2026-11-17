@@ -295,7 +295,7 @@
                     <el-radio :value="ReturnApproveMode.RESUME_SOURCE">从当前节点审批</el-radio>
                   </el-radio-group>
                   <div class="text-12px text-gray-500">
-                    从当前节点审批时，退回目标节点最近一次的审批人修改后，继续当前节点审批。
+                    从当前节点审批时，退回目标节点修改人修改后，继续当前节点审批。
                   </div>
                 </div>
               </el-form-item>
