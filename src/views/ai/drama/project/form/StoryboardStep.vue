@@ -22,7 +22,7 @@
         :type="AiModelTypeEnum.CHAT"
         placeholder="默认对话模型"
         clearable
-        class="!w-220px"
+        class="!w-240px"
       />
       <el-dropdown :disabled="!!generatingDetail" @command="handleMoreCommand">
         <el-button :loading="!!generatingDetail">

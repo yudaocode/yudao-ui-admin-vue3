@@ -6,7 +6,7 @@
         v-model="queryParams.keyword"
         placeholder="搜索名称、画风"
         clearable
-        class="!w-220px"
+        class="!w-200px"
         @keyup.enter="handleQuery"
         @clear="handleQuery"
       >

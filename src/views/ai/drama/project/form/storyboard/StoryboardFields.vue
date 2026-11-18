@@ -52,7 +52,7 @@
 
     <el-divider content-position="left">镜头内容</el-divider>
     <el-row :gutter="12">
-      <el-col :span="6">
+      <el-col :span="8">
         <el-form-item label="镜头序号">
           <el-input-number
             v-model="formData.sceneNo"
@@ -62,7 +62,7 @@
           />
         </el-form-item>
       </el-col>
-      <el-col :span="18">
+      <el-col :span="16">
         <el-form-item label="镜头标题">
           <el-input v-model="formData.title" maxlength="128" />
         </el-form-item>

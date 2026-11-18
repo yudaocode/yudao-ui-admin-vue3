@@ -7,12 +7,12 @@
           v-model="queryParams.name"
           placeholder="请输入项目名称"
           clearable
-          class="!w-200px"
+          class="!w-240px"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="项目状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="全部" clearable class="!w-160px">
+        <el-select v-model="queryParams.status" placeholder="全部" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_PROJECT_STATUS)"
             :key="dict.value"
@@ -26,7 +26,7 @@
           v-model="queryParams.composeStatus"
           placeholder="全部"
           clearable
-          class="!w-160px"
+          class="!w-240px"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.AI_DRAMA_STATUS)"
