@@ -2,14 +2,15 @@ import axios, { CanceledError } from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
 
 /**
- * request 封装的请求取消能力（参考上游 32381408b 的 cancelRequest / cancelAllRequest，按芋道 service 适配）
+ * request 封装的请求取消能力（cancelRequest / cancelAllRequest）
  *
  * 只登记通过 request 封装发起、且调用方没有自行传入 signal / cancelToken 的请求；
  * 调用方自管的取消方式保持原样，不登记、不受 cancelRequest / cancelAllRequest 影响。
- * 不做自动取消或去重：同一 url 并发的多个请求各自登记，按 url 取消时一并取消。
+ * 按取消键登记：调用方传入 requestKey 时为 requestKey，否则为 url。
+ * 不做自动取消或去重：同一取消键并发的多个请求各自登记，按该键取消时一并取消。
  */
 
-// 原始 url（调用方传入的 option.url，未拼接 baseURL / params）-> 进行中请求的控制器
+// 取消键（requestKey，或调用方传入的原始 option.url，未拼接 baseURL / params）-> 进行中请求的控制器
 const pendingRequests = new Map<string, Set<AbortController>>()
 // 本能力创建的 signal，用于识别"被本能力主动取消"的错误
 const managedSignals = new WeakSet<AbortSignal>()
@@ -26,11 +27,11 @@ export const hasCallerCancellation = (option: Recordable): boolean => {
  * 无论成功、失败或取消，结束后都会注销登记并移除监听。
  */
 export const runCancellableRequest = <T>(
-  url: unknown,
+  cancelKey: unknown,
   send: (signal: AbortSignal) => Promise<T>
 ): Promise<T> => {
-  // url 为空（未传、空字符串、非字符串）时登记在 '' 下：不能按 url 取消，仅 cancelAllRequest 生效
-  const key = typeof url === 'string' ? url : ''
+  // 取消键为空（未传、空字符串、非字符串）时登记在 '' 下：不能按键取消，仅 cancelAllRequest 生效
+  const key = typeof cancelKey === 'string' ? cancelKey : ''
   const controller = new AbortController()
   const { signal } = controller
   managedSignals.add(signal)
@@ -64,10 +65,10 @@ export const runCancellableRequest = <T>(
   })
 }
 
-/** 中止指定 url 下所有进行中的登记请求；空 url 忽略，已结束的请求不再登记，重复取消无副作用 */
-export const cancelRequest = (url: string | string[]) => {
-  const urls = Array.isArray(url) ? url : [url]
-  for (const key of urls) {
+/** 中止指定取消键（requestKey，未传时为 url）下所有进行中的登记请求；空键忽略，已结束的请求不再登记，重复取消无副作用 */
+export const cancelRequest = (cancelKey: string | string[]) => {
+  const keys = Array.isArray(cancelKey) ? cancelKey : [cancelKey]
+  for (const key of keys) {
     if (typeof key !== 'string' || key === '') continue
     const controllers = pendingRequests.get(key)
     if (!controllers) continue
@@ -75,7 +76,7 @@ export const cancelRequest = (url: string | string[]) => {
   }
 }
 
-/** 中止全部进行中的登记请求（含未传 url 的请求） */
+/** 中止全部进行中的登记请求（含取消键为空的请求） */
 export const cancelAllRequest = () => {
   for (const controllers of [...pendingRequests.values()]) {
     for (const controller of [...controllers]) controller.abort()

@@ -3,7 +3,6 @@ import { ElMessageBox } from 'element-plus'
 
 import avatarImg from '@/assets/imgs/avatar.gif'
 import { useDesign } from '@/hooks/web/useDesign'
-import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
 import LockDialog from './components/LockDialog.vue'
 import LockPage from './components/LockPage.vue'
@@ -16,8 +15,6 @@ const { t } = useI18n()
 const { push, replace } = useRouter()
 
 const userStore = useUserStore()
-
-const tagsViewStore = useTagsViewStore()
 
 const { getPrefixCls } = useDesign()
 
@@ -41,10 +38,12 @@ const loginOut = async () => {
       cancelButtonText: t('common.cancel'),
       type: 'warning'
     })
-    await userStore.loginOut()
-    tagsViewStore.delAllViews()
-    replace('/login?redirect=/index')
-  } catch {}
+  } catch {
+    return
+  }
+  // 登出接口失败时本地登录态（含标签页）已清理，同样回到登录页
+  await userStore.loginOut().catch(() => {})
+  replace('/login?redirect=/index')
 }
 const toProfile = async () => {
   push('/user/profile')
@@ -55,9 +54,9 @@ const toDocument = () => {
 </script>
 
 <template>
-  <ElDropdown class="custom-hover" :class="prefixCls" trigger="click">
+  <ElDropdown class="header-action" :class="prefixCls" trigger="click">
     <div class="flex items-center">
-      <ElAvatar :src="avatar" alt="" class="w-[calc(var(--logo-height)-25px)] rounded-[50%]" />
+      <ElAvatar :src="avatar" alt="" class="!w-35px rounded-[50%]" />
       <span class="pl-[5px] text-14px text-[var(--top-header-text-color)] <lg:hidden">
         {{ userName }}
       </span>

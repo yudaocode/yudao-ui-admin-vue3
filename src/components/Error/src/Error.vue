@@ -2,7 +2,6 @@
 import pageError from '@/assets/svgs/404.svg'
 import networkError from '@/assets/svgs/500.svg'
 import noPermission from '@/assets/svgs/403.svg'
-import { propTypes } from '@/utils/propTypes'
 
 defineOptions({ name: 'Error' })
 
@@ -14,9 +13,8 @@ interface ErrorMap {
 
 const { t } = useI18n()
 
-const errorMap: {
-  [key: string]: ErrorMap
-} = {
+// 文案随语言切换更新：不刷新页面切换语言后，错误页提示与按钮也使用新语言
+const errorMap = computed<Record<string, ErrorMap>>(() => ({
   '404': {
     url: pageError,
     message: t('error.pageError'),
@@ -32,10 +30,15 @@ const errorMap: {
     message: t('error.noPermission'),
     buttonText: t('error.returnToHome')
   }
-}
+}))
 
+// 原生运行时 props 声明，保留取值范围的运行时校验与默认 404
 const props = defineProps({
-  type: propTypes.string.validate((v: string) => ['404', '500', '403'].includes(v)).def('404')
+  type: {
+    type: String,
+    default: '404',
+    validator: (v: string) => ['404', '500', '403'].includes(v)
+  }
 })
 
 const emit = defineEmits(['errorClick'])

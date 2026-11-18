@@ -1,5 +1,6 @@
 # 可选开发容器（参考上游 7a0d401b5d）：docker compose -f docker-compose.dev.yaml up --build
 # 宿主只在 127.0.0.1 上暴露端口，默认 http://127.0.0.1:5173，可用 DEV_PORT 修改；NODE_IMAGE 可替换基础镜像来源
+# PNPM_REGISTRY 可替换依赖安装源，默认 npm 官方 registry
 services:
   yudao-ui-admin-dev:
     build:
@@ -7,6 +8,7 @@ services:
       dockerfile: Dockerfile.dev
       args:
         NODE_IMAGE: ${NODE_IMAGE:-node:22-bookworm-slim}
+        PNPM_REGISTRY: ${PNPM_REGISTRY:-https://registry.npmjs.org}
     ports:
       - '127.0.0.1:${DEV_PORT:-5173}:80'
     environment:

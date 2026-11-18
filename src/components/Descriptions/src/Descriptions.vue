@@ -3,9 +3,8 @@ import { FunctionalComponent, PropType, VNodeChild } from 'vue'
 import dayjs from 'dayjs'
 import { get } from 'lodash-es'
 import { useDesign } from '@/hooks/web/useDesign'
-import { propTypes } from '@/utils/propTypes'
 import { useAppStore } from '@/store/modules/app'
-import { DescriptionsSchema } from '@/types/descriptions'
+import type { DescriptionsSchema } from './types'
 
 defineOptions({ name: 'Descriptions' })
 
@@ -18,10 +17,11 @@ const attrs = useAttrs()
 const slots = useSlots()
 
 const props = defineProps({
-  title: propTypes.string.def(''),
-  message: propTypes.string.def(''),
-  collapse: propTypes.bool.def(true),
-  columns: propTypes.number.def(1),
+  title: { type: String, default: '' },
+  message: { type: String, default: '' },
+  collapse: { type: Boolean, default: true },
+  // 默认两列；传 1 可恢复单列
+  columns: { type: Number, default: 2 },
   schema: {
     type: Array as PropType<DescriptionsSchema[]>,
     default: () => []
@@ -30,10 +30,9 @@ const props = defineProps({
     type: Object as PropType<any>,
     default: () => ({})
   },
-  // 普通字段值为 null / undefined 时显示的占位文字（参考上游 83b09f09f）；默认空串，与原显示一致
-  emptyText: propTypes.string.def(''),
-  // 内容区内边距：上游 82245ee6d 直接删除了默认内边距，芋道保留默认 20px，改为按需传入实现同样的紧凑显示
-  // 本属性为芋道适配（非上游新增）：0 表示无内边距，数字按 px，字符串原样；未传保持默认 p-20px
+  // 普通字段值为 null / undefined 时显示的占位文字，默认 '-'；传 '' 可恢复空白显示
+  emptyText: { type: String, default: '-' },
+  // 内容区内边距：按需传入实现紧凑显示。0 表示无内边距，数字按 px，字符串原样；未传保持默认 p-20px
   contentPadding: {
     type: [Number, String] as PropType<number | string>,
     default: undefined
@@ -53,7 +52,9 @@ const getBindValue = computed(() => {
     'data',
     'class',
     'emptyText',
-    'contentPadding'
+    'contentPadding',
+    // 已通过 :column 传入，不再作为未声明属性落到 DOM 上；调用方显式传 column 仍可覆盖
+    'columns'
   ]
   const obj = { ...attrs, ...props }
   for (const key in obj) {
@@ -115,6 +116,15 @@ const toggleClick = () => {
     show.value = !unref(show)
   }
 }
+
+// 可折叠时标题支持键盘 Enter / 空格切换（空格阻止页面滚动）
+const onHeaderKeydown = (event: KeyboardEvent) => {
+  if (!props.collapse || event.target !== event.currentTarget) return
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    toggleClick()
+  }
+}
 </script>
 
 <template>
@@ -130,7 +140,11 @@ const toggleClick = () => {
         `${prefixCls}-header`,
         'h-50px flex justify-between items-center b-b-1 border-solid border-[var(--el-border-color)] px-10px cursor-pointer dark:border-[var(--el-border-color)]'
       ]"
+      :aria-expanded="collapse ? show : undefined"
+      :role="collapse ? 'button' : undefined"
+      :tabindex="collapse ? 0 : undefined"
       @click="toggleClick"
+      @keydown="onHeaderKeydown"
     >
       <div :class="[`${prefixCls}-header__title`, 'relative font-18px font-bold ml-10px']">
         <div class="flex items-center">

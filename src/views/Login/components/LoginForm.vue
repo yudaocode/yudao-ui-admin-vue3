@@ -31,6 +31,7 @@
           <el-input
             v-model="loginData.loginForm.username"
             :placeholder="t('login.usernamePlaceholder')"
+            autocomplete="username"
             :prefix-icon="iconAvatar"
           />
         </el-form-item>
@@ -40,6 +41,7 @@
           <el-input
             v-model="loginData.loginForm.password"
             :placeholder="t('login.passwordPlaceholder')"
+            autocomplete="current-password"
             :prefix-icon="iconLock"
             show-password
             type="password"
@@ -146,9 +148,8 @@ import { useIcon } from '@/hooks/web/useIcon'
 
 import * as authUtil from '@/utils/auth'
 import { buildSocialRedirectUri } from '@/utils/social'
-import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
-import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
+import { LoginStateEnum, resolveLoginRedirect, useFormValid, useLoginState } from './useLogin'
 
 defineOptions({ name: 'LoginForm' })
 
@@ -161,7 +162,6 @@ const formLogin = ref()
 const { validForm } = useFormValid(formLogin)
 const { setLoginState, getLoginState } = useLoginState()
 const { currentRoute, push, resolve } = useRouter()
-const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
@@ -194,7 +194,7 @@ const socialList = [
   { icon: 'ant-design:alipay-circle-filled', type: 0 }
 ]
 
-// 登录进行中的同步锁：Enter 与点击、验证码 success 重复回调只触发一次登录（参考上游 97e7660e2）；
+// 登录进行中的同步锁：Enter 与点击、验证码 success 重复回调只触发一次登录；
 // 不复用 loginLoading，避免社交登录失败未复位 loginLoading 时阻塞账号登录
 let loginPending = false
 // 获取验证码
@@ -284,7 +284,8 @@ const handleLogin = async (params: any) => {
     if (redirect.value.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      await push({ path: redirect.value || permissionStore.addRouters[0].path })
+      // 整串交给路由解析，原样保留 query、hash（{ path } 形式会丢弃 query 并重复编码 hash）；只接受站内绝对路径
+      await push(resolveLoginRedirect(redirect.value))
     }
   } finally {
     loginPending = false

@@ -113,6 +113,7 @@
 <script lang="ts" setup>
 import { getPropertyList, PropertyAndValues, SkuList } from '@/views/mall/product/spu/components'
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
 import { floatToFixed2, formatToFraction } from '@/utils'
@@ -146,7 +147,7 @@ const queryParams = ref({
   createTime: []
 }) // 查询参数
 const propertyList = ref<PropertyAndValues[]>([]) // 商品属性列表
-const spuListRef = ref<InstanceType<typeof ElTable>>()
+const spuListRef = ref<TableInstance>()
 const skuListRef = ref<InstanceType<typeof SkuList>>() // 商品属性选择 Ref
 const spuData = ref<ProductSpuApi.Spu>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
@@ -174,7 +175,7 @@ const selectSku = (val: ProductSpuApi.Sku[]) => {
       // 清空选择
       skuTable?.clearSelection()
       // 变更为最后一次选择的
-      skuTable?.toggleRowSelection(val.pop(), true)
+      skuTable?.toggleRowSelection(val.pop()!, true)
       return
     }
   } else {
@@ -197,14 +198,17 @@ const selectSpu = (val: ProductSpuApi.Spu[]) => {
     // 清空选择
     spuListRef.value?.clearSelection()
     // 变更为最后一次选择的
-    spuListRef.value?.toggleRowSelection(val.pop(), true)
+    spuListRef.value?.toggleRowSelection(val.pop()!, true)
     return
   }
   expandChange(val[0], val)
 }
 
 // 计算商品属性
-const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi.Spu[]) => {
+const expandChange = async (
+  row: ProductSpuApi.Spu,
+  expandedRows?: ProductSpuApi.Spu[] | boolean
+) => {
   // 判断需要展开的 spuId === 选择的 spuId。如果选择了 A 就展开 A 的 skuList。如果选择了 A 手动展开 B 则阻断
   // 目的防止误选 sku
   if (selectedSpuId.value !== 0) {
@@ -221,7 +225,7 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi
   spuData.value = {}
   propertyList.value = []
   isExpand.value = false
-  if (expandedRows?.length === 0) {
+  if (Array.isArray(expandedRows) ? expandedRows.length === 0 : expandedRows === false) {
     // 如果展开个数为 0
     expandRowKeys.value = []
     return

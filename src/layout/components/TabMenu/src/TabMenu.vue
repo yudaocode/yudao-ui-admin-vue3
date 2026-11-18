@@ -11,6 +11,7 @@ import { filterMenusPath, initTabMap, tabPathMap } from './helper'
 import { useDesign } from '@/hooks/web/useDesign'
 import { isUrl } from '@/utils/is'
 import { createRouteLocation } from '@/utils/routeParams'
+import { getRouteTitle } from '@/utils/routeTitle'
 import { getRootPath, isHeaderMixedNavLayout, isTwoColumnLayout } from '@/utils/layout'
 import { getRootMenuRoute, normalizeMenuTargetPath } from '@/layout/components/Menu/src/menuRoute'
 
@@ -87,12 +88,24 @@ export default defineComponent({
 
     const showTitle = ref(true)
 
+    // 展开后延时显示标题的定时器；每次切换先清除，避免快速展开又收起时旧定时器在收起态重新显示标题
+    let showTitleTimer: ReturnType<typeof setTimeout> | undefined
+
+    const clearShowTitleTimer = () => {
+      if (showTitleTimer !== undefined) {
+        clearTimeout(showTitleTimer)
+        showTitleTimer = undefined
+      }
+    }
+
     watch(
       () => collapse.value,
       (collapse: boolean, oldCollapse?: boolean) => {
+        clearShowTitleTimer()
         // 首次（immediate）直接同步，避免挂载时新增延时回调
         if (!collapse && oldCollapse !== undefined) {
-          setTimeout(() => {
+          showTitleTimer = setTimeout(() => {
+            showTitleTimer = undefined
             showTitle.value = !collapse
           }, 200)
         } else {
@@ -104,6 +117,8 @@ export default defineComponent({
       }
     )
 
+    onBeforeUnmount(clearShowTitleTimer)
+
     // 是否显示菜单
     const showMenu = ref(unref(fixedMenu) || unref(headerMixed) || unref(twoColumn))
 
@@ -113,6 +128,33 @@ export default defineComponent({
     const hasExtraMenu = computed(() => permissionStore.getMenuTabRouters.length > 0)
 
     const getFullTabPath = (route: AppRouteRecordRaw) => pathResolve(getTabParentPath(), route.path)
+
+    const isPathInTab = (currentPath: string, route: AppRouteRecordRaw) => {
+      const tabPath = getFullTabPath(route)
+      return currentPath === tabPath || currentPath.startsWith(`${tabPath}/`)
+    }
+
+    // 以 / 开头的子路由由 vue-router 按绝对路径注册，完整路径不以所属一级菜单为前缀，前缀匹配无法命中；
+    // 非 header-mixed-nav（一级为顶层菜单）时，按菜单树定位其所属一级菜单作为兜底。
+    // 仅在没有任何一级菜单前缀命中、树中命中且当前路径不在该一级菜单路径之下时生效，前缀能命中的原有场景不受影响
+    const absoluteDescendantRootTab = computed((): AppRouteRecordRaw | undefined => {
+      if (unref(headerMixed)) {
+        return undefined
+      }
+      const currentPath = unref(currentMenuPath)
+      if (unref(tabRouters).some((route) => isPathInTab(currentPath, route))) {
+        return undefined
+      }
+      const rootInfo = getRootMenuRoute(unref(routers), currentPath)
+      if (
+        !rootInfo ||
+        currentPath === rootInfo.fullPath ||
+        currentPath.startsWith(`${rootInfo.fullPath}/`)
+      ) {
+        return undefined
+      }
+      return unref(tabRouters).find((route) => route === rootInfo.route)
+    })
 
     const getVisibleChildren = (route: AppRouteRecordRaw): AppRouteRecordRaw[] =>
       (route.children || []).filter((child) => !child.meta?.hidden)
@@ -173,10 +215,9 @@ export default defineComponent({
       }
 
       const currentPath = unref(currentMenuPath)
-      const activeTab = unref(tabRouters).find((route) => {
-        const tabPath = getFullTabPath(route)
-        return currentPath === tabPath || currentPath.startsWith(`${tabPath}/`)
-      })
+      const activeTab =
+        unref(tabRouters).find((route) => isPathInTab(currentPath, route)) ||
+        unref(absoluteDescendantRootTab)
 
       if (!activeTab || !shouldShowExtraMenu(activeTab)) {
         tabActive.value = activeTab ? getFullTabPath(activeTab) : ''
@@ -240,13 +281,22 @@ export default defineComponent({
       }
     }
 
+    // 扩展菜单的二级标题：当前展开的一级入口标题
+    const extraMenuTitle = computed(() => {
+      const activeTab = unref(tabRouters).find(
+        (route) => getFullTabPath(route) === unref(tabActive)
+      )
+      return activeTab ? getRouteTitle(activeTab.meta) : ''
+    })
+
     // 设置高亮
     const isActive = (currentPath: string) => {
       const { path } = unref(currentRoute)
       if (isCurrentRouteInTab(currentPath) || tabPathMap[currentPath]?.includes(path)) {
         return true
       }
-      return false
+      const rootTab = unref(absoluteDescendantRootTab)
+      return !!rootTab && getFullTabPath(rootTab) === currentPath
     }
 
     const mouseleave = () => {
@@ -255,62 +305,80 @@ export default defineComponent({
     }
 
     return () => (
-      <div
+      <aside
         id={`${variables.namespace}-menu`}
         class={[
           prefixCls,
           'relative bg-[var(--left-menu-bg-color)] layout-border__right',
           {
             'w-[var(--tab-menu-max-width)]': !unref(collapse),
-            'w-[var(--tab-menu-min-width)]': unref(collapse)
+            'w-[var(--tab-menu-min-width)]': unref(collapse),
+            'is-collapsed': unref(collapse)
           }
         ]}
         onMouseleave={mouseleave}
       >
         <ElScrollbar class="!h-[calc(100%-var(--tab-menu-collapse-height))]">
-          <div>
+          {/* 一级导航语义地标；顶部混合导航下此列为二级入口，不重复“主导航”名称 */}
+          <nav aria-label={unref(headerMixed) ? undefined : t('layout.mainNavigation')}>
             {() => {
               return unref(tabRouters).map((v) => {
                 const fullTabPath = getFullTabPath(v)
                 const item = getTabItem(v)
+                const active = isActive(fullTabPath)
+                // 原生 button，可键盘聚焦、Enter/Space 触发；
+                // 收起时只显示图标，以 aria-label 提供可访问名称，并以 title 悬停提示标题
+                // （展开时标题已可见，不重复提示）；以完整路径作 key，重排时焦点不错位到其它路由
                 return (
-                  <div
+                  <button
+                    key={fullTabPath}
+                    type="button"
+                    aria-label={getRouteTitle(item.meta)}
+                    title={unref(showTitle) ? undefined : getRouteTitle(item.meta)}
+                    aria-current={active ? 'true' : undefined}
                     class={[
                       `${prefixCls}__item`,
-                      'text-center text-12px relative py-12px cursor-pointer',
+                      'block w-full text-center text-12px relative py-12px cursor-pointer',
                       {
-                        'is-active': isActive(fullTabPath)
+                        'is-active': active
                       }
                     ]}
                     onClick={() => {
                       tabClick(item)
                     }}
                   >
-                    <div>
+                    {/* button 内只放 phrasing content：block span 代替原 div / p（全局 var.css 已将 p 外边距置 0） */}
+                    <span class="block">
                       <Icon icon={item?.meta?.icon}></Icon>
-                    </div>
+                    </span>
                     {!unref(showTitle) ? undefined : (
-                      <p class="mt-5px break-words px-2px">{t(item.meta?.title)}</p>
+                      <span class={`${prefixCls}__title block mt-5px break-words px-2px`}>
+                        {getRouteTitle(item.meta)}
+                      </span>
                     )}
-                  </div>
+                  </button>
                 )
               })
             }}
-          </div>
+          </nav>
         </ElScrollbar>
-        <div
+        <button
+          type="button"
+          aria-expanded={!unref(collapse)}
+          aria-label={t(unref(collapse) ? 'layout.expandNavigation' : 'layout.collapseNavigation')}
           class={[
             `${prefixCls}--collapse`,
-            'text-center h-[var(--tab-menu-collapse-height)] leading-[var(--tab-menu-collapse-height)] cursor-pointer'
+            'block w-full text-center h-[var(--tab-menu-collapse-height)] leading-[var(--tab-menu-collapse-height)] cursor-pointer'
           ]}
           onClick={setCollapse}
         >
           <Icon icon={unref(collapse) ? 'ep:d-arrow-right' : 'ep:d-arrow-left'}></Icon>
-        </div>
+        </button>
         {unref(hasExtraMenu) ? (
           <Menu
             split={false}
             menus={permissionStore.getMenuTabRouters}
+            secondaryTitle={unref(extraMenuTitle)}
             mode="vertical"
             class={[
               '!absolute top-0 z-11',
@@ -325,7 +393,7 @@ export default defineComponent({
             style="transition: width var(--transition-time-02), left var(--transition-time-02);"
           ></Menu>
         ) : undefined}
-      </div>
+      </aside>
     )
   }
 })
@@ -337,8 +405,24 @@ $prefix-cls: #{$namespace}-tab-menu;
 .#{$prefix-cls} {
   transition: all var(--transition-time-02);
 
+  // 原生 button 默认样式重置：只重置原子类未设置的属性（不动 font-size、上下内边距、行高原子类）
+  &__item,
+  &--collapse {
+    padding-inline: 0;
+    margin: 0;
+    font-family: inherit;
+    border: 0;
+
+    &:focus-visible {
+      outline: 2px solid var(--el-color-primary);
+      outline-offset: -2px;
+    }
+  }
+
   &__item {
+    line-height: inherit;
     color: var(--left-menu-text-color);
+    background-color: transparent;
     transition: all var(--transition-time-02);
 
     &:hover {
@@ -348,6 +432,8 @@ $prefix-cls: #{$namespace}-tab-menu;
   }
 
   &--collapse {
+    padding-block: 0;
+    font-size: inherit;
     color: var(--left-menu-text-color);
     background-color: var(--left-menu-bg-light-color);
   }
@@ -355,6 +441,51 @@ $prefix-cls: #{$namespace}-tab-menu;
   .is-active {
     color: var(--left-menu-text-active-color);
     background-color: var(--left-menu-bg-active-color);
+  }
+
+  // 一级入口 pill + 选中主色指示条：
+  // 用伪元素绘制，按钮尺寸与点击区域不变；颜色全部取自菜单主题变量，已保存的自定义主题继续生效
+  // 展开宽度 72px 时 pill 宽 56px
+  &__item {
+    isolation: isolate;
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      border-radius: 10px;
+      content: '';
+      transition: background-color var(--transition-time-02);
+      inset: 4px 8px;
+    }
+
+    &:hover::before {
+      background-color: color-mix(in srgb, var(--left-menu-text-active-color) 10%, transparent);
+    }
+
+    &.is-active {
+      font-weight: 600;
+      background-color: transparent;
+
+      &::before {
+        background-color: var(--left-menu-bg-active-color);
+      }
+
+      &::after {
+        position: absolute;
+        top: 12px;
+        bottom: 12px;
+        left: 0;
+        width: 3px;
+        background-color: var(--el-color-primary);
+        border-radius: 0 3px 3px 0;
+        content: '';
+      }
+    }
+  }
+
+  // 收起（30px）时 pill 内缩减小，避免挤占图标
+  &.is-collapsed .#{$prefix-cls}__item::before {
+    inset: 4px 3px;
   }
 }
 </style>

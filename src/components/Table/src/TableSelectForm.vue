@@ -29,6 +29,7 @@
 
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 
 defineOptions({ name: 'TableSelectForm' })
 withDefaults(
@@ -51,7 +52,7 @@ const queryParams = reactive({
 const emits = defineEmits<{
   (e: 'update:modelValue', v: number[]): void
 }>()
-const multipleTableRef = ref<InstanceType<typeof ElTable>>()
+const multipleTableRef = ref<TableInstance>()
 const multipleSelection = ref<any[]>([])
 const handleSelectionChange = (val: any[]) => {
   multipleSelection.value = val

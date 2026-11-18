@@ -36,40 +36,40 @@ import { defineComponent } from 'vue'
     canTo: true               设置为true即使hidden为true，也依然可以进行路由跳转(默认 false)
   }
 **/
+interface RouteMetaCustom extends Record<string | number | symbol, unknown> {
+  hidden?: boolean
+  alwaysShow?: boolean
+  title?: string
+  titleSuffix?: string
+  icon?: string
+  noCache?: boolean
+  viewKey?: string
+  breadcrumb?: boolean
+  affix?: boolean
+  activeMenu?: string
+  noTagsView?: boolean
+  followAuth?: string
+  canTo?: boolean
+  hash?: string
+  iframeSrc?: string
+  link?: string
+  params?: Recordable
+  query?: Recordable
+}
+
 declare module 'vue-router' {
-  interface RouteMeta extends Record<string | number | symbol, unknown> {
-    hidden?: boolean
-    alwaysShow?: boolean
-    title?: string
-    titleSuffix?: string
-    icon?: string
-    noCache?: boolean
-    viewKey?: string
-    breadcrumb?: boolean
-    affix?: boolean
-    activeMenu?: string
-    noTagsView?: boolean
-    followAuth?: string
-    canTo?: boolean
-    hash?: string
-    iframeSrc?: string
-    link?: string
-    params?: Recordable
-    query?: Recordable
-  }
+  interface RouteMeta extends RouteMetaCustom {}
 }
 
 type Component<T = any> =
-  | ReturnType<typeof defineComponent>
-  | (() => Promise<typeof import('*.vue')>)
-  | (() => Promise<T>)
+  ReturnType<typeof defineComponent> | (() => Promise<typeof import('*.vue')>) | (() => Promise<T>)
 
 // RouteRecordRaw 为联合类型，Omit 后 component/children 仍为 vue-router 的类型，
 // 与下方自定义的 component（含 string）、children（自定义记录数组）不兼容，需一并排除
 declare global {
   interface AppRouteRecordRaw extends Omit<RouteRecordRaw, 'meta' | 'component' | 'children'> {
     name: string
-    meta: RouteMeta
+    meta: RouteMetaCustom
     component?: Component | string
     children?: AppRouteRecordRaw[]
     props?: Recordable
@@ -83,12 +83,12 @@ declare global {
   > {
     icon: any
     name: string
-    meta: RouteMeta
+    meta: RouteMetaCustom
     component: string
     componentName?: string
     id?: number | string
     path: string
-    redirect: string
+    redirect?: string
     children?: AppCustomRouteRecordRaw[]
     keepAlive?: boolean
     visible?: boolean

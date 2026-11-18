@@ -29,18 +29,15 @@ const handleClickOutside = () => {
 }
 
 const renderLayout = () => {
+  const { renderClassic, renderTopLeft, renderTop, renderCutMenu } = useRenderLayout()
   switch (getLayoutRenderMode(unref(layout))) {
     case 'classic':
-      const { renderClassic } = useRenderLayout()
       return renderClassic()
     case 'topLeft':
-      const { renderTopLeft } = useRenderLayout()
       return renderTopLeft()
     case 'top':
-      const { renderTop } = useRenderLayout()
       return renderTop()
     case 'cutMenu':
-      const { renderCutMenu } = useRenderLayout()
       return renderCutMenu()
     default:
       break
@@ -50,6 +47,8 @@ const renderLayout = () => {
 export default defineComponent({
   name: 'Layout',
   setup() {
+    const { t } = useI18n()
+
     return () => (
       <section
         class={[
@@ -59,11 +58,17 @@ export default defineComponent({
           'w-[100%] h-[100%] relative'
         ]}
       >
+        {/* 移动端遮罩用原生 button，可键盘聚焦并带可访问名称 */}
         {mobile.value && !collapse.value ? (
-          <div
-            class="absolute left-0 top-0 z-99 h-full w-full bg-[var(--el-color-black)] opacity-30"
+          <button
+            aria-label={t('layout.closeNavigation')}
+            class={[
+              `${prefixCls}__mask`,
+              'absolute left-0 top-0 z-99 h-full w-full bg-[var(--el-color-black)] opacity-30'
+            ]}
+            type="button"
             onClick={handleClickOutside}
-          ></div>
+          ></button>
         ) : undefined}
 
         {renderLayout()}
@@ -82,5 +87,39 @@ $prefix-cls: #{$namespace}-layout;
 
 .#{$prefix-cls} {
   background-color: var(--app-content-bg-color);
+
+  // 只重置原生 button 默认盒模型，层级仍由上面的 class 决定；
+  // 遮罩外观：半透明深色 + 轻度背景模糊（用背景色透明度代替 opacity，焦点框不被淡化）
+  &__mask {
+    padding: 0;
+    margin: 0;
+    background-color: rgb(15 23 42 / 45%);
+    border: 0;
+    opacity: 1;
+    appearance: none;
+    backdrop-filter: blur(2px);
+
+    // 遮罩铺满且 html/body overflow: hidden，原生焦点框改为内缩才不被裁掉
+    &:focus-visible {
+      outline-offset: -4px;
+    }
+  }
+
+  // 顶栏（header-nav / header-sidebar-nav / mixed-nav / sidebar-mixed-nav / header-mixed-nav）：
+  // 浮于下方菜单与内容之上，以壳层阴影区分；尺寸、背景色仍由原 class 与主题变量决定
+  &__topbar {
+    z-index: 20;
+    box-shadow: var(--layout-shadow);
+  }
+
+  // sidebar-nav 的顶部工具栏 + 标签栏容器（固定头部时浮于内容之上）
+  &__toolbar {
+    box-shadow: var(--layout-shadow);
+  }
+
+  // 移动端展开的侧栏抽屉阴影，宽度不变
+  &__sidebar--mobile-open {
+    box-shadow: 20px 0 50px rgb(15 23 42 / 25%);
+  }
 }
 </style>

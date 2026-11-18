@@ -67,7 +67,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
+import type { PropType } from 'vue'
 import type { UploadProps, UploadRawFile, UploadUserFile } from 'element-plus'
 import { isString } from '@/utils/is'
 import { getFileNameFromUrl } from '@/utils/file'
@@ -80,15 +80,15 @@ const message = useMessage() // 消息弹窗
 const emit = defineEmits(['update:modelValue', 'update:fileSize'])
 
 const props = defineProps({
-  modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
-  fileType: propTypes.array.def(['doc', 'xls', 'ppt', 'txt', 'pdf']), // 文件类型，空数组表示不限制格式
-  fileSize: propTypes.number.def(5), // 大小限制(MB)
-  limit: propTypes.number.def(5), // 数量限制
-  autoUpload: propTypes.bool.def(true), // 自动上传
-  drag: propTypes.bool.def(false), // 拖拽上传
-  isShowTip: propTypes.bool.def(true), // 是否显示提示
-  disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
-  directory: propTypes.string.def(undefined) // 上传目录 ==> 非必传（默认为 undefined）
+  modelValue: { type: [String, Array] as PropType<string | string[]>, required: true },
+  fileType: { type: Array, default: () => ['doc', 'xls', 'ppt', 'txt', 'pdf'] }, // 文件类型，空数组表示不限制格式
+  fileSize: { type: Number, default: 5 }, // 大小限制(MB)
+  limit: { type: Number, default: 5 }, // 数量限制
+  autoUpload: { type: Boolean, default: true }, // 自动上传
+  drag: { type: Boolean, default: false }, // 拖拽上传
+  isShowTip: { type: Boolean, default: true }, // 是否显示提示
+  disabled: { type: Boolean, default: false }, // 是否禁用上传组件 ==> 非必传（默认为 false）
+  directory: { type: String } // 上传目录 ==> 非必传（默认为 undefined）
 })
 
 // ========== 上传相关 ==========

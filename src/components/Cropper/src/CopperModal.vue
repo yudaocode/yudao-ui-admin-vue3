@@ -127,14 +127,13 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { dataURLtoBlob } from '@/utils/filt'
 import { useI18n } from 'vue-i18n'
 import type { CropendResult, Cropper } from './types'
-import { propTypes } from '@/utils/propTypes'
 import { CropperImage } from '@/components/Cropper'
 
 defineOptions({ name: 'CopperModal' })
 
 const props = defineProps({
-  srcValue: propTypes.string.def(''),
-  circled: propTypes.bool.def(true)
+  srcValue: { type: String, default: '' },
+  circled: { type: Boolean, default: true }
 })
 const emit = defineEmits(['uploadSuccess'])
 const { t } = useI18n()

@@ -12,6 +12,103 @@ import { store } from '../index'
 
 const { wsCache } = useCache()
 
+/**
+ * 主题分为主色、菜单、头部三部分：用户显式设置过的部分（customThemeParts）按已保存颜色以内联变量渲染；
+ * 未设置的部分不写内联，由 var.css 按明暗提供默认值
+ */
+export type ThemePart = 'primary' | 'menu' | 'header'
+
+const THEME_PARTS: ThemePart[] = ['primary', 'menu', 'header']
+
+const THEME_PART_KEYS: Record<ThemePart, string[]> = {
+  primary: ['elColorPrimary'],
+  menu: [
+    'leftMenuBorderColor',
+    'leftMenuBgColor',
+    'leftMenuBgLightColor',
+    'leftMenuBgActiveColor',
+    'leftMenuCollapseBgActiveColor',
+    'leftMenuTextColor',
+    'leftMenuTextActiveColor',
+    'logoTitleTextColor',
+    'logoBorderColor'
+  ],
+  header: ['topHeaderBgColor', 'topHeaderTextColor', 'topHeaderHoverColor', 'topToolBorderColor']
+}
+
+const getThemePart = (key: string): ThemePart | undefined =>
+  THEME_PARTS.find((part) => THEME_PART_KEYS[part].includes(key))
+
+const PRIMARY_LEVEL_VARS = [
+  '--el-color-primary-light-3',
+  '--el-color-primary-light-5',
+  '--el-color-primary-light-7',
+  '--el-color-primary-light-8',
+  '--el-color-primary-light-9',
+  '--el-color-primary-dark-2'
+]
+
+const removeCssVar = (prop: string) => {
+  document.documentElement.style.removeProperty(prop)
+}
+
+/**
+ * 已自定义的主题部分：无 THEME 缓存为全新默认（忽略残留标记）；
+ * 有 THEME 缓存时只认合法标记，标记缺失或异常一律视为全部自定义，不按颜色推断用户意图
+ */
+const resolveCustomThemeParts = (): ThemePart[] => {
+  if (!wsCache.get(CACHE_KEY.THEME)) {
+    return []
+  }
+  const parts = wsCache.get(CACHE_KEY.THEME_CUSTOM_PARTS)
+  if (Array.isArray(parts) && parts.every((part) => THEME_PARTS.includes(part))) {
+    return THEME_PARTS.filter((part) => parts.includes(part))
+  }
+  return [...THEME_PARTS]
+}
+
+// 按菜单背景色推导菜单主题（原 setMenuTheme 规则，由 Setting 移入）
+const getMenuThemeByColor = (color: string): Recordable => {
+  const primaryColor = useCssVar('--el-color-primary', document.documentElement)
+  const isDarkColor = colorIsDark(color)
+  return {
+    // 左侧菜单边框颜色
+    leftMenuBorderColor: isDarkColor ? 'inherit' : '#eee',
+    // 左侧菜单背景颜色
+    leftMenuBgColor: color,
+    // 左侧菜单浅色背景颜色
+    leftMenuBgLightColor: isDarkColor ? lighten(color!, 6) : color,
+    // 左侧菜单选中背景颜色
+    leftMenuBgActiveColor: isDarkColor
+      ? 'var(--el-color-primary)'
+      : hexToRGB(primaryColor.value || '#409eff', 0.1),
+    // 左侧菜单收起选中背景颜色
+    leftMenuCollapseBgActiveColor: isDarkColor
+      ? 'var(--el-color-primary)'
+      : hexToRGB(primaryColor.value || '#409eff', 0.1),
+    // 左侧菜单字体颜色
+    leftMenuTextColor: isDarkColor ? '#bfcbd9' : '#333',
+    // 左侧菜单选中字体颜色
+    leftMenuTextActiveColor: isDarkColor ? '#fff' : 'var(--el-color-primary)',
+    // logo字体颜色
+    // 浅色菜单取上游浅色 Logo 标题色，避免继承暗色模式正文浅色字后在白底上不可读
+    logoTitleTextColor: isDarkColor ? '#fff' : '#172033',
+    // logo边框颜色
+    logoBorderColor: isDarkColor ? color : '#eee'
+  }
+}
+
+// 按头部背景色推导头部主题（原 setHeaderTheme 规则）
+const getHeaderThemeByColor = (color: string): Recordable => {
+  const isDarkColor = colorIsDark(color)
+  return {
+    topHeaderBgColor: color,
+    topHeaderTextColor: isDarkColor ? '#fff' : 'inherit',
+    topHeaderHoverColor: isDarkColor ? lighten(color!, 6) : '#f6f6f6',
+    topToolBorderColor: isDarkColor ? color : '#eee'
+  }
+}
+
 interface AppState {
   breadcrumb: boolean
   breadcrumbIcon: boolean
@@ -33,20 +130,19 @@ interface AppState {
   pageLoading: boolean
   layout: LayoutType
   title: string
-  userInfo: string
   isDark: boolean
   currentSize: ElementPlusSize
   sizeMap: ElementPlusSize[]
   mobile: boolean
   footer: boolean
   theme: ThemeTypes
+  customThemeParts: ThemePart[]
   fixedMenu: boolean
 }
 
 export const useAppStore = defineStore('app', {
   state: (): AppState => {
     return {
-      userInfo: 'userInfo', // 登录信息存储字段-建议每个项目换一个字段，避免与其他项目冲突
       sizeMap: ['default', 'large', 'small'],
       mobile: false, // 是否是移动端
       title: import.meta.env.VITE_APP_TITLE, // 标题
@@ -54,8 +150,9 @@ export const useAppStore = defineStore('app', {
 
       breadcrumb: true, // 面包屑
       breadcrumbIcon: true, // 面包屑图标
-      collapse: false, // 折叠菜单
-      uniqueOpened: true, // 是否只保持一个子菜单的展开
+      // 折叠菜单：刷新后恢复桌面端上次的折叠状态，只认布尔 true
+      collapse: wsCache.get(CACHE_KEY.COLLAPSE) === true,
+      uniqueOpened: false, // 是否只保持一个子菜单的展开
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
       search: true, // 搜索图标
@@ -75,33 +172,37 @@ export const useAppStore = defineStore('app', {
       layout: normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT)), // layout布局
       isDark: wsCache.get(CACHE_KEY.IS_DARK) || false, // 是否是暗黑模式
       currentSize: wsCache.get(CACHE_KEY.CURRENT_SIZE) || 'default', // 组件尺寸
+      // 已显式自定义的主题部分（见 resolveCustomThemeParts），只有显式设置主题时才会增加
+      customThemeParts: resolveCustomThemeParts(),
+      // 已保存的主题缓存原样使用；仅无缓存时采用默认主题对象（仅作展示与拷贝，未自定义的部分不按它渲染）：
+      // 主色 #409eff + 浅色菜单（选中背景为主色 10%，Logo 标题 #172033）
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
         elColorPrimary: '#409eff',
         // 左侧菜单边框颜色
-        leftMenuBorderColor: 'inherit',
+        leftMenuBorderColor: '#eee',
         // 左侧菜单背景颜色
-        leftMenuBgColor: '#001529',
+        leftMenuBgColor: '#fff',
         // 左侧菜单浅色背景颜色
-        leftMenuBgLightColor: '#0f2438',
+        leftMenuBgLightColor: '#fff',
         // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: 'var(--el-color-primary)',
+        leftMenuBgActiveColor: 'RGBA(64,158,255,0.1)',
         // 左侧菜单收起选中背景颜色
-        leftMenuCollapseBgActiveColor: 'var(--el-color-primary)',
+        leftMenuCollapseBgActiveColor: 'RGBA(64,158,255,0.1)',
         // 左侧菜单字体颜色
-        leftMenuTextColor: '#bfcbd9',
+        leftMenuTextColor: '#333',
         // 左侧菜单选中字体颜色
-        leftMenuTextActiveColor: '#fff',
+        leftMenuTextActiveColor: 'var(--el-color-primary)',
         // logo字体颜色
-        logoTitleTextColor: '#fff',
+        logoTitleTextColor: '#172033',
         // logo边框颜色
-        logoBorderColor: 'inherit',
+        logoBorderColor: '#eee',
         // 头部背景颜色
         topHeaderBgColor: '#fff',
-        // 头部字体颜色
-        topHeaderTextColor: 'inherit',
+        // 头部字体颜色（与 var.css 浅色默认一致）
+        topHeaderTextColor: '#526077',
         // 头部悬停颜色
-        topHeaderHoverColor: '#f6f6f6',
+        topHeaderHoverColor: '#f4f5fb',
         // 头部边框颜色
         topToolBorderColor: '#eee'
       }
@@ -168,9 +269,6 @@ export const useAppStore = defineStore('app', {
     getTitle(): string {
       return this.title
     },
-    getUserInfo(): string {
-      return this.userInfo
-    },
     getIsDark(): boolean {
       return this.isDark
     },
@@ -186,23 +284,31 @@ export const useAppStore = defineStore('app', {
     getTheme(): ThemeTypes {
       return this.theme
     },
+    getCustomThemeParts(): ThemePart[] {
+      return this.customThemeParts
+    },
     getFooter(): boolean {
       return this.footer
     }
   },
   actions: {
     setPrimaryLight() {
-      if (this.theme.elColorPrimary) {
+      if (this.customThemeParts.includes('primary') && this.theme.elColorPrimary) {
         const elColorPrimary = this.theme.elColorPrimary
-        const color = this.isDark ? '#000000' : '#ffffff'
+        // 与 Element Plus 一致：light-* 明色混白、暗色混暗色背景 #141414；dark-2 明色混黑、暗色混白
+        const lightBase = this.isDark ? '#141414' : '#ffffff'
+        const darkBase = this.isDark ? '#ffffff' : '#000000'
         const lightList = [3, 5, 7, 8, 9]
         lightList.forEach((v) => {
-          setCssVar(`--el-color-primary-light-${v}`, mix(color, elColorPrimary, v / 10))
+          setCssVar(`--el-color-primary-light-${v}`, mix(lightBase, elColorPrimary, v / 10))
         })
-        setCssVar(`--el-color-primary-dark-2`, mix(color, elColorPrimary, 0.2))
-
-        this.setAllColorRgbVars()
+        setCssVar(`--el-color-primary-dark-2`, mix(darkBase, elColorPrimary, 0.2))
+      } else {
+        // 未自定义主色：主色及色阶由 var.css 按明暗提供
+        removeCssVar('--el-color-primary')
+        PRIMARY_LEVEL_VARS.forEach(removeCssVar)
       }
+      this.setAllColorRgbVars()
     },
 
     // 处理element自带的主题色和辅助色的-rgb切换主题变化，如：--el-color-primary-rgb
@@ -233,6 +339,10 @@ export const useAppStore = defineStore('app', {
     },
     setCollapse(collapse: boolean) {
       this.collapse = collapse
+      // 移动端的自动收起、抽屉开合不写入缓存，避免回到桌面端刷新后沿用移动端状态
+      if (!this.mobile) {
+        wsCache.set(CACHE_KEY.COLLAPSE, collapse)
+      }
     },
     setUniqueOpened(uniqueOpened: boolean) {
       this.uniqueOpened = uniqueOpened
@@ -287,7 +397,20 @@ export const useAppStore = defineStore('app', {
         return
       }
       this.layout = normalizedLayout
-      wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      // 移动端强制的 sidebar-nav 只用于显示，不写入缓存，回到桌面端由 restoreLayout 恢复用户选择的布局
+      if (!this.mobile) {
+        wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      }
+      // 顶部导航布局的菜单跟随头部色显示：只重新渲染，不改已保存的主题
+      this.setCssVarTheme()
+    },
+    // 从移动端回到桌面端时，恢复缓存中用户选择的布局
+    restoreLayout() {
+      const layout = normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT))
+      if (layout !== this.layout) {
+        this.layout = layout
+        this.setCssVarTheme()
+      }
     },
     setTitle(title: string) {
       this.title = title
@@ -311,65 +434,61 @@ export const useAppStore = defineStore('app', {
     setMobile(mobile: boolean) {
       this.mobile = mobile
     },
+    // 显式设置主题（设置抽屉选色或外部直接调用）：合并并持久化，传入键所属部分记为已自定义，随后渲染
     setTheme(theme: ThemeTypes) {
       this.theme = Object.assign(this.theme, theme)
+      Object.keys(theme).forEach((key) => {
+        const part = getThemePart(key)
+        if (part && !this.customThemeParts.includes(part)) {
+          this.customThemeParts.push(part)
+        }
+      })
       wsCache.set(CACHE_KEY.THEME, this.theme)
+      wsCache.set(CACHE_KEY.THEME_CUSTOM_PARTS, this.customThemeParts)
+      this.setCssVarTheme()
     },
+    // 按已保存主题渲染 CSS 变量；加载、切换布局、明暗切换等自动路径只走这里，不写缓存、不改主题对象。
+    // 已自定义部分写内联变量，未自定义部分移除内联由 var.css 提供；顶部导航布局下菜单显示跟随头部色
     setCssVarTheme() {
-      for (const key in this.theme) {
-        setCssVar(`--${humpToUnderline(key)}`, this.theme[key])
+      const isCustom = (part: ThemePart) => this.customThemeParts.includes(part)
+      // 先渲染主色，菜单推导选中色时读取的是当前生效主色
+      if (isCustom('primary') && this.theme.elColorPrimary) {
+        setCssVar('--el-color-primary', this.theme.elColorPrimary)
       }
       this.setPrimaryLight()
+      const headerColor = isCustom('header') ? this.theme.topHeaderBgColor : undefined
+      let menuTheme: Recordable | undefined
+      if (isHeaderNavLayout(this.layout)) {
+        menuTheme = headerColor ? getMenuThemeByColor(headerColor) : undefined
+      } else {
+        menuTheme = isCustom('menu') ? this.theme : undefined
+      }
+      for (const key in this.theme) {
+        const part = getThemePart(key)
+        const prop = `--${humpToUnderline(key)}`
+        if (part === 'menu') {
+          menuTheme ? setCssVar(prop, menuTheme[key]) : removeCssVar(prop)
+        } else if (!part || isCustom(part)) {
+          setCssVar(prop, this.theme[key])
+        } else {
+          removeCssVar(prop)
+        }
+      }
+      // 已自定义头部色时暗色工具栏保持原 --el-bg-color 底色；默认主题跟随头部色（var.css）
+      if (isCustom('header')) {
+        setCssVar('--top-tool-dark-bg-color', 'var(--el-bg-color)')
+      } else {
+        removeCssVar('--top-tool-dark-bg-color')
+      }
     },
-    // 按头部背景色设置头部主题；顶部导航类布局时菜单同步使用该颜色（由 Setting 移入，参考上游 59d4ed4dd）
+    // 按头部背景色设置头部主题（显式选色，由 Setting 移入）；
+    // 顶部导航布局下菜单显示跟随头部色由 setCssVarTheme 渲染，不改写已保存的菜单色
     setHeaderTheme(color: string) {
-      const isDarkColor = colorIsDark(color)
-      const textColor = isDarkColor ? '#fff' : 'inherit'
-      const textHoverColor = isDarkColor ? lighten(color!, 6) : '#f6f6f6'
-      const topToolBorderColor = isDarkColor ? color : '#eee'
-      setCssVar('--top-header-bg-color', color)
-      setCssVar('--top-header-text-color', textColor)
-      setCssVar('--top-header-hover-color', textHoverColor)
-      this.setTheme({
-        topHeaderBgColor: color,
-        topHeaderTextColor: textColor,
-        topHeaderHoverColor: textHoverColor,
-        topToolBorderColor
-      })
-      if (isHeaderNavLayout(this.getLayout)) {
-        this.setMenuTheme(color)
-      }
+      this.setTheme(getHeaderThemeByColor(color))
     },
-    // 按菜单背景色设置菜单主题（由 Setting 移入，参考上游 59d4ed4dd）
+    // 按菜单背景色设置菜单主题（显式选色，由 Setting 移入）
     setMenuTheme(color: string) {
-      const primaryColor = useCssVar('--el-color-primary', document.documentElement)
-      const isDarkColor = colorIsDark(color)
-      const theme: Recordable = {
-        // 左侧菜单边框颜色
-        leftMenuBorderColor: isDarkColor ? 'inherit' : '#eee',
-        // 左侧菜单背景颜色
-        leftMenuBgColor: color,
-        // 左侧菜单浅色背景颜色
-        leftMenuBgLightColor: isDarkColor ? lighten(color!, 6) : color,
-        // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: isDarkColor
-          ? 'var(--el-color-primary)'
-          : hexToRGB(primaryColor.value || '#409eff', 0.1),
-        // 左侧菜单收起选中背景颜色
-        leftMenuCollapseBgActiveColor: isDarkColor
-          ? 'var(--el-color-primary)'
-          : hexToRGB(primaryColor.value || '#409eff', 0.1),
-        // 左侧菜单字体颜色
-        leftMenuTextColor: isDarkColor ? '#bfcbd9' : '#333',
-        // 左侧菜单选中字体颜色
-        leftMenuTextActiveColor: isDarkColor ? '#fff' : 'var(--el-color-primary)',
-        // logo字体颜色
-        logoTitleTextColor: isDarkColor ? '#fff' : 'inherit',
-        // logo边框颜色
-        logoBorderColor: isDarkColor ? color : '#eee'
-      }
-      this.setTheme(theme)
-      this.setCssVarTheme()
+      this.setTheme(getMenuThemeByColor(color))
     },
     setFooter(footer: boolean) {
       this.footer = footer

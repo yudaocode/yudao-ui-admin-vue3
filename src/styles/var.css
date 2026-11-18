@@ -1,45 +1,56 @@
 :root {
   --login-bg-color: #293146;
 
-  --left-menu-max-width: 200px;
+  /* 尺寸：侧栏 224/72、一级导航栏 72、Logo 50、标签栏 38、外层内距 20 */
+  --left-menu-max-width: 224px;
 
-  --left-menu-min-width: 64px;
+  --left-menu-min-width: 72px;
 
-  --left-menu-bg-color: #001529;
+  --layout-rail-width: 72px;
 
-  --left-menu-bg-light-color: #0f2438;
+  /* 菜单 / Logo / 头部颜色：无 THEME 自定义时由此处按明暗提供（暗色值见下方 .dark），已保存的自定义颜色以内联变量覆盖 */
+  --left-menu-bg-color: #fff;
 
-  --left-menu-bg-active-color: var(--el-color-primary);
+  --left-menu-bg-light-color: #fff;
 
-  --left-menu-text-color: #bfcbd9;
+  --left-menu-bg-active-color: color-mix(in srgb, var(--el-color-primary) 10%, transparent);
 
-  --left-menu-text-active-color: #fff;
+  --left-menu-text-color: #333;
 
-  --left-menu-collapse-bg-active-color: var(--el-color-primary);
+  --left-menu-text-active-color: var(--el-color-primary);
+
+  --left-menu-collapse-bg-active-color: color-mix(
+    in srgb,
+    var(--el-color-primary) 10%,
+    transparent
+  );
   /* left menu end */
 
   /* logo start */
   --logo-height: 50px;
 
-  --logo-title-text-color: #fff;
+  --logo-title-text-color: #172033;
   /* logo end */
 
   /* header start */
-  --top-header-bg-color: '#fff';
+  --top-header-bg-color: #fff;
 
-  --top-header-text-color: 'inherit';
+  --top-header-text-color: #526077;
 
-  --top-header-hover-color: #f6f6f6;
+  --top-header-hover-color: #f4f5fb;
+
+  /* 暗色下工具栏底色：默认跟随头部色；已保存自定义头部色时由 app store 内联为 --el-bg-color（保持原暗色表现） */
+  --top-tool-dark-bg-color: var(--top-header-bg-color);
 
   --top-tool-height: var(--logo-height);
 
   --top-tool-p-x: 0;
 
-  --tags-view-height: 35px;
+  --tags-view-height: 38px;
   /* header start */
 
-  /* tab menu start */
-  --tab-menu-max-width: 80px;
+  /* tab menu start：展开宽度即上游一级导航栏宽度，收起 30px 为芋道保留 */
+  --tab-menu-max-width: var(--layout-rail-width);
 
   --tab-menu-min-width: 30px;
 
@@ -48,15 +59,108 @@
 
   --app-content-padding: 20px;
 
-  --app-content-bg-color: #f5f7f9;
+  --app-content-bg-color: #f6f7fb;
 
   --app-footer-height: 50px;
 
   --transition-time-02: 0.2s;
+
+  /* 壳层分隔线与浮层阴影 */
+  --layout-border-color: #e7eaf0;
+
+  --layout-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 8px 24px rgb(15 23 42 / 4%);
+}
+
+/* 系统开启“减少动态效果”时，布局侧栏、菜单面板、固定头部的过渡立即完成 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-time-02: 0s;
+  }
+}
+
+/* 移动端侧栏抽屉宽度，与 ConfigGlobal 的 768 断点一致 */
+@media (width < 768px) {
+  :root {
+    --left-menu-max-width: min(82vw, 224px);
+  }
 }
 
 .dark {
-  --app-content-bg-color: var(--el-bg-color);
+  --app-content-bg-color: #0b1120;
+
+  --layout-border-color: #273244;
+
+  --layout-shadow: 0 1px 2px rgb(0 0 0 / 18%), 0 10px 30px rgb(0 0 0 / 18%);
+
+  /* 无自定义主题时的暗色壳层 */
+  --left-menu-bg-color: #111827;
+
+  --left-menu-bg-light-color: #151e30;
+
+  --left-menu-bg-active-color: #252e47;
+
+  --left-menu-text-color: #94a3b8;
+
+  --left-menu-text-active-color: #c7d2fe;
+
+  --left-menu-collapse-bg-active-color: #252e47;
+
+  --logo-title-text-color: #f8fafc;
+
+  --top-header-bg-color: #111827;
+
+  --top-header-text-color: #cbd5e1;
+
+  --top-header-hover-color: #1c2638;
+}
+
+/*
+ * Element Plus 中性色（文字 / 边框 / 填充 / 背景）。
+ * 主题色色阶为未自定义主色时的默认值，已保存的自定义主色由 appStore 以内联变量覆盖。
+ * html:root 的优先级高于 Element Plus 的 :root；html:root.dark 高于其 html.dark，与引入顺序无关。
+ */
+html:root {
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a0cfff;
+  --el-color-primary-light-7: #c6e2ff;
+  --el-color-primary-light-8: #d9ecff;
+  --el-color-primary-light-9: #ecf5ff;
+  --el-color-primary-dark-2: #337ecc;
+  --el-bg-color: #fff;
+  --el-bg-color-page: #f6f7fb;
+  --el-bg-color-overlay: #fff;
+  --el-fill-color-blank: #fff;
+  --el-fill-color-light: #f5f6fa;
+  --el-border-color: #dfe3ea;
+  --el-border-color-light: #e7eaf0;
+  --el-border-color-lighter: #edf0f5;
+  --el-text-color-primary: #273142;
+  --el-text-color-regular: #526077;
+  --el-text-color-secondary: #7a879c;
+}
+
+html:root.dark {
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #3375b9;
+  --el-color-primary-light-5: #2a598a;
+  --el-color-primary-light-7: #213d5b;
+  --el-color-primary-light-8: #1d3043;
+  --el-color-primary-light-9: #18222b;
+  --el-color-primary-dark-2: #66b1ff;
+  --el-bg-color: #151e30;
+  --el-bg-color-page: #0b1120;
+  --el-bg-color-overlay: #1b2538;
+  --el-fill-color-blank: #151e30;
+  --el-fill-color-light: #1c2638;
+  --el-fill-color: #1a2436;
+  --el-fill-color-dark: #0f1726;
+  --el-border-color: #344055;
+  --el-border-color-light: #2d394c;
+  --el-border-color-lighter: #273244;
+  --el-text-color-primary: #f1f5f9;
+  --el-text-color-regular: #cbd5e1;
+  --el-text-color-secondary: #94a3b8;
 }
 
 html,

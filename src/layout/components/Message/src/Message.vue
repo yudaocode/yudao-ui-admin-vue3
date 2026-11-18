@@ -2,13 +2,10 @@
 import { formatDate } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
 import { useUserStoreWithOut } from '@/store/modules/user'
-import { propTypes } from '@/utils/propTypes'
 
 defineOptions({ name: 'Message' })
 
-defineProps({
-  color: propTypes.string.def('')
-})
+withDefaults(defineProps<{ color?: string }>(), { color: '' })
 
 const { t } = useI18n()
 const { push } = useRouter()

@@ -565,8 +565,14 @@ const getDetailTotalPrice = (detail: ShipmentOrderDetailVO) => {
 }
 
 /** 展开明细 */
-const handleExpandChange = async (row: ShipmentOrderVO, expandedRows: ShipmentOrderVO[]) => {
-  if (!row.id || !expandedRows.some((item) => item.id === row.id)) {
+const handleExpandChange = async (
+  row: ShipmentOrderVO,
+  expandedRows: ShipmentOrderVO[] | boolean
+) => {
+  const expanded = Array.isArray(expandedRows)
+    ? expandedRows.some((item) => item.id === row.id)
+    : expandedRows
+  if (!row.id || !expanded) {
     return
   }
   delete detailMap[row.id]

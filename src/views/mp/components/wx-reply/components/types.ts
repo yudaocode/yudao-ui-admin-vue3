@@ -51,4 +51,5 @@ const createEmptyReply = (old: Reply | Ref<Reply>): Reply => {
   }
 }
 
-export { Reply, NewsType, ReplyType, createEmptyReply }
+export type { Reply }
+export { NewsType, ReplyType, createEmptyReply }

@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import { useId } from 'vue'
-import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { useDesign } from '@/hooks/web/useDesign'
 import Dialog from './Dialog.vue'
 import { useResize } from './useResize'
 
 /**
- * 可拖拽边缘调整宽高的对话框（参考上游 e6affad67 的 ResizeDialog）
+ * 可拖拽边缘调整宽高的对话框
  *
  * 基于本地 Dialog，标题、全屏、底部按钮、loading 等属性与插槽原样透传；内容区固定开启滚动，
  * 拖拽调整的是 Dialog 的 width 与 maxHeight。不替换、不修改原 Dialog
@@ -15,16 +14,16 @@ import { useResize } from './useResize'
 defineOptions({ name: 'ResizeDialog', inheritAttrs: false })
 
 const props = defineProps({
-  modelValue: propTypes.bool.def(false),
-  // 初始宽度、内容区初始高度，与 Dialog 默认值一致
-  width: propTypes.oneOfType([String, Number]).def('40%'),
-  maxHeight: propTypes.oneOfType([String, Number]).def('400px'),
-  // 与上游属性名一致：设置时优先于 width / maxHeight（单位 px）
-  initWidth: propTypes.number,
-  initHeight: propTypes.number,
+  modelValue: { type: Boolean, default: false },
+  // 初始宽度 40%、内容区初始高度 400px：保留本组件原有兼容默认值（不随 Dialog 回落 50%）
+  width: { type: [String, Number], default: '40%' },
+  maxHeight: { type: [String, Number], default: '400px' },
+  // 初始宽高：设置时优先于 width / maxHeight（单位 px）
+  initWidth: { type: Number },
+  initHeight: { type: Number },
   // 拖拽时的最小宽度、最小内容高度（px）
-  minResizeWidth: propTypes.number.def(300),
-  minResizeHeight: propTypes.number.def(100)
+  minResizeWidth: { type: Number, default: 300 },
+  minResizeHeight: { type: Number, default: 100 }
 })
 
 const emit = defineEmits(['update:modelValue'])

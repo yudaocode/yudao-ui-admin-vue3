@@ -1,6 +1,6 @@
 import ConfigGlobal from './src/ConfigGlobal.vue'
 
-// 与上游一致的类型入口；类型定义仍在 @/types/configGlobal
-export type { ConfigGlobalTypes } from '@/types/configGlobal'
+// ConfigGlobalProps 与 ConfigGlobalTypes 相同，保留为兼容名称
+export type { ConfigGlobalTypes, ConfigGlobalTypes as ConfigGlobalProps } from './src/types'
 
 export { ConfigGlobal }

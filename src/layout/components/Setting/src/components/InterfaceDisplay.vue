@@ -77,7 +77,12 @@ const tagsView = ref(appStore.getTagsView)
 
 const tagsViewChange = (show: boolean) => {
   // 切换标签栏显示时，同步切换标签栏的高度
-  setCssVar('--tags-view-height', show ? '35px' : '0px')
+  // 显示时去掉内联值，回落 var.css 的标签栏高度（38px）
+  if (show) {
+    document.documentElement.style.removeProperty('--tags-view-height')
+  } else {
+    setCssVar('--tags-view-height', '0px')
+  }
   appStore.setTagsView(show)
 }
 

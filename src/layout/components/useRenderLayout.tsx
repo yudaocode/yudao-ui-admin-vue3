@@ -45,10 +45,13 @@ export const useRenderLayout = () => {
   const renderClassic = () => {
     return (
       <>
-        <div
+        <aside
           class={[
             'absolute top-0 left-0 h-full layout-border__right',
-            { '!fixed z-3000': mobile.value }
+            {
+              '!fixed z-3000': mobile.value,
+              [`${prefixCls}__sidebar--mobile-open`]: mobile.value && !collapse.value
+            }
           ]}
         >
           {logo.value ? (
@@ -56,7 +59,8 @@ export const useRenderLayout = () => {
               class={[
                 'bg-[var(--left-menu-bg-color)] relative',
                 {
-                  '!pl-0': mobile.value && collapse.value,
+                  // 移动端收起时侧栏宽度为 0：裁掉 Logo 链接左右内距撑出的区域，避免遮挡并截获工具栏折叠按钮的点击
+                  '!pl-0 overflow-hidden': mobile.value && collapse.value,
                   'w-[var(--left-menu-min-width)]': appStore.getCollapse,
                   'w-[var(--left-menu-max-width)]': !appStore.getCollapse
                 }
@@ -65,8 +69,8 @@ export const useRenderLayout = () => {
             ></Logo>
           ) : undefined}
           <Menu class={[{ '!h-[calc(100%-var(--logo-height))]': logo.value }]}></Menu>
-        </div>
-        <div
+        </aside>
+        <main
           class={[
             `${prefixCls}-content`,
             'absolute top-0 h-[100%]',
@@ -92,6 +96,7 @@ export const useRenderLayout = () => {
           >
             <div
               class={[
+                `${prefixCls}__toolbar`,
                 {
                   'fixed top-0 left-0 z-10': fixedHeader.value,
                   'w-[calc(100%-var(--left-menu-min-width))] !left-[var(--left-menu-min-width)]':
@@ -119,7 +124,7 @@ export const useRenderLayout = () => {
 
             <AppView></AppView>
           </ElScrollbar>
-        </div>
+        </main>
       </>
     )
   }
@@ -128,27 +133,36 @@ export const useRenderLayout = () => {
     const showHeaderMenu = isMixedNavLayout(layout.value)
     return (
       <>
-        <div class="relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom dark:bg-[var(--el-bg-color)]">
-          {logo.value ? <Logo class="custom-hover !w-auto !pr-15px"></Logo> : undefined}
+        <header
+          role="banner"
+          class={[
+            `${prefixCls}__topbar`,
+            'relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom dark:bg-[var(--top-tool-dark-bg-color)]'
+          ]}
+        >
+          {/* 窄屏时 Logo 标题省略让位（最小保留图片 58px + 右内距 15px），根菜单至少保留左右内距 20px + “更多”64px */}
+          {logo.value ? (
+            <Logo class="header-action !w-auto !pr-15px min-w-[73px]"></Logo>
+          ) : undefined}
 
           {showHeaderMenu ? (
             <Menu
               mode="horizontal"
               rootOnly
               theme="header"
-              class="h-[var(--top-tool-height)] min-w-0 flex-1 px-10px"
+              class="h-[var(--top-tool-height)] !min-w-[84px] flex-1 px-10px"
             ></Menu>
           ) : undefined}
 
           <ToolHeader class={showHeaderMenu ? 'flex-none' : 'flex-1'}></ToolHeader>
-        </div>
+        </header>
         <div class="absolute left-0 top-[var(--logo-height)] h-[calc(100%-var(--logo-height))] w-full flex">
           <Menu
             split={showHeaderMenu}
             mode="vertical"
             class="relative layout-border__right !h-full"
           ></Menu>
-          <div
+          <main
             class={[
               `${prefixCls}-content`,
               'h-[100%] flex-none',
@@ -189,7 +203,7 @@ export const useRenderLayout = () => {
 
               <AppView></AppView>
             </ElScrollbar>
-          </div>
+          </main>
         </div>
       </>
     )
@@ -198,23 +212,25 @@ export const useRenderLayout = () => {
   const renderTop = () => {
     return (
       <>
-        <div
+        <header
+          role="banner"
           class={[
+            `${prefixCls}__topbar`,
             'flex items-center justify-between bg-[var(--top-header-bg-color)] relative',
             {
               'layout-border__bottom': !tagsView.value
             }
           ]}
         >
-          {logo.value ? <Logo class="custom-hover"></Logo> : undefined}
+          {logo.value ? <Logo class="header-action"></Logo> : undefined}
           <Menu
             mode="horizontal"
             theme="header"
             class="h-[var(--top-tool-height)] flex-1 px-10px"
           ></Menu>
           <ToolHeader></ToolHeader>
-        </div>
-        <div class={[`${prefixCls}-content`, 'w-full h-[calc(100%-var(--top-tool-height))]']}>
+        </header>
+        <main class={[`${prefixCls}-content`, 'w-full h-[calc(100%-var(--top-tool-height))]']}>
           <ElScrollbar
             v-loading={pageLoading.value}
             class={[
@@ -239,7 +255,7 @@ export const useRenderLayout = () => {
 
             <AppView></AppView>
           </ElScrollbar>
-        </div>
+        </main>
       </>
     )
   }
@@ -251,23 +267,31 @@ export const useRenderLayout = () => {
       fixedTwoColumnMenu && permissionStore.getMenuTabRouters.length > 0
     return (
       <>
-        <div class="relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom">
-          {logo.value ? <Logo class="custom-hover !w-auto !pr-15px"></Logo> : undefined}
+        <header
+          role="banner"
+          class={[
+            `${prefixCls}__topbar`,
+            'relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom'
+          ]}
+        >
+          {logo.value ? (
+            <Logo class="header-action !w-auto !pr-15px min-w-[73px]"></Logo>
+          ) : undefined}
 
           {showHeaderMenu ? (
             <Menu
               mode="horizontal"
               rootOnly
               theme="header"
-              class="h-[var(--top-tool-height)] min-w-0 flex-1 px-10px"
+              class="h-[var(--top-tool-height)] !min-w-[84px] flex-1 px-10px"
             ></Menu>
           ) : undefined}
 
           <ToolHeader class={showHeaderMenu ? 'flex-none' : 'flex-1'}></ToolHeader>
-        </div>
+        </header>
         <div class="absolute left-0 top-[var(--logo-height)] h-[calc(100%-var(--logo-height))] w-full flex">
           <TabMenu></TabMenu>
-          <div
+          <main
             class={[
               `${prefixCls}-content`,
               'absolute top-0 h-[100%] flex-none',
@@ -320,7 +344,7 @@ export const useRenderLayout = () => {
 
               <AppView></AppView>
             </ElScrollbar>
-          </div>
+          </main>
         </div>
       </>
     )

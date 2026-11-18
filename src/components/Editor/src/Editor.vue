@@ -2,7 +2,6 @@
 import { PropType } from 'vue'
 import { Editor, Toolbar } from '@wangeditor-next/editor-for-vue'
 import { i18nChangeLanguage, IDomEditor, IEditorConfig } from '@wangeditor-next/editor'
-import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { ElMessage } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
@@ -20,20 +19,23 @@ type InsertVideoFnType = (src: string, poster: string) => void // 视频插入�
 
 const localeStore = useLocaleStore()
 
-const currentLocale = computed(() => localeStore.getCurrentLocale)
-
-i18nChangeLanguage(unref(currentLocale).lang)
+// wangEditor 界面语言跟随无刷新语言切换：immediate 保持初始化时设置一次
+watch(
+  () => localeStore.getCurrentLocale.lang,
+  (lang) => i18nChangeLanguage(lang),
+  { immediate: true }
+)
 
 const props = defineProps({
-  editorId: propTypes.string.def('wangEditor-1'),
-  height: propTypes.oneOfType([Number, String]).def('500px'),
+  editorId: { type: String, default: 'wangEditor-1' },
+  height: { type: [Number, String], default: '500px' },
   editorConfig: {
     type: Object as PropType<Partial<IEditorConfig>>,
     default: () => undefined
   },
-  readonly: propTypes.bool.def(false),
-  modelValue: propTypes.string.def(''),
-  directory: propTypes.string.def('editor-default'),
+  readonly: { type: Boolean, default: false },
+  modelValue: { type: String, default: '' },
+  directory: { type: String, default: 'editor-default' },
   uploadImage: Function as PropType<(file: File) => Promise<string>>,
   uploadVideo: Function as PropType<(file: File) => Promise<string>>
 })

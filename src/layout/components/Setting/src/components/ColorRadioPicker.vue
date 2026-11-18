@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
 defineOptions({ name: 'ColorRadioPicker' })
@@ -14,7 +13,7 @@ const props = defineProps({
     type: Array as PropType<string[]>,
     default: () => []
   },
-  modelValue: propTypes.string.def('')
+  modelValue: { type: String, default: '' }
 })
 
 const emit = defineEmits(['update:modelValue', 'change'])
@@ -41,23 +40,35 @@ watch(
 
 <template>
   <div :class="prefixCls" class="flex flex-wrap space-x-14px">
-    <span
+    <!-- 颜色选项为原生 button，可键盘选择并带可访问名称与选中状态 -->
+    <button
       v-for="(item, i) in schema"
       :key="`radio-${i}`"
-      :class="{ 'is-active': colorVal === item }"
+      :aria-label="item"
+      :aria-pressed="colorVal === item"
+      :class="[`${prefixCls}__option`, { 'is-active': colorVal === item }]"
       :style="{
         background: item
       }"
       class="mb-5px h-20px w-20px cursor-pointer border-2px border-gray-300 rounded-2px border-solid text-center leading-20px"
+      type="button"
       @click="colorVal = item"
     >
       <Icon v-if="colorVal === item" :size="16" color="#fff" icon="ep:check" />
-    </span>
+    </button>
   </div>
 </template>
 
 <style lang="scss" scoped>
 $prefix-cls: #{$namespace}-color-radio-picker;
+
+// :where 不增加优先级，只重置原生 button 默认样式（尺寸、边框、背景色仍由原子类与内联样式决定），保留 focus outline；
+// box-sizing 沿用全局 var.css 的 border-box，与原 span 同为 20×20
+:where(.#{$prefix-cls}__option) {
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
 
 .#{$prefix-cls} {
   .is-active {

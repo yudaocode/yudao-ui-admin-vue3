@@ -7,7 +7,6 @@
 </template>
 
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { PREDEFINE_COLORS } from '@/utils/color'
 import { useVModels } from '@vueuse/core'
 
@@ -17,8 +16,8 @@ import { useVModels } from '@vueuse/core'
 defineOptions({ name: 'InputWithColor' })
 
 const props = defineProps({
-  modelValue: propTypes.string.def('').isRequired,
-  color: propTypes.string.def('').isRequired
+  modelValue: { type: String, default: '', required: true },
+  color: { type: String, default: '', required: true }
 })
 const emit = defineEmits(['update:modelValue', 'update:color'])
 const { modelValue, color } = useVModels(props, emit)

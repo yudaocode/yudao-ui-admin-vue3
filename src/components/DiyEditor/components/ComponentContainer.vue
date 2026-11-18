@@ -50,8 +50,7 @@ export default {
 </script>
 <script setup lang="ts">
 import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
-import { propTypes } from '@/utils/propTypes'
-import { object } from 'vue-types'
+import type { PropType } from 'vue'
 
 /**
  * 组件容器：目前在中间部分
@@ -61,11 +60,11 @@ defineOptions({ name: 'ComponentContainer' })
 
 type DiyComponentWithStyle = DiyComponent<any> & { property: { style?: ComponentStyle } }
 const props = defineProps({
-  component: object<DiyComponentWithStyle>().isRequired,
-  active: propTypes.bool.def(false),
-  canMoveUp: propTypes.bool.def(false),
-  canMoveDown: propTypes.bool.def(false),
-  showToolbar: propTypes.bool.def(true)
+  component: { type: Object as PropType<DiyComponentWithStyle>, required: true },
+  active: { type: Boolean, default: false },
+  canMoveUp: { type: Boolean, default: false },
+  canMoveDown: { type: Boolean, default: false },
+  showToolbar: { type: Boolean, default: true }
 })
 
 /**

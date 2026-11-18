@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
 import { isClient, useEventListener, useWindowSize } from '@vueuse/core'
 import type { CSSProperties } from 'vue'
 
@@ -7,11 +6,11 @@ defineOptions({ name: 'Sticky' })
 
 const props = defineProps({
   // 距离顶部或者底部的距离(单位px)
-  offset: propTypes.number.def(0),
+  offset: { type: Number, default: 0 },
   // 设置元素的堆叠顺序
-  zIndex: propTypes.number.def(999),
+  zIndex: { type: Number, default: 999 },
   // 设置指定的class
-  className: propTypes.string.def(''),
+  className: { type: String, default: '' },
   // 定位方式，默认为(top)，表示距离顶部位置，可以设置为top或者bottom
   position: {
     type: String,

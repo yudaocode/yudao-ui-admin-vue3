@@ -12,6 +12,7 @@ import { createRouteLocation, resolveDynamicPath } from '@/utils/routeParams'
 import { isHeaderNavLayout, isHorizontalMenuLayout, isTwoColumnLayout } from '@/utils/layout'
 import { cloneDeep } from 'lodash-es'
 import { pathResolve } from '@/utils/routerHelper'
+import { getRouteTitle } from '@/utils/routeTitle'
 import {
   findRouteByPath,
   getRootMenuActivePath,
@@ -49,16 +50,21 @@ export default defineComponent({
     menus: {
       type: Array as PropType<AppRouteRecordRaw[]>,
       default: undefined
+    },
+    // 二级菜单标题：未传时，split（mixed-nav 左侧）取当前一级菜单标题，其它为空不显示
+    secondaryTitle: {
+      type: String,
+      default: undefined
     }
   },
   setup(props) {
+    const { t } = useI18n()
+
     const appStore = useAppStore()
 
     const layout = computed(() => appStore.getLayout)
 
     const { push, currentRoute, resolve } = useRouter()
-
-    const { t } = useI18n()
 
     const permissionStore = usePermissionStore()
 
@@ -89,7 +95,9 @@ export default defineComponent({
           : {
               ...route.meta,
               icon: firstVisibleChild.meta?.icon,
-              title: firstVisibleChild.meta?.title
+              title: firstVisibleChild.meta?.title,
+              // 标题来源随标题一起复制，后端菜单原文不被当作语言 key 翻译
+              titleSource: firstVisibleChild.meta?.titleSource
             }
       return {
         ...route,
@@ -107,6 +115,27 @@ export default defineComponent({
       }
       return sourceRouters.map(getRootOnlyMenuRoute)
     })
+
+    // 二级菜单标题：标题来源与顶栏一级菜单一致（含首个可见子项回退、后端原文）
+    const secondaryTitle = computed(() => {
+      if (props.secondaryTitle !== undefined) {
+        return props.secondaryTitle
+      }
+      if (!props.split) {
+        return ''
+      }
+      const path = (unref(currentRoute).meta.activeMenu as string) || unref(currentRoute).path
+      const rootRoute = getRootMenuRoute(permissionStore.getRouters, path)?.route
+      return rootRoute ? getRouteTitle(getRootOnlyMenuRoute(rootRoute).meta) : ''
+    })
+
+    // 仅垂直且未折叠时显示（双栏布局的扩展菜单不折叠，与 ElMenu 的 collapse 规则一致）
+    const showSecondaryTitle = computed(
+      () =>
+        !!unref(secondaryTitle) &&
+        unref(menuMode) === 'vertical' &&
+        (isTwoColumnLayout(unref(layout)) || !unref(collapse))
+    )
 
     const activeMenu = computed(() => {
       const { meta, path } = unref(currentRoute)
@@ -415,7 +444,11 @@ export default defineComponent({
       if (isHeaderNavLayout(unref(layout)) || unref(menuMode) === 'horizontal') {
         return renderMenu()
       } else {
-        return <ElScrollbar>{renderMenu()}</ElScrollbar>
+        return (
+          <ElScrollbar class={{ '!h-[calc(100%-46px)]': unref(showSecondaryTitle) }}>
+            {renderMenu()}
+          </ElScrollbar>
+        )
       }
     }
 
@@ -526,11 +559,14 @@ export default defineComponent({
             {overflowRoutes.map((route) => (
               <li
                 key={getOverflowMenuIndex(route)}
-                class="el-menu-item"
+                class={[
+                  'el-menu-item',
+                  { 'is-active': getOverflowMenuIndex(route) === unref(activeMenu) }
+                ]}
                 role="menuitem"
                 onClick={() => menuSelect(getOverflowMenuIndex(route))}
               >
-                {route.meta?.title ? t(route.meta.title as string) : ''}
+                {getRouteTitle(route.meta)}
               </li>
             ))}
           </ul>
@@ -539,9 +575,10 @@ export default defineComponent({
     }
 
     return () => (
-      <div
+      <nav
         id={prefixCls}
         ref={menuWrapRef}
+        aria-label={props.rootOnly ? t('layout.mainNavigation') : undefined}
         class={[
           `${prefixCls} ${prefixCls}__${unref(menuMode)}`,
           `${prefixCls}--${props.theme}`,
@@ -561,9 +598,14 @@ export default defineComponent({
           backgroundColor: unref(menuBgColor)
         }}
       >
+        {unref(showSecondaryTitle) ? (
+          <div class={`${prefixCls}__secondary-title`} title={unref(secondaryTitle)}>
+            {unref(secondaryTitle)}
+          </div>
+        ) : undefined}
         {renderMenuWrap()}
         {renderHorizontalOverflowFallback()}
-      </div>
+      </nav>
     )
   }
 })
@@ -717,6 +759,32 @@ $prefix-cls: #{$namespace}-menu;
   }
 }
 
+// 二级菜单标题：46px 标题行 + 主色圆点
+.#{$prefix-cls}__secondary-title {
+  height: 46px;
+  padding: 0 18px;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 46px;
+  color: var(--logo-title-text-color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--layout-border-color);
+
+  &::before {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 9px;
+    vertical-align: 1px;
+    background-color: var(--el-color-primary);
+    border-radius: 50%;
+    content: '';
+    box-shadow: 0 0 0 4px var(--el-color-primary-light-9);
+  }
+}
+
 .#{$prefix-cls}-overflow-fallback {
   position: fixed;
   top: calc(var(--top-tool-height) + 6px);
@@ -735,6 +803,158 @@ $prefix-cls: #{$namespace}-menu;
 .#{$prefix-cls}-overflow-fallback:hover,
 .#{$prefix-cls}-overflow-fallback.is-open {
   display: block;
+}
+
+// 菜单 pill 外观：
+// 用伪元素在菜单项内侧绘制圆角底色，菜单项宽度、内边距与点击区域不受 pill 影响；
+// 颜色全部取自菜单 / 头部主题变量，已保存的自定义主题继续生效
+// 密度（可见 44px、间距 3px 10px）：行高 50px、pill 上下内缩 3px，点击区域仍为整行 50px
+.#{$prefix-cls}.#{$prefix-cls}__vertical {
+  :deep(.#{$elNamespace}-menu) {
+    --el-menu-item-height: 50px;
+    --el-menu-sub-item-height: 50px;
+
+    .#{$elNamespace}-sub-menu__title,
+    .#{$elNamespace}-menu-item {
+      position: relative;
+      isolation: isolate;
+
+      &,
+      &:hover,
+      &.is-active,
+      &.is-active:hover {
+        background-color: transparent !important;
+      }
+
+      &::before {
+        position: absolute;
+        z-index: -1;
+        border-radius: 10px;
+        content: '';
+        transition: background-color var(--transition-time-02);
+        inset: 3px 10px;
+      }
+
+      &:hover::before {
+        background-color: color-mix(in srgb, var(--left-menu-text-active-color) 10%, transparent);
+      }
+    }
+
+    .#{$elNamespace}-menu-item.is-active {
+      font-weight: 600;
+
+      &::before {
+        background-color: var(--left-menu-bg-active-color);
+      }
+    }
+
+    // 内联子菜单区域保留浅色底；子项 44px 行加 6px 间距，pill 不再上下内缩，避免与间距叠加
+    .#{$elNamespace}-menu--inline {
+      --el-menu-item-height: 44px;
+      --el-menu-sub-item-height: 44px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 6px;
+      background-color: var(--left-menu-bg-light-color) !important;
+
+      // 展开动画的 max-height 取不含 padding 的内容高度，过渡期间按 content-box 计算，避免末尾跳动
+      &.#{$elNamespace}-collapse-transition-enter-active {
+        box-sizing: content-box;
+      }
+
+      .#{$elNamespace}-sub-menu__title::before,
+      .#{$elNamespace}-menu-item::before {
+        inset: 0 10px;
+      }
+    }
+  }
+
+  // 一级菜单上下留白（上游 .el-menu padding 8px 0），内联子菜单不加
+  :deep(.#{$elNamespace}-menu--vertical) {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  // 折叠态：一级项图标居中、显示 48px pill（72px 宽 - 2 × 12px），选中沿用收起选中色
+  :deep(.#{$elNamespace}-menu--collapse) {
+    & > .#{$elNamespace}-menu-item,
+    & > .#{$elNamespace}-menu-item .#{$elNamespace}-menu-tooltip__trigger,
+    & > .#{$elNamespace}-sub-menu > .#{$elNamespace}-sub-menu__title {
+      padding: 0 !important;
+      justify-content: center;
+    }
+
+    & > .#{$elNamespace}-menu-item::before,
+    & > .#{$elNamespace}-sub-menu > .#{$elNamespace}-sub-menu__title::before {
+      inset: 3px 12px;
+    }
+
+    & > .is-active {
+      background-color: transparent !important;
+    }
+
+    & > .#{$elNamespace}-menu-item.is-active::before,
+    & > .#{$elNamespace}-sub-menu.is-active > .#{$elNamespace}-sub-menu__title::before {
+      background-color: var(--left-menu-collapse-bg-active-color);
+    }
+
+    // 图标 22px，需覆盖 Icon 的内联字号
+    .#{$namespace}-icon {
+      flex: none;
+      width: 22px;
+      height: 22px;
+      font-size: 22px !important;
+
+      .iconify {
+        font-size: 22px !important;
+      }
+    }
+  }
+}
+
+// 水平菜单：pill 上下内缩至 38px，底部高亮线隐藏（边框宽度保留，不改变菜单项宽度与 More 溢出计算）
+.#{$prefix-cls}.#{$prefix-cls}__horizontal {
+  :deep(.#{$elNamespace}-menu--horizontal) {
+    & > .#{$elNamespace}-menu-item,
+    & > .#{$elNamespace}-sub-menu > .#{$elNamespace}-sub-menu__title {
+      position: relative;
+      isolation: isolate;
+
+      &,
+      &:hover {
+        background-color: transparent !important;
+        border-bottom-color: transparent !important;
+      }
+
+      &::before {
+        position: absolute;
+        z-index: -1;
+        border-radius: 10px;
+        content: '';
+        transition: background-color var(--transition-time-02);
+        inset: calc((100% - 38px) / 2) 2px;
+      }
+
+      &:hover::before {
+        background-color: var(--top-header-hover-color);
+      }
+    }
+
+    & > .#{$elNamespace}-menu-item.is-active,
+    & > .#{$elNamespace}-sub-menu.is-active > .#{$elNamespace}-sub-menu__title {
+      &,
+      &:hover {
+        background-color: transparent !important;
+        border-bottom-color: transparent !important;
+      }
+
+      &::before {
+        background-color: color-mix(in srgb, var(--el-color-primary) 12%, transparent);
+      }
+    }
+  }
 }
 </style>
 
@@ -807,6 +1027,56 @@ $prefix-cls: #{$namespace}-menu-popper;
     &:hover {
       background-color: var(--top-header-hover-color) !important;
     }
+  }
+}
+
+// 弹层圆角、边框与阴影，菜单项圆角；背景与文字颜色仍取主题变量
+.#{$prefix-cls}--vertical,
+.#{$prefix-cls}--horizontal {
+  // 弹层菜单项高度 40px，垂直 / 横向弹层统一
+  --el-menu-item-height: 40px;
+  --el-menu-sub-item-height: 40px;
+  --el-menu-horizontal-sub-item-height: 40px;
+
+  overflow: hidden;
+  border: 1px solid var(--layout-border-color) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--layout-shadow) !important;
+
+  .el-menu--popup {
+    padding: 6px;
+  }
+
+  .el-sub-menu__title,
+  .el-menu-item {
+    margin: 2px 0;
+    border-radius: 8px;
+  }
+}
+
+// 侧栏折叠弹层的悬停底色（头部主题弹层沿用上方 --header 规则）
+.#{$prefix-cls}--vertical:not(.#{$prefix-cls}--header) {
+  .el-sub-menu__title,
+  .el-menu-item:not(.is-active) {
+    &:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--left-menu-text-active-color) 10%,
+        transparent
+      ) !important;
+    }
+  }
+}
+
+// 横向弹层选中项：600 字重 + 主色浅底；自定义 More 弹层在组件内，需高于组件内 header 选中规则
+.#{$prefix-cls}--horizontal .el-menu--popup .el-menu-item.is-active,
+.#{$namespace}-menu-overflow-fallback.#{$prefix-cls}--horizontal
+  .el-menu.el-menu--popup
+  .el-menu-item.is-active {
+  &,
+  &:hover {
+    font-weight: 600;
+    background-color: var(--el-color-primary-light-9) !important;
   }
 }
 </style>

@@ -2,16 +2,19 @@
 import { computed, nextTick, onBeforeUnmount, PropType, ref, unref, watch } from 'vue'
 import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import { cloneDeep } from 'lodash-es'
-import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 import { isString } from '@/utils/is'
-import { QrcodeLogo } from '@/types/qrcode'
+import type { QrcodeLogo } from './types'
 
 defineOptions({ name: 'Qrcode' })
 
 const props = defineProps({
   // img 或者 canvas,img不支持logo嵌套
-  tag: propTypes.string.validate((v: string) => ['canvas', 'img'].includes(v)).def('canvas'),
+  tag: {
+    type: String,
+    default: 'canvas',
+    validator: (v: string) => ['canvas', 'img'].includes(v)
+  },
   // 二维码内容
   text: {
     type: [String, Array] as PropType<string | Recordable[]>,
@@ -23,16 +26,16 @@ const props = defineProps({
     default: () => ({})
   },
   // 宽度
-  width: propTypes.number.def(200),
+  width: { type: Number, default: 200 },
   // logo
   logo: {
     type: [String, Object] as PropType<Partial<QrcodeLogo> | string>,
     default: ''
   },
   // 是否过期
-  disabled: propTypes.bool.def(false),
+  disabled: { type: Boolean, default: false },
   // 过期提示内容
-  disabledText: propTypes.string.def('')
+  disabledText: { type: String, default: '' }
 })
 
 // error：编码失败、logo 加载失败或 canvas 无法导出时触发

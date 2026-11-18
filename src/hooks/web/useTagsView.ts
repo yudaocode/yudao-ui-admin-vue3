@@ -48,11 +48,13 @@ export const useTagsView = () => {
     if (!removeTargetCache) {
       tagsViewStore.delCachedView()
     }
-    const { path, query } = target
+    // 带上 hash，刷新后回到同一锚点，由 Redirect 页继续转发
+    const { path, query, hash } = target
     await nextTick()
     const location = {
       path: '/redirect' + path,
-      query: query
+      query: query,
+      hash: hash
     }
     let removeAfterEach: (() => void) | undefined
     if (removeTargetCache) {
@@ -64,7 +66,11 @@ export const useTagsView = () => {
         tagsViewStore.delCachedView(target)
       })
     }
-    replace(location).finally(() => removeAfterEach?.())
+    // 调用方不等待刷新结果：守卫抛错、懒加载失败时 replace 会 reject，错误已交给 router.onError，
+    // 这里输出到控制台后收口，避免未处理的 Promise 拒绝；无论成功或失败都移除 afterEach
+    replace(location)
+      .catch((error) => console.error(error))
+      .finally(() => removeAfterEach?.())
     callback?.()
   }
 

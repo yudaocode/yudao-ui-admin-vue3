@@ -2,13 +2,20 @@ export default {
   layout: {
     expandNavigation: '展开导航',
     collapseNavigation: '收起导航',
+    closeNavigation: '关闭导航菜单',
+    mainNavigation: '主导航',
     switchLanguage: '切换语言',
     toggleDarkMode: '切换暗黑模式',
+    switchLayout: '切换页面布局',
+    layoutTitle: '页面布局',
+    layoutHint: '选择后立即生效',
     enterFullscreen: '全屏',
     exitFullscreen: '退出全屏',
     menuSearch: '菜单搜索',
+    menuSearchPlaceholder: '请输入菜单内容',
     switchSize: '切换尺寸',
-    message: '站内信'
+    message: '站内信',
+    openChat: '打开即时通讯'
   },
   common: {
     inputText: '请输入',

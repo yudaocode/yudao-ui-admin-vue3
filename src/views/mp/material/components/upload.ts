@@ -21,12 +21,5 @@ const beforeVoiceUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) 
 const beforeVideoUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
   useBeforeUpload(UploadType.Video, 10)(rawFile)
 
-export {
-  HEADERS,
-  UPLOAD_URL,
-  UploadType,
-  UploadData,
-  beforeImageUpload,
-  beforeVoiceUpload,
-  beforeVideoUpload
-}
+export type { UploadData }
+export { HEADERS, UPLOAD_URL, UploadType, beforeImageUpload, beforeVoiceUpload, beforeVideoUpload }

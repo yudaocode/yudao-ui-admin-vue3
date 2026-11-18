@@ -2,7 +2,7 @@
 import 'virtual:element-plus-style'
 
 // 引入unocss css
-import '@/plugins/unocss'
+import 'virtual:uno.css'
 
 // 导入全局的svg图标
 import '@/plugins/svgIcon'
@@ -21,9 +21,6 @@ import { setupElementPlus } from '@/plugins/elementPlus'
 
 // 引入全局样式
 import '@/styles/index.scss'
-
-// 引入动画
-import '@/plugins/animate.css'
 
 // 路由
 import router, { setupRouter } from '@/router'
@@ -54,7 +51,7 @@ window.addEventListener('vite:preloadError', (event) => {
 const setupAll = async () => {
   const app = createApp(App)
 
-  await setupI18n(app)
+  setupI18n(app)
 
   setupStore(app)
 

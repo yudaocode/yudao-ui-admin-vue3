@@ -292,6 +292,7 @@ import { createImageViewer } from '@/components/ImageViewer'
 import { RuleConfig } from '@/views/mall/product/spu/components/index'
 import { PropertyAndValues } from './index'
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'SkuList' })
@@ -564,7 +565,7 @@ watch(
     immediate: true
   }
 )
-const activitySkuListRef = ref<InstanceType<typeof ElTable>>()
+const activitySkuListRef = ref<TableInstance>()
 
 const getSkuTableRef = () => {
   return activitySkuListRef.value

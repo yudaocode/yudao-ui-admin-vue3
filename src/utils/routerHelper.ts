@@ -1,9 +1,11 @@
-import type { RouteLocationNormalized, Router, RouteRecordNormalized } from 'vue-router'
+import type { RouteLocationNormalized, RouteMeta, Router, RouteRecordNormalized } from 'vue-router'
 import { defineComponent, h } from 'vue'
 import { createRouter, createWebHashHistory, RouteRecordRaw, RouterView } from 'vue-router'
 import { isUrl } from '@/utils/is'
+import { BACKEND_TITLE_SOURCE } from '@/utils/routeTitle'
 import { cloneDeep, omit } from 'lodash-es'
 import {
+  getDynamicPathParamNames,
   getExternalRoutePath,
   parseExternalRouteLocation,
   splitDynamicRouteParams,
@@ -11,17 +13,35 @@ import {
 } from '@/utils/routeParams'
 
 const modules = import.meta.glob('../views/**/*.{vue,tsx}')
+
+/**
+ * 按视图路径（相对 src/views，可带前导 /、可带扩展名）查找组件模块的键：
+ * 先精确匹配 .vue、.tsx 文件，未命中再按原有的包含规则匹配。
+ * 精确优先，避免 oa/leave/index 这类路径先命中后缀相同的 bpm/oa/leave/index.vue
+ */
+const resolveViewModuleKey = (
+  viewPath: string,
+  modulesKeys: string[] = Object.keys(modules)
+): string | undefined => {
+  const normalizedPath = viewPath.replace(/^\/+/, '')
+  const exactKey = [
+    `../views/${normalizedPath}`,
+    `../views/${normalizedPath}.vue`,
+    `../views/${normalizedPath}.tsx`
+  ].find((key) => key in modules)
+  return exactKey ?? modulesKeys.find((key) => key.includes(viewPath))
+}
+
 /**
  * 注册一个异步组件
  * @param componentPath 例:/bpm/oa/leave/detail
  */
 export const registerComponent = (componentPath: string) => {
-  for (const item in modules) {
-    if (item.includes(componentPath)) {
-      // 使用异步组件的方式来动态加载组件
-      // @ts-ignore
-      return defineAsyncComponent(modules[item])
-    }
+  const key = resolveViewModuleKey(componentPath)
+  if (key) {
+    // 使用异步组件的方式来动态加载组件
+    // @ts-ignore
+    return defineAsyncComponent(modules[key])
   }
 }
 /* Layout */
@@ -70,6 +90,27 @@ export const getRawRoute = (route: RouteLocationNormalized): RouteLocationNormal
   }
 }
 
+/**
+ * 查找后端菜单对应的视图组件：后端传了 component 时按 component 匹配（精确路径优先，未命中再模糊包含），
+ * 未传时按 path 匹配（模糊包含，规则同原逻辑）。
+ * 找不到时输出诊断，仍返回 undefined，不阻断路由注册与登录；
+ * 构建时去除 console（VITE_DROP_CONSOLE）的环境看不到该日志
+ */
+const findViewComponent = (route: AppCustomRouteRecordRaw, modulesRoutesKeys: string[]) => {
+  const key = route?.component
+    ? resolveViewModuleKey(route.component, modulesRoutesKeys)
+    : modulesRoutesKeys.find((ev) => ev.includes(route.path))
+  if (!key) {
+    const component = route.component || '未配置，按 path 匹配'
+    console.error(
+      `[菜单路由] 未找到菜单「${route.name}」的视图组件（path: ${route.path}，component: ${component}），` +
+        '请在 src/views 下创建对应的 .vue 或 .tsx 文件'
+    )
+    return undefined
+  }
+  return modules[key]
+}
+
 // 后端控制路由生成
 export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecordRaw[] => {
   const res: AppRouteRecordRaw[] = []
@@ -88,6 +129,8 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
     // 1. 生成 meta 菜单元数据
     const meta = {
       title: route.name,
+      // 标记 title 为后端菜单原文，展示时不按语言 key 翻译（见 getRouteTitle）
+      titleSource: BACKEND_TITLE_SOURCE,
       icon: route.icon,
       hidden: !route.visible,
       noCache: !route.keepAlive,
@@ -146,10 +189,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         redirect: route.redirect,
         meta: meta
       }
-      const index = route?.component
-        ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
-        : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-      childrenData.component = modules[modulesRoutesKeys[index]]
+      childrenData.component = findViewComponent(route, modulesRoutesKeys)
       data.children = [childrenData]
     } else {
       // 目录
@@ -183,10 +223,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         // 菜单
       } else {
         // 对后端传component组件路径和不传做兼容（如果后端传component组件路径，那么path可以随便写，如果不传，component组件路径会根path保持一致）
-        const index = route?.component
-          ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
-          : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-        data.component = modules[modulesRoutesKeys[index]]
+        data.component = findViewComponent(route, modulesRoutesKeys)
       }
       if (route.children) {
         data.children = generateRoute(route.children)
@@ -211,6 +248,16 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
               alwaysShow: remainingChildren.length > 0 ? data.meta.alwaysShow : false
             }
           }
+        }
+        // getRedirect 遇到 children 缺省 / null 的叶子（后端叶子的常见形态）时不生成 redirect；
+        // 此时对绝对路径、可见且无 query / params / hash 的目录，按已生成的子路由补充默认跳转
+        if (
+          data.redirect === undefined &&
+          data.children?.length &&
+          data.path.startsWith('/') &&
+          isPlainRouteMeta(data.meta)
+        ) {
+          data.redirect = getDefaultRedirect(data.path, data.children)
         }
       }
     }
@@ -274,7 +321,54 @@ export const getRedirect = (parentPath: string, children: AppCustomRouteRecordRa
   // 递归子节点
   if (children[0].children) return getRedirect(path, children[0].children)
 }
+
+/**
+ * 目录的默认跳转（getRedirect 未生成时使用），基于 generateRoute 已生成的子路由沿首个子路由向下查找。
+ *
+ * 只有叶子是生成后实际存在的静态页面才返回其完整路径，否则返回 undefined，保持菜单等使用方原有的 fallback：
+ * 每层须可见、为站内相对路径（外链已生成为绝对路径的独立父路由），meta 中无 query / params / hash
+ * （包含 path / component 携带的 ?、#）；叶子须有页面组件、无显式 redirect，完整路径无动态参数。
+ * 同名折叠后的节点（children 为 []，meta 沿用父目录、不含原子节点的 hidden / query / hash）不作为默认跳转，
+ * 后端 children 缺省 / null 的普通叶子生成后没有 children
+ */
+const getDefaultRedirect = (
+  parentPath: string,
+  children: AppRouteRecordRaw[] | undefined
+): string | undefined => {
+  const child = children?.[0]
+  if (
+    !child ||
+    !child.path ||
+    child.path.startsWith('/') ||
+    isUrl(child.path) ||
+    !isPlainRouteMeta(child.meta)
+  ) {
+    return undefined
+  }
+  const path = generateRoutePath(parentPath, child.path)
+  if (child.children?.length) {
+    return getDefaultRedirect(path, child.children)
+  }
+  if (
+    child.children ||
+    !child.component ||
+    child.redirect ||
+    getDynamicPathParamNames(path).length
+  ) {
+    return undefined
+  }
+  return path
+}
+
+// 可见，且无 query / params / hash（包含 path / component 携带的 ?、#）
+const isPlainRouteMeta = (meta?: RouteMeta) => {
+  return !meta?.hidden && !meta?.query && !meta?.params && !meta?.hash
+}
 const generateRoutePath = (parentPath: string, path: string) => {
+  // 与 pathResolve 一致：以 / 开头的子路由由 vue-router 按绝对路径注册，默认跳转不拼接父路径
+  if (path.startsWith('/')) {
+    return path
+  }
   if (parentPath.endsWith('/')) {
     parentPath = parentPath.slice(0, -1) // 移除默认的 /
   }
@@ -286,8 +380,10 @@ const generateRoutePath = (parentPath: string, path: string) => {
 export const pathResolve = (parentPath: string, path: string) => {
   if (isUrl(path)) return path
   if (!path) return parentPath // 修复 path 为空时返回 parentPath，避免拼接出错 https://t.zsxq.com/QVr6b
-  const childPath = path.startsWith('/') ? path : `/${path}`
-  return `${parentPath}${childPath}`.replace(/\/+/g, '/')
+  // 以 / 开头的子路由由 vue-router 按绝对路径注册，不拼接父路径，菜单索引、面包屑等与注册路径一致；
+  // 不做 trim：注册路径保留原始空白，菜单侧单独 trim 会与注册路径不一致
+  if (path.startsWith('/')) return path.replace(/\/+/g, '/')
+  return `${parentPath}/${path}`.replace(/\/+/g, '/')
 }
 
 // 路由降级

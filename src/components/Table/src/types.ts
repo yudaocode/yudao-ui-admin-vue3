@@ -1,7 +1,7 @@
 import type { ComponentSize } from 'element-plus'
 import type { CSSProperties, VNodeChild } from 'vue'
 
-// 注意：本文件是 Table 类型的唯一定义处，@/types/table 从这里重导出，这里不能反向导入 @/types/table
+// 注意：本文件是 Table 类型的唯一定义处，外部请通过公共入口 @/components/Table 以 import type 导入
 
 /** 列固定方式：false 表示不固定 */
 export type ColumnFixed = false | 'left' | 'right'
@@ -31,6 +31,14 @@ export interface TableColumn {
   sortOrders?: (string | null)[]
   resizable?: boolean
   formatter?: (...args: any[]) => any
+  /**
+   * 字典类型：未配置 slots / formatter 时，使用 DictTag 渲染单元格，例如 DICT_TYPE.COMMON_STATUS
+   */
+  dictType?: string
+  /**
+   * 字典值类型（兼容原 CrudSchema 的配置）：DictTag 按字符串比较字典值，表格渲染不依赖该值
+   */
+  dictClass?: 'string' | 'number' | 'boolean'
   showOverflowTooltip?: boolean
   align?: 'left' | 'center' | 'right'
   headerAlign?: 'left' | 'center' | 'right'

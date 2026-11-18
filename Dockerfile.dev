@@ -1,6 +1,7 @@
 # 可选开发容器（参考上游 7a0d401b5d，按当前 engines / packageManager 适配）
 # 用法：docker compose -f docker-compose.dev.yaml up --build，然后访问 http://127.0.0.1:5173（宿主端口可用 DEV_PORT 修改）
 # 镜像只安装依赖：源码、.env* 等不进入镜像层（见 .dockerignore），运行时由 compose 挂载项目目录
+# 默认 Node 22 LTS 滚动标签（随官方镜像获取安全补丁，需满足 engines 最低 22.22.1）；也可用 --build-arg NODE_IMAGE 指定 Node 24.11+ 镜像
 ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE}
 
@@ -10,10 +11,12 @@ WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 
-# 依赖清单、workspace 配置（allowBuilds / patchedDependencies）及补丁，按锁文件安装
+# 依赖清单、workspace 配置（allowBuilds），按锁文件安装
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY patches ./patches
-RUN pnpm install --frozen-lockfile
+# 安装源默认 npm 官方 registry，可用 --build-arg PNPM_REGISTRY=<公开镜像地址> 覆盖
+ARG PNPM_REGISTRY=https://registry.npmjs.org
+# 仅安装步骤限制解包 worker、内存与并发峰值（只作用于本条 RUN，不设为 ENV，不影响运行时 Vite）
+RUN PNPM_MAX_WORKERS=1 NODE_OPTIONS="--max-old-space-size=1024" pnpm install --frozen-lockfile --network-concurrency=4 --child-concurrency=1 --registry="${PNPM_REGISTRY}"
 
 EXPOSE 80
 

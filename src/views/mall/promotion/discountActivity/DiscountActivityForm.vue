@@ -1,52 +1,101 @@
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="65%">
-    <Form
+    <el-form
       ref="formRef"
       v-loading="formLoading"
-      :isCol="true"
+      :model="formData"
       :rules="rules"
-      :schema="allSchemas.formSchema"
+      label-width="auto"
+      @submit.prevent
     >
-      <!-- 先选择 -->
-      <template #spuId>
-        <el-button @click="spuSelectRef.open()">选择商品</el-button>
-        <SpuAndSkuList
-          ref="spuAndSkuListRef"
-          :deletable="true"
-          :rule-config="ruleConfig"
-          :spu-list="spuList"
-          :spu-property-list-p="spuPropertyList"
-          @delete="deleteSpu"
-        >
-          <el-table-column align="center" label="优惠金额" min-width="168">
-            <template #default="{ row }">
-              <el-input-number
-                v-model="row.productConfig.discountPrice"
-                :max="parseFloat(fenToYuan(row.price))"
-                :min="0"
-                :precision="2"
-                :step="0.1"
-                class="w-100%"
-                @change="handleSkuDiscountPriceChange(row)"
-              />
-            </template>
-          </el-table-column>
-          <el-table-column align="center" label="折扣百分比(%)" min-width="168">
-            <template #default="{ row }">
-              <el-input-number
-                v-model="row.productConfig.discountPercent"
-                :max="100"
-                :min="0"
-                :precision="2"
-                :step="0.1"
-                class="w-100%"
-                @change="handleSkuDiscountPercentChange(row)"
-              />
-            </template>
-          </el-table-column>
-        </SpuAndSkuList>
-      </template>
-    </Form>
+      <el-row :gutter="20" class="!mx-0">
+        <el-col :span="24">
+          <el-form-item label="活动名称" prop="name">
+            <el-input
+              v-model="formData.name"
+              clearable
+              :placeholder="t('common.inputText') + '活动名称'"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="活动开始时间" prop="startTime">
+            <el-date-picker
+              v-model="formData.startTime"
+              class="!w-full"
+              clearable
+              :placeholder="t('common.selectText') + '活动开始时间'"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col v-bind="colProps">
+          <el-form-item label="活动结束时间" prop="endTime">
+            <el-date-picker
+              v-model="formData.endTime"
+              class="!w-full"
+              clearable
+              :placeholder="t('common.selectText') + '活动结束时间'"
+              type="date"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="活动商品" prop="spuId">
+            <!-- 先选择 -->
+            <el-button :disabled="formLoading" @click="spuSelectRef.open()">选择商品</el-button>
+            <SpuAndSkuList
+              ref="spuAndSkuListRef"
+              :deletable="true"
+              :rule-config="ruleConfig"
+              :spu-list="spuList"
+              :spu-property-list-p="spuPropertyList"
+              @delete="deleteSpu"
+            >
+              <el-table-column align="center" label="优惠金额" min-width="168">
+                <template #default="{ row }">
+                  <el-input-number
+                    v-model="row.productConfig.discountPrice"
+                    :max="parseFloat(fenToYuan(row.price))"
+                    :min="0"
+                    :precision="2"
+                    :step="0.1"
+                    class="w-100%"
+                    @change="handleSkuDiscountPriceChange(row)"
+                  />
+                </template>
+              </el-table-column>
+              <el-table-column align="center" label="折扣百分比(%)" min-width="168">
+                <template #default="{ row }">
+                  <el-input-number
+                    v-model="row.productConfig.discountPercent"
+                    :max="100"
+                    :min="0"
+                    :precision="2"
+                    :step="0.1"
+                    class="w-100%"
+                    @change="handleSkuDiscountPercentChange(row)"
+                  />
+                </template>
+              </el-table-column>
+            </SpuAndSkuList>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
+            <el-input
+              v-model="formData.remark"
+              :rows="4"
+              clearable
+              :placeholder="t('common.inputText') + '备注'"
+              type="textarea"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+    </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -55,8 +104,8 @@
   <SpuSelect ref="spuSelectRef" :isSelectSku="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
+import type { FormInstance, FormRules } from 'element-plus'
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '../components'
-import { allSchemas, rules } from './discountActivity.data'
 import { cloneDeep, debounce } from 'lodash-es'
 import * as DiscountActivityApi from '@/api/mall/promotion/discount/discountActivity'
 import * as ProductSpuApi from '@/api/mall/product/spu'
@@ -73,7 +122,27 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formRef = ref() // 表单 Ref
+const formRef = ref<FormInstance>() // 表单 Ref
+
+// 半宽表单项的栅格：小屏整行，其余半行
+const colProps = { xs: 24, sm: 12, md: 12, lg: 12, xl: 12 }
+
+/** 表单初始数据：新增与每次打开时重置使用 */
+const createFormData = (): Recordable => ({
+  name: '',
+  startTime: '',
+  endTime: '',
+  spuId: '',
+  remark: ''
+})
+const formData = ref<Recordable>(createFormData())
+// 表单校验
+const rules = reactive<FormRules>({
+  name: [required],
+  startTime: [required],
+  endTime: [required],
+  discountType: [required]
+})
 // ================= 商品选择相关 =================
 
 const spuSelectRef = ref() // 商品和属性选择 Ref
@@ -88,8 +157,15 @@ const ruleConfig: RuleConfig[] = [
 const spuList = ref<DiscountActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<DiscountActivityApi.SpuExtension>[]>([])
 const spuIds = ref<number[]>([])
-const selectSpu = (spuId: number, skuIds: number[]) => {
-  getSpuDetails(spuId, skuIds)
+const selectSpu = async (spuId: number, skuIds: number[]) => {
+  // 加载或保存期间不处理新的选择；商品详情加载完成前保持加载，不可提交，多个商品逐个加入
+  if (formLoading.value) return
+  formLoading.value = true
+  try {
+    await getSpuDetails(spuId, skuIds)
+  } finally {
+    formLoading.value = false
+  }
 }
 /**
  * 获取 SPU 详情
@@ -148,6 +224,8 @@ const getSpuDetails = async (
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
+  // 上一次的加载或保存未结束时不重新打开，避免旧请求的结果写入新表单
+  if (formLoading.value) return
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -168,7 +246,8 @@ const open = async (type: string, id?: number) => {
           'load'
         )
       }
-      formRef.value.setValues(data)
+      // 合并接口返回的全部字段（与原表单 setValues 一致：隔离接口对象）
+      Object.assign(formData.value, cloneDeep(data))
     } finally {
       formLoading.value = false
     }
@@ -179,20 +258,25 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  // 校验表单
-  if (!formRef) return
-  const valid = await formRef.value.getElFormRef().validate()
-  if (!valid) return
-  // 提交请求
+  if (!formRef.value || formLoading.value) return
+  // 校验与提交期间保持加载，不可重复提交、选择商品或重新打开
   formLoading.value = true
   try {
+    // 校验表单
+    const valid = await formRef.value.validate()
+    // 校验期间已关闭弹窗：不再提交
+    if (!valid || !dialogVisible.value) return
+    if (spuList.value.length === 0) {
+      message.warning('请选择商品')
+      return
+    }
     // 获取折扣商品配置
     const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
     products.forEach((item: DiscountActivityApi.DiscountProductVO) => {
       item.discountPercent = convertToInteger(item.discountPercent)
       item.discountPrice = convertToInteger(item.discountPrice)
     })
-    const data = cloneDeep(formRef.value.formModel) as DiscountActivityApi.DiscountActivityVO
+    const data = cloneDeep(formData.value) as DiscountActivityApi.DiscountActivityVO
     data.products = products
     // 真正提交
     if (formType.value === 'create') {
@@ -245,8 +329,10 @@ const resetForm = async () => {
   spuList.value = []
   spuPropertyList.value = []
   spuIds.value = []
+  // 每次打开使用全新的初始数据，不带上一次编辑对象的字段（如 id）
+  formData.value = createFormData()
   await nextTick()
-  formRef.value.getElFormRef().resetFields()
+  formRef.value?.resetFields()
 }
 
 /**

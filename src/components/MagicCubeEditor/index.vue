@@ -47,8 +47,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { propTypes } from '@/utils/propTypes'
-import * as vueTypes from 'vue-types'
+import type { PropType } from 'vue'
 import { Point, Rect, isContains, isOverlap, createRect } from './util'
 
 // 魔方编辑器
@@ -71,13 +70,13 @@ type Cube = Point & { active: boolean }
 // 定义属性
 const props = defineProps({
   // 热区列表
-  modelValue: vueTypes.array<any>().isRequired,
+  modelValue: { type: Array as PropType<any[]>, required: true },
   // 行数，默认 4 行
-  rows: propTypes.number.def(4),
+  rows: { type: Number, default: 4 },
   // 列数，默认 4 列
-  cols: propTypes.number.def(4),
+  cols: { type: Number, default: 4 },
   // 方块大小，单位px，默认75px
-  cubeSize: propTypes.number.def(75)
+  cubeSize: { type: Number, default: 75 }
 })
 
 // 魔方矩阵：所有的方块

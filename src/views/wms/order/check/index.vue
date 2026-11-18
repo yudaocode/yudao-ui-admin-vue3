@@ -558,8 +558,11 @@ const resetQuery = () => {
 }
 
 /** 展开明细 */
-const handleExpandChange = async (row: CheckOrderVO, expandedRows: CheckOrderVO[]) => {
-  if (!row.id || !expandedRows.some((item) => item.id === row.id)) {
+const handleExpandChange = async (row: CheckOrderVO, expandedRows: CheckOrderVO[] | boolean) => {
+  const expanded = Array.isArray(expandedRows)
+    ? expandedRows.some((item) => item.id === row.id)
+    : expandedRows
+  if (!row.id || !expanded) {
     return
   }
   delete detailMap[row.id]

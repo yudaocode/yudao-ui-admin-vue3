@@ -1,44 +1,33 @@
 import type { App } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { useLocaleStoreWithOut } from '@/store/modules/locale'
-import type { I18n, I18nOptions } from 'vue-i18n'
-import { setHtmlPageLang } from './helper'
-// 支持的语言包体积很小，静态引入后切换语言无需再按需加载 chunk（避免加载失败触发整页刷新、丢失未保存的输入）
-import zhCN from '@/locales/zh-CN'
-import en from '@/locales/en'
+// 语言包与默认语言取自语言注册表；语言包仍为静态引入，切换语言无需加载 chunk
+import { DEFAULT_LOCALE, localeMessages } from '@/config/locale'
 
-export let i18n: ReturnType<typeof createI18n>
-
-const createI18nOptions = async (): Promise<I18nOptions> => {
-  const localeStore = useLocaleStoreWithOut()
-  const locale = localeStore.getCurrentLocale
-  const localeMap = localeStore.getLocaleMap
-
-  setHtmlPageLang(locale.lang)
-
-  localeStore.setCurrentLocale({
-    lang: locale.lang
-    // elLocale: elLocal
+const createAppI18n = (locale: LocaleType) =>
+  createI18n({
+    legacy: false,
+    locale,
+    // 当前语言缺失的文案回退到默认语言显示，而不是显示原始 key
+    fallbackLocale: DEFAULT_LOCALE,
+    messages: localeMessages,
+    missingWarn: false,
+    // 回退到默认语言时不告警
+    fallbackWarn: false
   })
 
-  return {
-    legacy: false,
-    locale: locale.lang,
-    fallbackLocale: locale.lang,
-    messages: {
-      'zh-CN': zhCN,
-      en
-    },
-    availableLocales: localeMap.map((v) => v.lang),
-    sync: true,
-    silentTranslationWarn: true,
-    missingWarn: false,
-    silentFallbackWarn: true
-  }
-}
+// 组合式 i18n 实例，供 @/hooks/web/useI18n、useLocale 在组件外使用
+export let i18n: ReturnType<typeof createAppI18n>
 
-export const setupI18n = async (app: App<Element>) => {
-  const options = await createI18nOptions()
-  i18n = createI18n(options) as I18n
+// 语言包为静态引入，安装过程无异步步骤，同步执行
+export const setupI18n = (app: App<Element>) => {
+  const localeStore = useLocaleStoreWithOut()
+  const lang = localeStore.getCurrentLocale.lang
+
+  // 写回规范化后的语言：缓存值不受支持时 store 已回退默认语言，这里同步缓存与 Element Plus 语言对象
+  localeStore.setCurrentLocale({ lang })
+  document.documentElement.lang = lang
+
+  i18n = createAppI18n(lang)
   app.use(i18n)
 }

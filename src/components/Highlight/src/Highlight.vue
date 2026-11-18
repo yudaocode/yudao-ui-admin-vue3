@@ -1,24 +1,45 @@
 <script lang="tsx">
-import { defineComponent, PropType, h, VNode } from 'vue'
-import { propTypes } from '@/utils/propTypes'
+import { defineComponent, getCurrentInstance, PropType, h, VNode } from 'vue'
 
 export default defineComponent({
   name: 'Highlight',
   props: {
-    tag: propTypes.string.def('span'),
+    tag: { type: String, default: 'span' },
     keys: {
       type: Array as PropType<string[]>,
       default: () => []
     },
-    color: propTypes.string.def('var(--el-color-primary)')
+    color: { type: String, default: 'var(--el-color-primary)' }
   },
   emits: ['click'],
   setup(props, { emit, slots }) {
-    // 每次命中单独创建节点，同一关键词多次出现不复用同一 VNode
+    const instance = getCurrentInstance()
+
+    // 调用方是否监听了 click：click 为声明的 emit，监听器不在 $attrs 中，从组件 vnode 原始 props 读取
+    const hasClickListener = () => {
+      const vnodeProps = instance?.vnode.props
+      return !!(vnodeProps?.onClick || vnodeProps?.onClickOnce)
+    }
+
+    // 每次命中单独创建节点，同一关键词多次出现不复用同一 VNode；
+    // 有 click 监听时，关键词同时可键盘聚焦并以 Enter / 空格触发；无监听时不产生无效的 Tab 停靠点
     const renderKey = (key: string) => {
+      const keyboardProps = hasClickListener()
+        ? {
+            role: 'button',
+            tabindex: 0,
+            onKeydown: (event: KeyboardEvent) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                emit('click', key)
+              }
+            }
+          }
+        : {}
       return h(
         'span',
         {
+          ...keyboardProps,
           onClick: () => {
             emit('click', key)
           },

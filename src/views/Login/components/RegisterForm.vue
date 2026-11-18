@@ -32,6 +32,7 @@
           <el-input
             v-model="registerData.registerForm.username"
             :placeholder="t('login.username')"
+            autocomplete="username"
             size="large"
             :prefix-icon="iconAvatar"
           />
@@ -52,7 +53,7 @@
           <el-input
             v-model="registerData.registerForm.password"
             type="password"
-            auto-complete="off"
+            autocomplete="new-password"
             :placeholder="t('login.password')"
             size="large"
             :prefix-icon="iconLock"
@@ -66,7 +67,7 @@
             v-model="registerData.registerForm.confirmPassword"
             type="password"
             size="large"
-            auto-complete="off"
+            autocomplete="new-password"
             :placeholder="t('login.checkPassword')"
             :prefix-icon="iconLock"
             show-password
@@ -98,9 +99,8 @@ import LoginFormTitle from './LoginFormTitle.vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useIcon } from '@/hooks/web/useIcon'
 import * as authUtil from '@/utils/auth'
-import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
-import { LoginStateEnum, useLoginState, useFormValid } from './useLogin'
+import { LoginStateEnum, resolveLoginRedirect, useLoginState, useFormValid } from './useLogin'
 
 defineOptions({ name: 'RegisterForm' })
 
@@ -112,7 +112,6 @@ const formLogin = ref()
 const { validForm } = useFormValid(formLogin)
 const { handleBackLogin, getLoginState } = useLoginState()
 const { currentRoute, push } = useRouter()
-const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
@@ -167,9 +166,15 @@ const registerData = reactive({
 })
 
 const loading = ref() // ElLoading.service 返回的实例
+// 注册进行中的同步锁：点击与验证码 success 重复回调只触发一次注册（与 LoginForm 一致）
+let registerPending = false
 // 提交注册
 const handleRegister = async (params: any) => {
-  loading.value = true
+  if (registerPending) {
+    return
+  }
+  registerPending = true
+  loginLoading.value = true
   try {
     if (registerData.tenantEnable) {
       await getTenantId()
@@ -205,16 +210,23 @@ const handleRegister = async (params: any) => {
     if (redirect.value.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      push({ path: redirect.value || permissionStore.addRouters[0].path })
+      // 与账号登录一致：整串交给路由解析，原样保留 query、hash；只接受站内绝对路径
+      await push(resolveLoginRedirect(redirect.value))
     }
   } finally {
+    registerPending = false
     loginLoading.value = false
-    loading.value.close()
+    // 校验失败、接口无返回或异常时，尚未创建 loading 实例
+    loading.value?.close()
+    loading.value = undefined
   }
 }
 
 // 获取验证码
 const getCode = async () => {
+  if (registerPending) {
+    return
+  }
   // 情况一，未开启：则直接注册
   if (registerData.captchaEnable === 'false') {
     await handleRegister({})
