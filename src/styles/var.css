@@ -1,7 +1,7 @@
 :root {
   --login-bg-color: #293146;
 
-  /* 尺寸：侧栏 224/72、一级导航栏 72、Logo 60、标签栏 38、外层内距 24 */
+  /* 尺寸：侧栏 224/72、一级导航栏 72、Logo 50、标签栏 38、外层内距 20 */
   --left-menu-max-width: 224px;
 
   --left-menu-min-width: 72px;
@@ -27,7 +27,7 @@
   /* left menu end */
 
   /* logo start */
-  --logo-height: 60px;
+  --logo-height: 50px;
 
   --logo-title-text-color: #172033;
   /* logo end */
@@ -57,7 +57,7 @@
   --tab-menu-collapse-height: 36px;
   /* tab menu end */
 
-  --app-content-padding: 24px;
+  --app-content-padding: 20px;
 
   --app-content-bg-color: #f6f7fb;
 
@@ -120,13 +120,13 @@
  * html:root 的优先级高于 Element Plus 的 :root；html:root.dark 高于其 html.dark，与引入顺序无关。
  */
 html:root {
-  --el-color-primary: #5b5bd6;
-  --el-color-primary-light-3: #7c7cdf;
-  --el-color-primary-light-5: #9d9de8;
-  --el-color-primary-light-7: #c1c1f1;
-  --el-color-primary-light-8: #dadaf7;
-  --el-color-primary-light-9: #eef;
-  --el-color-primary-dark-2: #4949b8;
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a0cfff;
+  --el-color-primary-light-7: #c6e2ff;
+  --el-color-primary-light-8: #d9ecff;
+  --el-color-primary-light-9: #ecf5ff;
+  --el-color-primary-dark-2: #337ecc;
   --el-bg-color: #fff;
   --el-bg-color-page: #f6f7fb;
   --el-bg-color-overlay: #fff;
@@ -141,13 +141,13 @@ html:root {
 }
 
 html:root.dark {
-  --el-color-primary: #818cf8;
-  --el-color-primary-light-3: #747ee0;
-  --el-color-primary-light-5: #5e68bd;
-  --el-color-primary-light-7: #454e86;
-  --el-color-primary-light-8: #343c67;
-  --el-color-primary-light-9: #252c49;
-  --el-color-primary-dark-2: #9aa2fa;
+  --el-color-primary: #409eff;
+  --el-color-primary-light-3: #3375b9;
+  --el-color-primary-light-5: #2a598a;
+  --el-color-primary-light-7: #213d5b;
+  --el-color-primary-light-8: #1d3043;
+  --el-color-primary-light-9: #18222b;
+  --el-color-primary-dark-2: #66b1ff;
   --el-bg-color: #151e30;
   --el-bg-color-page: #0b1120;
   --el-bg-color-overlay: #1b2538;

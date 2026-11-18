@@ -175,10 +175,10 @@ export const useAppStore = defineStore('app', {
       // 已显式自定义的主题部分（见 resolveCustomThemeParts），只有显式设置主题时才会增加
       customThemeParts: resolveCustomThemeParts(),
       // 已保存的主题缓存原样使用；仅无缓存时采用默认主题对象（仅作展示与拷贝，未自定义的部分不按它渲染）：
-      // 上游主色 #5b5bd6 + 浅色菜单（选中背景为主色 10%，Logo 标题 #172033）
+      // 主色 #409eff + 浅色菜单（选中背景为主色 10%，Logo 标题 #172033）
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
-        elColorPrimary: '#5b5bd6',
+        elColorPrimary: '#409eff',
         // 左侧菜单边框颜色
         leftMenuBorderColor: '#eee',
         // 左侧菜单背景颜色
@@ -186,9 +186,9 @@ export const useAppStore = defineStore('app', {
         // 左侧菜单浅色背景颜色
         leftMenuBgLightColor: '#fff',
         // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: 'RGBA(91,91,214,0.1)',
+        leftMenuBgActiveColor: 'RGBA(64,158,255,0.1)',
         // 左侧菜单收起选中背景颜色
-        leftMenuCollapseBgActiveColor: 'RGBA(91,91,214,0.1)',
+        leftMenuCollapseBgActiveColor: 'RGBA(64,158,255,0.1)',
         // 左侧菜单字体颜色
         leftMenuTextColor: '#333',
         // 左侧菜单选中字体颜色

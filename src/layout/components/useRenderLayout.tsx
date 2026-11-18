@@ -59,7 +59,8 @@ export const useRenderLayout = () => {
               class={[
                 'bg-[var(--left-menu-bg-color)] relative',
                 {
-                  '!pl-0': mobile.value && collapse.value,
+                  // 移动端收起时侧栏宽度为 0：裁掉 Logo 链接左右内距撑出的区域，避免遮挡并截获工具栏折叠按钮的点击
+                  '!pl-0 overflow-hidden': mobile.value && collapse.value,
                   'w-[var(--left-menu-min-width)]': appStore.getCollapse,
                   'w-[var(--left-menu-max-width)]': !appStore.getCollapse
                 }

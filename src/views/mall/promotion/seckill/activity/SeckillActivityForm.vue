@@ -55,7 +55,7 @@
                 v-for="item in seckillConfigList"
                 :key="item.id"
                 v-bind="omit(item, ['label', 'value'])"
-                :label="t(item.name)"
+                :label="item.name"
                 :value="item.id"
               />
             </el-select>
