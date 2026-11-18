@@ -102,10 +102,20 @@
           </el-button>
         </div>
       </div>
+      <!-- 锁定：仍可查看全部属性，解锁后再调整 -->
+      <el-alert
+        v-if="object.locked"
+        type="warning"
+        :closable="false"
+        show-icon
+        title="已锁定：可查看属性，解锁后再调整"
+        class="mb-8px"
+      />
       <el-form-item label="名称">
         <el-input
           v-model="formData.name"
           maxlength="100"
+          :disabled="object.locked"
           @change="commit('patch-object', { name: formData.name.trim() || object.name })"
         />
       </el-form-item>
@@ -114,6 +124,7 @@
           <el-color-picker
             v-model="formData.color"
             :clearable="false"
+            :disabled="object.locked"
             @change="commit('patch-object', { color: formData.color || object.color })"
           />
           <el-switch
@@ -210,6 +221,7 @@
           <div class="w-full">
             <el-checkbox
               v-model="formData.autoFace"
+              :disabled="object.locked"
               @change="commit('patch-object', { autoFace: formData.autoFace })"
             >
               沿移动方向自动转身
@@ -217,6 +229,7 @@
             <el-select
               v-model="formData.lookAtId"
               placeholder="注视对象"
+              :disabled="object.locked"
               class="mt-4px !w-full"
               @change="commit('patch-object', { lookAtId: formData.lookAtId || undefined })"
             >

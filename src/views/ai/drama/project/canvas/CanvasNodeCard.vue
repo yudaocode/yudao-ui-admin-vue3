@@ -57,6 +57,7 @@
 import { Handle, Position } from '@vue-flow/core'
 import { DICT_TYPE } from '@/utils/dict'
 import {
+  DRAMA_CANVAS_ICONS as ICONS,
   DRAMA_CANVAS_LABELS,
   DRAMA_IMAGE_PURPOSES,
   DramaCanvasKind,
@@ -74,15 +75,6 @@ const props = defineProps<{
   videoUrl?: string
 }>()
 
-const ICONS: Record<DramaCanvasKind, string> = {
-  text: 'ep:edit-pen',
-  script: 'ep:document',
-  image: 'ep:picture',
-  video: 'ep:video-camera',
-  audio: 'ep:microphone',
-  previs: 'ep:film',
-  group: 'ep:folder'
-}
 const PLACEHOLDERS: Record<DramaCanvasKind, string> = {
   text: '写下故事、对白或制作笔记',
   script: '编写剧本，或连接文本节点',

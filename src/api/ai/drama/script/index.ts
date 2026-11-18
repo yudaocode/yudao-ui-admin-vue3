@@ -1,4 +1,8 @@
+import { fetchEventSource } from '@microsoft/fetch-event-source'
+
 import request from '@/config/axios'
+import { config } from '@/config/axios/config'
+import { getAccessToken, getTenantId, getVisitTenantId } from '@/utils/auth'
 import type { DramaStoryboardVO } from '@/api/ai/drama/storyboard'
 
 // AI 短剧剧本 VO
@@ -18,6 +22,44 @@ export interface DramaScriptVO {
 }
 
 const GENERATE_TIMEOUT = 5 * 60 * 1000 // 同步调用模型生成，超时时间放宽到 5 分钟
+
+/**
+ * 流式请求的身份头：与 axios 请求拦截器（src/config/axios/service.ts）的条件一致
+ *
+ * 1. 有访问令牌时带 Authorization
+ * 2. 开启租户时带 tenant-id；已登录（带 Authorization）且选了访问租户时，再带 visit-tenant-id
+ */
+const buildStreamHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const accessToken = getAccessToken()
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`
+  }
+  if (import.meta.env.VITE_APP_TENANT_ENABLE === 'true') {
+    const tenantId = getTenantId()
+    if (tenantId) {
+      headers['tenant-id'] = String(tenantId)
+    }
+    const visitTenantId = getVisitTenantId()
+    if (headers.Authorization && visitTenantId) {
+      headers['visit-tenant-id'] = String(visitTenantId)
+    }
+  }
+  return headers
+}
+
+// 从故事想法创建项目 Request VO：项目设置与故事想法；名称为空时使用生成的剧名
+export interface DramaScriptCreateReqVO {
+  name?: string
+  description?: string
+  idea: string
+  style?: number
+  aestheticSkillId?: number
+  directorSkillId?: number
+  storyboardSkillIds?: number[]
+  composeAspectRatio?: string
+  modelId?: number
+}
 
 // AI 短剧剧本 API
 export const DramaScriptApi = {
@@ -88,6 +130,31 @@ export const DramaScriptApi = {
       url: `/ai/drama/script/generate-acting-notes`,
       data: { projectId, modelId },
       timeout: GENERATE_TIMEOUT
+    })
+  },
+  // 从故事想法创建项目：流式生成初版剧本；data 生成中为增量文本 content，最后一条为项目编号 projectId
+  createProjectStream: ({
+    data,
+    onMessage,
+    onError,
+    onClose,
+    ctrl
+  }: {
+    data: DramaScriptCreateReqVO
+    onMessage?: (res: any) => void
+    onError?: (...args: any[]) => void
+    onClose?: (...args: any[]) => void
+    ctrl: AbortController
+  }) => {
+    return fetchEventSource(`${config.base_url}/ai/drama/script/create-stream`, {
+      method: 'post',
+      headers: buildStreamHeaders(),
+      openWhenHidden: true,
+      body: JSON.stringify(data),
+      onmessage: onMessage,
+      onerror: onError,
+      onclose: onClose,
+      signal: ctrl.signal
     })
   },
   // 规划关键帧：生成关键帧画面描述与画面焦点

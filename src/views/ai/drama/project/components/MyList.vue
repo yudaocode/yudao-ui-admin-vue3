@@ -39,6 +39,9 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button type="primary" plain @click="emit('create')">
+          <Icon icon="ep:plus" class="mr-5px" /> 新建项目
+        </el-button>
       </el-form-item>
     </el-form>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
@@ -105,7 +108,7 @@ import { DramaProjectApi, DramaProjectVO } from '@/api/ai/drama/project'
 /** AI 短剧：我的项目 */
 defineOptions({ name: 'AiDramaMyList' })
 
-const emit = defineEmits(['edit']) // 进入项目表单
+const emit = defineEmits(['edit', 'create']) // 进入项目表单、新建页
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

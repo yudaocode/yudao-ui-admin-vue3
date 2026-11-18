@@ -34,6 +34,8 @@ export interface DramaProjectVO {
   composeStoryboardCount?: number // 成片镜头数：成片实际拼接的
   composeErrorMessage?: string // 合成失败原因
   composeFinishTime?: Date // 成片完成时间
+  composeStale?: boolean // 成片是否待重新合成：实际合成输入（参与的镜头视频、镜头增删）已变化；只在项目详情返回
+  composeStaleReason?: string // 待重新合成的原因，例如「镜头视频已更换」
   storyboardCount?: number // 镜头数
   storyboardSuccessCount?: number // 视频已完成的镜头数
   createTime?: Date // 创建时间

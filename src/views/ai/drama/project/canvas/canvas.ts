@@ -64,6 +64,26 @@ export const DRAMA_CANVAS_LABELS: Record<DramaCanvasKind, string> = {
   group: '分组'
 }
 
+export const DRAMA_CANVAS_ICONS: Record<DramaCanvasKind, string> = {
+  text: 'ep:edit-pen',
+  script: 'ep:document',
+  image: 'ep:picture',
+  video: 'ep:video-camera',
+  audio: 'ep:microphone',
+  previs: 'ep:film',
+  group: 'ep:folder'
+}
+
+/** 可从工具条添加的节点：分组由「成组」产生 */
+export const DRAMA_CANVAS_ADD_KINDS: DramaCanvasKind[] = [
+  'text',
+  'script',
+  'image',
+  'video',
+  'audio',
+  'previs'
+]
+
 export const DRAMA_IMAGE_PURPOSES: { label: string; value: DramaImagePurpose }[] = [
   { label: '角色', value: 'character' },
   { label: '场景', value: 'location' },
@@ -150,6 +170,10 @@ export const getDramaConnectionIssue = (
   }
   return reaches(target) ? '连线不能形成循环' : ''
 }
+
+/** 可以作为该种节点下游的节点种类：从连接点拖到空白处时供选择 */
+export const getDramaCanvasDownstreamKinds = (kind: DramaCanvasKind) =>
+  DRAMA_CANVAS_ADD_KINDS.filter((item) => CANVAS_INPUTS[item].includes(kind))
 
 /** 获得节点的输入节点 */
 export const getDramaCanvasInputs = (doc: DramaCanvasDocument, id: string) =>

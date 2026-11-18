@@ -3,16 +3,12 @@
   <doc-alert title="AI 短剧制作" url="https://doc.iocoder.cn/ai/drama/" />
 
   <ContentWrap>
-    <div class="flex items-center justify-between">
-      <el-tabs v-model="activeTab" class="flex-1" @tab-change="handleTabChange">
-        <el-tab-pane label="我的项目" name="my" />
-        <el-tab-pane label="公开广场" name="public" />
-      </el-tabs>
-      <el-button v-if="activeTab === 'my'" type="primary" class="mb-14px" @click="openForm()">
-        <Icon icon="ep:plus" class="mr-5px" /> 新建项目
-      </el-button>
-    </div>
-    <MyList v-show="activeTab === 'my'" ref="myListRef" @edit="openForm" />
+    <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+      <el-tab-pane label="我的项目" name="my" />
+      <el-tab-pane label="公开广场" name="public" />
+    </el-tabs>
+    <!-- 「新建项目」在我的项目的查询操作区，与芋道其它列表的新增入口一致 -->
+    <MyList v-show="activeTab === 'my'" ref="myListRef" @edit="openForm" @create="openForm()" />
     <PublicList v-show="activeTab === 'public'" ref="publicListRef" />
   </ContentWrap>
 </template>

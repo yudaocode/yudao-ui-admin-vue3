@@ -59,6 +59,7 @@ export interface DramaStoryboardVO {
   videoModel?: string
   videoResolution?: string
   errorMessage?: string
+  planWarnings?: string[] // 规划提示：只在规划分镜时返回，例如角色指定的形象无法唯一匹配
   createTime?: Date
   updateTime?: Date
 }
@@ -99,7 +100,8 @@ export interface DramaStoryboardVoiceVO {
 
 // AI 短剧分镜 API
 export const DramaStoryboardApi = {
-  createStoryboard: async (data: any) => {
+  // 新增分镜：返回分镜编号
+  createStoryboard: async (data: any): Promise<number> => {
     return await request.post({ url: `/ai/drama/storyboard/create`, data })
   },
   updateStoryboard: async (data: any) => {

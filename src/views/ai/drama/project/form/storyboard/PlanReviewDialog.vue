@@ -35,6 +35,17 @@
           合计 {{ totalDuration }} 秒；当前已有 {{ detail.storyboards.length }} 个镜头
         </el-tag>
       </div>
+      <!-- 规划提示：例如角色指定的形象无法唯一匹配，已使用初始形象，导入前请检查 -->
+      <el-alert
+        v-if="planWarnings.length"
+        type="warning"
+        :closable="false"
+        show-icon
+        class="mb-12px"
+        :title="`有 ${planWarnings.length} 处需要检查`"
+      >
+        <div v-for="(item, index) in planWarnings" :key="index">{{ item }}</div>
+      </el-alert>
       <el-table :data="current" row-key="sceneNo" max-height="440px">
         <el-table-column label="#" type="index" width="50" align="center" />
         <el-table-column label="原文场次" width="80" align="center">
@@ -114,13 +125,25 @@ const emit = defineEmits<{ success: [] }>()
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false)
-const planning = ref(false)
 const importing = ref(false)
 const candidates = ref<DramaStoryboardVO[][]>([])
 const candidateIndex = ref(0)
-const scriptId = ref<number>()
+/** 本次打开的项目、剧本：规划结果只写入同一项目、剧本的窗口，导入也以它为准 */
+const context = ref<{ projectId: number; scriptId?: number }>()
+const getContextKey = () =>
+  context.value ? `${context.value.projectId}:${context.value.scriptId}` : ''
+/** 进行中的规划：所属的项目、剧本；其它剧本的窗口中不算规划中 */
+let planRequestId = 0
+const planRequest = ref<{ id: number; key: string }>()
+const planning = computed(() => !!planRequest.value && planRequest.value.key === getContextKey())
 
 const current = computed(() => candidates.value[candidateIndex.value] || [])
+/** 规划提示：带上第几个镜头 */
+const planWarnings = computed(() =>
+  current.value.flatMap((item, index) =>
+    (item.planWarnings || []).map((warning) => `第 ${index + 1} 镜「${item.title || ''}」：${warning}`)
+  )
+)
 const totalDuration = computed(() =>
   current.value.reduce((sum, item) => sum + (item.duration || 0), 0)
 )
@@ -144,26 +167,57 @@ const checkpoints = computed(() => {
 const getCharacterName = (characterId?: number) =>
   props.detail.characters.find((item) => item.id === characterId)?.name || '旁白'
 
-const open = () => {
+/**
+ * 打开：规划结果只保存在本次打开的窗口中
+ *
+ * @param options.autoPlan 是否立即开始规划（「从剧本生成分镜」）；同一项目、剧本上一次的规划仍在进行时，沿用它的结果；
+ *        其它剧本（例如剧本已有新版本）的规划结果到达后丢弃
+ */
+const open = (options?: { autoPlan?: boolean }) => {
   candidates.value = []
   candidateIndex.value = 0
-  scriptId.value = props.detail.script?.id
+  context.value = { projectId: props.detail.project.id, scriptId: props.detail.script?.id }
   dialogVisible.value = true
+  if (options?.autoPlan) {
+    handlePlan()
+  }
 }
 defineExpose({ open })
 
+/** 规划：多场剧本按场逐场规划（后端），只返回不保存；导入确认前原分镜保留 */
 const handlePlan = async () => {
-  planning.value = true
+  const key = getContextKey()
+  if (!context.value || planning.value) {
+    return
+  }
+  const id = ++planRequestId
+  planRequest.value = { id, key }
+  const { projectId, scriptId } = context.value
   try {
-    const list = await DramaScriptApi.planStoryboardList(props.detail.project.id, props.chatModelId)
+    const list = await DramaScriptApi.planStoryboardList(projectId, props.chatModelId)
+    // 已关闭窗口、或已打开其它项目、剧本的窗口：丢弃，不保存
+    if (!dialogVisible.value || key !== getContextKey()) {
+      return
+    }
+    // 规划期间剧本有了新版本：返回的分镜不属于发起时的剧本，丢弃
+    if (list.some((item) => item.scriptId && item.scriptId !== scriptId)) {
+      message.warning('剧本已有新版本，请关闭后重新规划分镜')
+      return
+    }
     candidates.value.push(list)
     candidateIndex.value = candidates.value.length - 1
   } finally {
-    planning.value = false
+    if (planRequest.value?.id === id) {
+      planRequest.value = undefined
+    }
   }
 }
 
 const handleImport = async () => {
+  // 以发起导入时的项目、剧本、方案为准：确认期间窗口变化（关闭、打开其它剧本、切换方案）时不导入
+  const key = getContextKey()
+  const { projectId, scriptId } = context.value!
+  const storyboards = current.value
   try {
     await message.confirm(
       `导入后替换当前剧本的全部 ${props.detail.storyboards.length} 个镜头（包括已生成的关键帧、视频），是否继续？`
@@ -171,13 +225,14 @@ const handleImport = async () => {
   } catch {
     return
   }
+  if (!dialogVisible.value || key !== getContextKey() || storyboards !== current.value) {
+    message.warning('规划窗口已变化，请重新确认导入')
+    return
+  }
   importing.value = true
   try {
-    await DramaScriptApi.importStoryboardList({
-      projectId: props.detail.project.id,
-      scriptId: scriptId.value!,
-      storyboards: current.value
-    })
+    // 剧本已有新版本时，后端拒绝导入
+    await DramaScriptApi.importStoryboardList({ projectId, scriptId: scriptId!, storyboards })
     message.success('已导入分镜')
     dialogVisible.value = false
     emit('success')

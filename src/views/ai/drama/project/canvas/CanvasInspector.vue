@@ -117,12 +117,6 @@
       v-if="node.kind !== 'text' && node.kind !== 'group'"
       class="border-t border-t-[var(--el-border-color-lighter)] border-t-solid p-12px"
     >
-      <div v-if="node.kind !== 'previs'" class="mb-8px flex justify-end gap-8px">
-        <el-button v-if="node.kind === 'script'" :disabled="busy" @click="emit('plan')">
-          拆分分镜
-        </el-button>
-        <el-button :disabled="busy" @click="emit('sync')">保存到项目</el-button>
-      </div>
       <el-button
         v-if="node.kind === 'previs'"
         type="primary"
@@ -131,15 +125,26 @@
       >
         打开 3D 导演
       </el-button>
-      <el-button
-        v-else-if="node.data.purpose !== 'frame'"
-        type="primary"
-        class="w-full"
-        :loading="busy"
-        @click="emit('generate')"
-      >
-        {{ GENERATE_LABELS[node.kind] }}
-      </el-button>
+      <template v-else>
+        <!-- 「保存到项目」写回节点关联的业务数据；画布布局在顶部「保存画布」 -->
+        <div class="mb-8px text-12px text-[var(--el-text-color-secondary)]">
+          「保存到项目」写回{{ BUSINESS_LABELS[node.kind] }}，不发起生成；画布在顶部保存
+        </div>
+        <div class="flex justify-end gap-8px">
+          <el-button v-if="node.kind === 'script'" :disabled="busy" @click="emit('plan')">
+            拆分分镜
+          </el-button>
+          <el-button :disabled="busy" @click="emit('sync')">保存到项目</el-button>
+          <el-button
+            v-if="node.data.purpose !== 'frame'"
+            type="primary"
+            :loading="busy"
+            @click="emit('generate')"
+          >
+            {{ generateLabel }}
+          </el-button>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -200,6 +205,19 @@ const GENERATE_LABELS: Partial<Record<DramaCanvasKind, string>> = {
   video: '保存并生成视频',
   audio: '保存并合成样音'
 }
+
+const BUSINESS_LABELS: Partial<Record<DramaCanvasKind, string>> = {
+  script: '项目剧本',
+  image: '项目资产',
+  video: '项目镜头',
+  audio: '角色声音'
+}
+/** 执行按钮：已保存为镜头的视频节点，再次生成即生成新版本 */
+const generateLabel = computed(() =>
+  props.node.kind === 'video' && props.node.data.business
+    ? '生成新版本'
+    : GENERATE_LABELS[props.node.kind]
+)
 
 const modelOptions = computed(() => {
   if (props.node.kind === 'image' && props.node.data.purpose !== 'frame') {

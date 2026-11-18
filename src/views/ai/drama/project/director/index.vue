@@ -8,25 +8,9 @@
     :before-close="handleClose"
   >
     <div v-loading="loading" class="h-[calc(100vh-120px)] flex flex-col">
-      <!-- 工具栏：编辑在左，保存在右 -->
+      <!-- 工具栏：编辑在左，保存在右；添加对象在左侧场景栏 -->
       <div class="flex flex-wrap items-center justify-between gap-8px pb-8px">
         <div class="flex flex-wrap items-center gap-8px">
-          <el-dropdown :disabled="busy" @command="(command) => handleAdd(command)">
-            <el-button type="primary" plain :disabled="busy">
-              <Icon icon="ep:plus" class="mr-5px" /> 添加对象
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item
-                  v-for="(label, kind) in directorKinds"
-                  :key="kind"
-                  :command="kind"
-                >
-                  {{ label }}
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
           <el-radio-group v-model="tool" size="default">
             <el-radio-button value="translate">移动</el-radio-button>
             <el-radio-button value="rotate">旋转</el-radio-button>
@@ -65,14 +49,12 @@
             <el-option label="9:16 竖屏" value="9:16" />
           </el-select>
           <el-dropdown :disabled="busy" @command="(command) => handlePreset(command)">
-            <el-button :disabled="busy">示例与工程</el-button>
+            <el-button :disabled="busy">
+              导入 / 导出 <Icon icon="ep:arrow-down" class="ml-5px" />
+            </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="sample">走位示例</el-dropdown-item>
-                <el-dropdown-item command="performance">表演示例</el-dropdown-item>
-                <el-dropdown-item command="battle">攻城示例</el-dropdown-item>
-                <el-dropdown-item command="clear" divided>清空场景</el-dropdown-item>
-                <el-dropdown-item command="export" divided>下载工程文件</el-dropdown-item>
+                <el-dropdown-item command="export">下载工程文件</el-dropdown-item>
                 <el-dropdown-item command="import">导入工程文件</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -80,9 +62,17 @@
           <el-button :disabled="busy" @click="captureRef.open()">参考视频动作</el-button>
         </div>
         <div class="flex items-center gap-8px">
-          <span class="text-12px text-[var(--el-text-color-secondary)]">
-            {{ dirty ? '有未保存的修改' : revision ? `已保存 · 修订 ${revision}` : '尚未保存' }}
+          <span
+            class="text-12px"
+            :class="
+              autoSave.paused.value
+                ? 'text-[var(--el-color-danger)]'
+                : 'text-[var(--el-text-color-secondary)]'
+            "
+          >
+            {{ saveStatus }}
           </span>
+          <el-checkbox v-model="autoSave.enabled.value">自动保存</el-checkbox>
           <el-button
             type="primary"
             :loading="saving"
@@ -97,37 +87,117 @@
       <div
         class="min-h-0 flex flex-1 overflow-hidden border border-[var(--el-border-color-lighter)] border-solid"
       >
-        <!-- 场景对象 -->
-        <el-scrollbar
-          class="w-200px border-r border-r-[var(--el-border-color-lighter)] border-r-solid bg-[var(--el-bg-color)]"
+        <!-- 场景栏：直接添加对象；列表中选择，就地显示、隐藏、锁定、解锁；底部载入示例、清空场景 -->
+        <div
+          class="w-220px flex flex-col border-r border-r-[var(--el-border-color-lighter)] border-r-solid bg-[var(--el-bg-color)]"
         >
-          <div
-            class="director-object"
-            :class="{ 'is-selected': selected === 'camera' }"
-            @click="handleSelect('camera')"
-          >
-            <Icon icon="ep:camera" class="mr-6px" /> 摄影机
+          <div class="flex items-center justify-between px-12px pb-4px pt-10px">
+            <span class="text-13px font-600">场景</span>
+            <span class="text-12px text-[var(--el-text-color-secondary)]">
+              {{ doc.objects.length }} 个对象
+            </span>
           </div>
-          <div
-            v-for="item in doc.objects"
-            :key="item.id"
-            class="director-object"
-            :class="{ 'is-selected': selected === item.id, 'is-hidden': !item.visible }"
-            @click="handleSelect(item.id)"
-          >
-            <span
-              class="mr-6px inline-block h-10px w-10px rounded-2px"
-              :style="{ background: item.color }"
-            ></span>
-            <span class="flex-1 truncate">{{ item.name }}</span>
-            <Icon v-if="item.locked" icon="ep:lock" />
+          <div class="grid grid-cols-2 gap-4px px-8px pb-8px">
+            <el-button
+              v-for="(label, kind) in directorKinds"
+              :key="kind"
+              size="small"
+              class="!ml-0"
+              :disabled="busy"
+              @click="handleAdd(kind as DirectorKind)"
+            >
+              + {{ label }}
+            </el-button>
           </div>
-          <el-empty
-            v-if="!doc.objects.length"
-            description="添加人物白模、道具后，沿时间轴设置动作与机位"
-            :image-size="60"
-          />
-        </el-scrollbar>
+          <el-scrollbar
+            class="min-h-0 flex-1 border-t border-t-[var(--el-border-color-lighter)] border-t-solid"
+          >
+            <div
+              class="director-object"
+              :class="{ 'is-selected': selected === 'camera' }"
+              @click="handleSelect('camera')"
+            >
+              <Icon icon="ep:camera" class="mr-6px" />
+              <span class="flex-1">摄影机</span>
+              <span class="text-12px text-[var(--el-text-color-secondary)]">
+                {{ doc.camera.keys.length }} 帧
+              </span>
+            </div>
+            <div
+              v-for="item in doc.objects"
+              :key="item.id"
+              class="director-object"
+              :class="{ 'is-selected': selected === item.id, 'is-hidden': !item.visible }"
+              @click="handleSelect(item.id)"
+            >
+              <span
+                class="mr-6px inline-block h-10px w-10px shrink-0 rounded-2px"
+                :style="{ background: item.color }"
+              ></span>
+              <span class="flex-1 truncate">{{ item.name }}</span>
+              <el-tooltip :content="item.visible ? '隐藏' : '显示'" placement="top">
+                <el-button
+                  link
+                  :disabled="busy"
+                  @click.stop="patchObject(item.id, { visible: !item.visible })"
+                >
+                  <Icon :icon="item.visible ? 'ep:view' : 'ep:hide'" />
+                </el-button>
+              </el-tooltip>
+              <el-tooltip
+                :content="item.locked ? '解锁' : '锁定：仍可查看，解锁后再调整'"
+                placement="top"
+              >
+                <el-button
+                  link
+                  class="!ml-4px"
+                  :type="item.locked ? 'warning' : undefined"
+                  :disabled="busy"
+                  @click.stop="patchObject(item.id, { locked: !item.locked })"
+                >
+                  <Icon :icon="item.locked ? 'ep:lock' : 'ep:unlock'" />
+                </el-button>
+              </el-tooltip>
+            </div>
+            <el-empty
+              v-if="!doc.objects.length"
+              description="添加人物白模、道具后，沿时间轴设置动作与机位"
+              :image-size="60"
+            />
+          </el-scrollbar>
+          <div
+            class="border-t border-t-[var(--el-border-color-lighter)] border-t-solid px-8px py-8px"
+          >
+            <div v-if="sceneSummary" class="mb-6px text-12px text-[var(--el-text-color-secondary)]">
+              {{ sceneSummary }}
+            </div>
+            <div class="flex gap-4px">
+              <el-dropdown
+                class="flex-1"
+                :disabled="busy"
+                @command="(command) => handlePreset(command)"
+              >
+                <el-button size="small" class="w-full" :disabled="busy">
+                  载入示例 <Icon icon="ep:arrow-down" class="ml-4px" />
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="sample">走位示例</el-dropdown-item>
+                    <el-dropdown-item command="performance">表演示例</el-dropdown-item>
+                    <el-dropdown-item command="battle">攻城示例</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+              <el-button
+                size="small"
+                :disabled="busy || !doc.objects.length"
+                @click="handlePreset('clear')"
+              >
+                清空场景
+              </el-button>
+            </div>
+          </div>
+        </div>
         <DirectorViewport
           v-if="dialogVisible && !loading"
           class="flex-1"
@@ -280,6 +350,8 @@ import DirectorViewport from './DirectorViewport.vue'
 import DirectorTimeline from './DirectorTimeline.vue'
 import DirectorInspector from './DirectorInspector.vue'
 import DirectorCaptureDialog from './DirectorCaptureDialog.vue'
+import { useDramaAutoSave } from '../canvas/useAutoSave'
+import { until } from '@vueuse/core'
 
 /** AI 短剧：3D 导演 */
 defineOptions({ name: 'AiDramaDirector' })
@@ -292,13 +364,15 @@ const HISTORY_LIMIT = 50
 
 const dialogVisible = ref(false)
 const loading = ref(false)
+const loaded = ref(false) // 当前代次的工程是否已加载成功：只有加载成功的工程才能保存
 const saving = ref(false)
 const nodeId = ref('')
 const title = ref('')
 const revision = ref(0)
 const doc = ref<DirectorDocument>(emptyDirector())
 const savedJson = ref('')
-const dirty = computed(() => JSON.stringify(doc.value) !== savedJson.value)
+const docJson = computed(() => JSON.stringify(doc.value))
+const dirty = computed(() => docJson.value !== savedJson.value)
 const undoStack = ref<string[]>([])
 const redoStack = ref<string[]>([])
 
@@ -320,52 +394,111 @@ const busy = computed(() => exporting.value || loading.value)
 
 const end = computed(() => totalFrames(doc.value) - 1)
 const object = computed(() => doc.value.objects.find((item) => item.id === selected.value))
+/** 场景栏底部：已锁定、已隐藏的对象数 */
+const sceneSummary = computed(() => {
+  const locked = doc.value.objects.filter((item) => item.locked).length
+  const hidden = doc.value.objects.filter((item) => !item.visible).length
+  return [locked ? `${locked} 个已锁定` : '', hidden ? `${hidden} 个已隐藏` : '']
+    .filter(Boolean)
+    .join(' · ')
+})
 
 // ========== 打开、保存 ==========
 
+/** 等待进行中的保存结束：多个等待者依次醒来时，重新检查，保证同一时间只有一次保存 */
+const waitSaved = async () => {
+  while (saving.value) {
+    await until(saving).toBe(false)
+  }
+}
+
+/** 打开代次：每次打开递增；保存的回包只在代次不变（仍是同一次打开的同一节点）时写入修订号与保存基线 */
+let generation = 0
+
 /** 打开预演节点的导演工程；复制来的节点首次打开时，以来源节点的工程为初稿 */
 const open = async (id: string, nodeTitle: string, sourceNodeId?: string) => {
+  const current = ++generation
+  autoSave.cancel()
   dialogVisible.value = true
   nodeId.value = id
   title.value = nodeTitle
   loading.value = true
+  loaded.value = false
   try {
+    // 先等上一个工程在途的保存结束，再加载：不被旧的回包覆盖修订号
+    await waitSaved()
     const projectId = props.detail.project.id
     const data = await DramaCanvasApi.getDirector(projectId, id)
-    revision.value = data.revision
     let document = data.document
     if (!document && sourceNodeId) {
       document = (await DramaCanvasApi.getDirector(projectId, sourceNodeId)).document
     }
+    if (current !== generation) {
+      return
+    }
+    revision.value = data.revision
     doc.value = document ? validateDirector(document) : emptyDirector()
     savedJson.value = data.document ? JSON.stringify(doc.value) : ''
+    autoSave.reset()
     undoStack.value = []
     redoStack.value = []
     selected.value = ''
     frame.value = 0
+    loaded.value = true
+  } catch {
+    // 加载失败（错误提示由请求拦截器展示）：清掉上一个工程的内容并关闭窗口，不以旧工程编辑、保存到该节点
+    if (current === generation) {
+      doc.value = emptyDirector()
+      savedJson.value = JSON.stringify(doc.value)
+      autoSave.reset()
+      dialogVisible.value = false
+    }
   } finally {
-    loading.value = false
+    if (current === generation) {
+      loading.value = false
+    }
   }
 }
-defineExpose({ open })
 
-const handleSave = async () => {
+/**
+ * 保存工程：修订号不一致时后端拒绝
+ *
+ * 手动保存、自动保存依次进行：上一次未结束时先等待，避免以同一修订号重复提交；自动保存不弹成功提示；
+ * 调用时记录打开代次与节点：等待期间打开了（同一或另一节点的）工程、或正在加载时放弃保存，不把旧工程提交到新节点；
+ * 保存期间关闭后又打开了工程时，回包不再写入当前工程的修订号与保存基线
+ */
+const persist = async (silent = false) => {
+  const current = generation
+  const id = nodeId.value
+  // 检查与占用在同一同步段内完成：多个等待者醒来时，只有第一个能占用，其余继续等待
+  while (saving.value) {
+    await until(saving).toBe(false)
+  }
+  if (current !== generation || id !== nodeId.value || loading.value || !loaded.value) {
+    return false
+  }
   saving.value = true
   try {
-    // 以本次提交的文档为保存基线：保存期间的后续修改仍为未保存
+    // 以本次提交的文档为保存基线：保存期间的后续修改仍为未保存，回包只更新修订号
     const json = JSON.stringify(doc.value)
     const snapshot: DirectorDocument = JSON.parse(json)
-    revision.value = await DramaCanvasApi.saveDirector({
+    const nextRevision = await DramaCanvasApi.saveDirector({
       projectId: props.detail.project.id,
-      nodeId: nodeId.value,
+      nodeId: id,
       revision: revision.value,
       document: snapshot
     })
-    savedJson.value = json
-    message.success('导演工程已保存')
+    if (current === generation) {
+      revision.value = nextRevision
+      savedJson.value = json
+    }
+    if (!silent) {
+      message.success('导演工程已保存')
+    }
+    // 摘要写入保存的那个预演节点
     emit(
       'saved',
-      nodeId.value,
+      id,
       `${snapshot.objects.length} 个场景对象 · ${snapshot.camera.keys.length} 个机位关键帧 · ${snapshot.duration} 秒 ${snapshot.aspect}`
     )
     return true
@@ -376,21 +509,73 @@ const handleSave = async () => {
   }
 }
 
-const handleClose = async (done: () => void) => {
+const handleSave = async () => {
+  if (await persist()) {
+    autoSave.resume()
+  }
+}
+
+/** 自动保存：默认关闭，勾选后编辑停顿时保存；失败后暂停，手动保存成功后恢复 */
+const autoSave = useDramaAutoSave({
+  storageKey: 'ai-drama-director-auto-save',
+  snapshot: () => docJson.value,
+  dirty,
+  saving,
+  ready: () => dialogVisible.value && !busy.value && !saving.value,
+  save: () => persist(true)
+})
+
+const saveStatus = computed(() => {
+  if (saving.value) {
+    return '保存中…'
+  }
+  if (autoSave.paused.value && dirty.value) {
+    return '自动保存失败，已暂停，请检查后手动保存'
+  }
+  if (dirty.value) {
+    return '有未保存的修改'
+  }
+  return revision.value ? `已保存 · 修订 ${revision.value}` : '尚未保存'
+})
+
+/**
+ * 关闭工程前（关闭对话框、离开画布）：开启自动保存时立即保存，保存成功后直接关闭；
+ * 手动保存模式、自动保存失败时仍有未保存的修改，确认后关闭
+ *
+ * @return 是否可以关闭
+ */
+const confirmLeave = async () => {
+  if (!dialogVisible.value) {
+    return true
+  }
   if (exporting.value) {
     message.warning('视频正在导出，请先取消导出')
-    return
+    return false
   }
   stop()
-  if (dirty.value) {
-    try {
-      await message.confirm('导演工程有未保存的修改，确认关闭？')
-    } catch {
-      return
-    }
+  if (dirty.value && !loading.value && autoSave.enabled.value) {
+    await autoSave.flush()
   }
-  done()
+  if (!dirty.value) {
+    return true
+  }
+  try {
+    await message.confirm('导演工程有未保存的修改，确认关闭？')
+    return true
+  } catch {
+    return false
+  }
 }
+
+const handleClose = async (done: () => void) => {
+  if (await confirmLeave()) {
+    done()
+  }
+}
+
+/** 是否有未保存的修改：只算打开中的工程（关闭时已确认放弃的不算） */
+const unsaved = computed(() => dialogVisible.value && dirty.value)
+defineExpose({ open, confirmLeave, dirty: unsaved })
 
 // ========== 编辑：每次修改先校验，再记入撤销 ==========
 
@@ -848,6 +1033,8 @@ watch(dialogVisible, (value) => {
   if (!value) {
     stop()
     controller?.abort()
+    // 关闭时放弃排队中的自动保存：未保存的修改已由用户确认放弃
+    autoSave.cancel()
   }
 })
 onBeforeUnmount(() => {
