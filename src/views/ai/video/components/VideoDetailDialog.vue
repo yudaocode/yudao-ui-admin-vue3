@@ -1,4 +1,4 @@
-<!-- AI 视频：作品详情；创作页与视频管理共用 -->
+<!-- AI 视频：作品详情；创作页与视频生成管理共用 -->
 <template>
   <Dialog v-model="dialogVisible" :title="title" width="720px">
     <div v-loading="loading">
@@ -99,10 +99,10 @@ const emit = defineEmits<{ same: [item: VideoVO] }>()
 const dialogVisible = ref(false)
 const loading = ref(false)
 const detail = ref<VideoVO | null>()
-const scope = ref('mine') // 详情的来源：mine - 创作页（我的、公开作品）；admin - 视频管理
+const scope = ref('mine') // 详情的来源：mine - 创作页（我的、公开作品）；admin - 视频生成管理
 const title = computed(() => (scope.value === 'admin' ? '视频详情' : '作品详情'))
 
-/** 打开详情：重新查询；创作页本人可见输入文件，视频管理额外展示用户、密钥与服务商任务 */
+/** 打开详情：重新查询；创作页本人可见输入文件，视频生成管理额外展示用户、密钥与服务商任务 */
 const open = async (id: number, detailScope = 'mine') => {
   dialogVisible.value = true
   scope.value = detailScope

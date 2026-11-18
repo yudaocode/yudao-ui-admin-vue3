@@ -1,4 +1,4 @@
-<!-- AI 音乐管理：详情弹窗 -->
+<!-- AI 音乐生成管理：详情弹窗 -->
 <template>
   <Dialog v-model="dialogVisible" title="音乐详情" width="800px" @closed="stopPlay">
     <el-descriptions v-loading="loading" :column="2" :label-width="120" border>
@@ -125,7 +125,7 @@ import { MusicApi, MusicVO } from '@/api/ai/music'
 import { AiMusicStatusEnum, isAiMusicRunning } from '@/views/ai/utils/constants'
 import { formatMusicDuration } from '@/views/ai/utils/utils'
 
-/** AI 音乐管理：详情弹窗 */
+/** AI 音乐生成管理：详情弹窗 */
 defineOptions({ name: 'AiMusicDetail' })
 
 const message = useMessage() // 消息弹窗

@@ -51,7 +51,7 @@ export const SpeechApi = {
     return await request.delete({ url: '/ai/speech/delete-my?id=' + id })
   },
 
-  // ================ 语音管理 ================
+  // ================ 语音生成管理 ================
 
   // 获得语音分页
   getSpeechPage: async (params: any) => {

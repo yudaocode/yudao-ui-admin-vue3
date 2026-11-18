@@ -57,7 +57,7 @@ export const OcrApi = {
     return await request.delete({ url: '/ai/ocr/delete-my?id=' + id })
   },
 
-  // ================ OCR 管理 ================
+  // ================ 图片识别管理 ================
 
   // 获得识别记录分页
   getOcrPage: async (params: any) => {

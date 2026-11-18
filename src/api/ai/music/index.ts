@@ -112,13 +112,8 @@ export const MusicApi = {
     return await request.get({ url: '/ai/music/get-detail?id=' + id })
   },
 
-  // 修改【我的】音乐：名称、封面、是否公开
-  updateMyMusic: async (data: {
-    id: number
-    title?: string
-    coverUrl?: string
-    publicStatus?: boolean
-  }) => {
+  // 修改【我的】音乐：名称、封面
+  updateMyMusic: async (data: { id: number; title?: string; coverUrl?: string }) => {
     return await request.put({ url: '/ai/music/update-my', data })
   },
 
@@ -132,7 +127,7 @@ export const MusicApi = {
     return await request.post({ url: '/ai/music/play?id=' + id })
   },
 
-  // ========== 音乐管理 ==========
+  // ========== 音乐生成管理 ==========
 
   // 查询音乐分页
   getMusicPage: async (params: any) => {

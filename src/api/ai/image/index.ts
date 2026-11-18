@@ -198,10 +198,6 @@ export const ImageApi = {
   deleteImageMy: async (id: number) => {
     return await request.delete({ url: `/ai/image/delete-my?id=${id}` })
   },
-  // 公开 / 取消公开【我的】绘画记录
-  updateImagePublicMy: async (id: number, publicStatus: boolean) => {
-    return await request.put({ url: `/ai/image/update-public-my`, data: { id, publicStatus } })
-  },
 
   // ================ midjourney 专属 ================
 
@@ -226,7 +222,7 @@ export const ImageApi = {
     return await request.post({ url: `/ai/image/midjourney/modal`, data })
   },
 
-  // ================ 绘图管理 ================
+  // ================ 图片生成管理 ================
 
   // 查询绘画分页
   getImagePage: async (params: any) => {

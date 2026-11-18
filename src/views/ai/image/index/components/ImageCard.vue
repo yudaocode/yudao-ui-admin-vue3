@@ -88,7 +88,7 @@
         </div>
       </div>
 
-      <!-- 操作：常用的单行展示；公开、Midjourney 其它动作、删除收进「更多」 -->
+      <!-- 操作：常用的单行展示；Midjourney 其它动作、删除收进「更多」 -->
       <div class="mt-auto flex items-center gap-12px whitespace-nowrap">
         <el-button link type="primary" size="small" @click="emit('detail', image)">详情</el-button>
         <el-button
@@ -130,16 +130,9 @@
                   {{ getButtonText(button) }}
                 </el-dropdown-item>
                 <el-dropdown-item
-                  v-if="image.status === AiImageStatusEnum.SUCCESS"
-                  command="public"
-                  :divided="otherButtons.length > 0"
-                >
-                  {{ image.publicStatus ? '取消公开' : '公开' }}
-                </el-dropdown-item>
-                <el-dropdown-item
                   v-if="image.status !== AiImageStatusEnum.IN_PROGRESS"
                   command="delete"
-                  divided
+                  :divided="otherButtons.length > 0"
                 >
                   <span class="text-[var(--el-color-danger)]">删除</span>
                 </el-dropdown-item>
@@ -179,7 +172,7 @@ const props = defineProps({
     default: 'mine'
   }
 })
-const emit = defineEmits(['detail', 'public', 'regenerate', 'delete', 'inpaint', 'acted'])
+const emit = defineEmits(['detail', 'regenerate', 'delete', 'inpaint', 'acted'])
 
 const message = useMessage() // 消息弹窗
 
@@ -231,10 +224,10 @@ const handleDownload = () => {
   download.image({ url: props.image.picUrl })
 }
 
-/** 「更多」下拉：公开、删除，或 Midjourney 按钮 */
-const handleCommand = (command: 'public' | 'delete' | ImageMidjourneyButtonsVO) => {
-  if (command === 'public' || command === 'delete') {
-    emit(command, props.image)
+/** 「更多」下拉：删除，或 Midjourney 按钮 */
+const handleCommand = (command: 'delete' | ImageMidjourneyButtonsVO) => {
+  if (command === 'delete') {
+    emit('delete', props.image)
     return
   }
   handleAction(command)

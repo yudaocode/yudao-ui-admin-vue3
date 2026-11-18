@@ -250,7 +250,7 @@ const getImageModels = async () => {
 }
 
 /** 选择材料：校验后立即上传到文件服务，成功后记录 fileUrl */
-const { httpRequest } = useUpload('ai/ppt')
+const { httpRequest } = useUpload()
 const uploadFile = ref<{ raw: File; uploading: boolean }>() // 已选的材料
 const handleFileChange = async (file: UploadFile) => {
   const raw = file.raw

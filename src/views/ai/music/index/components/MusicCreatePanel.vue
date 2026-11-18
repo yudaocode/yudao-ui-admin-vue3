@@ -395,7 +395,7 @@ const cancelExtend = () => {
 defineExpose({ setExtendSource })
 
 /** 上传音频：先上传到文件服务，再提交上传任务 */
-const { httpRequest: uploadFile } = useUpload('ai/music')
+const { httpRequest: uploadFile } = useUpload()
 const uploading = ref(false)
 const MAX_UPLOAD_MB = 50
 const beforeUpload = (file: File) => {

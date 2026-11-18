@@ -101,7 +101,7 @@ import { VideoApi, VideoVO } from '@/api/ai/video'
 import { isAiVideoRunning } from '@/views/ai/utils/constants'
 import VideoCreatePanel from './components/VideoCreatePanel.vue'
 import VideoList from './components/VideoList.vue'
-import VideoDetailDialog from './components/VideoDetailDialog.vue'
+import VideoDetailDialog from '../components/VideoDetailDialog.vue'
 
 /** AI 视频：用户创作页 */
 defineOptions({ name: 'AiVideo' })

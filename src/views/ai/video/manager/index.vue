@@ -191,7 +191,6 @@
   </ContentWrap>
 
   <!-- 详情 -->
-  <!-- TODO DONE @AI：拆分下（已改为复用创作页的 VideoDetailDialog，参考图片管理复用 ImageDetail；admin 范围展示用户、密钥与服务商任务） -->
   <VideoDetailDialog ref="detailRef" />
 </template>
 
@@ -202,9 +201,9 @@ import { checkPermi } from '@/utils/permission'
 import { VideoApi, VideoVO } from '@/api/ai/video'
 import UserSelect from '@/views/system/user/components/UserSelect.vue'
 import { AiVideoStatusEnum, isAiVideoRunning } from '@/views/ai/utils/constants'
-import VideoDetailDialog from '../index/components/VideoDetailDialog.vue'
+import VideoDetailDialog from '../components/VideoDetailDialog.vue'
 
-/** AI 视频管理 */
+/** AI 视频生成管理 */
 defineOptions({ name: 'AiVideoManager' })
 
 const message = useMessage() // 消息弹窗

@@ -23,10 +23,7 @@ export const AiPlatformEnum = {
   STABILITYAI: 'STABILITYAI', // Stability AI
   MIDJOURNEY: 'MIDJOURNEY', // Midjourney
   SUNO: 'SUNO', // Suno AI
-  // TODO DONE @AI：希望整合到腾讯、百度、豆包？你感觉我要不要修改下标志？YI_YAN 改成百度，它其实是文心一言（然后相关的包名都改了）tencent（已合并：平台标识改为 TENCENT、BAIDU、BYTEDANCE，文字识别按模型类型区分；包名、类名未改）
   TENCENT: 'TENCENT', // 腾讯
-  // TODO DONE @AI：这个也是噢，它其实是百度；（已并入上面的 BAIDU）
-  // TODO DONE @AI：火山引擎的包，字节？bytedance？这样就整体统一了。当然，讯飞那也要改；（已改为 BYTEDANCE；讯飞改为 IFLYTEK）
   BYTEDANCE: 'BYTEDANCE', // 字节
   MINIMAX: 'MINIMAX', // MiniMax
   KLING: 'KLING', // 可灵

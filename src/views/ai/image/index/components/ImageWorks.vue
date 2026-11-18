@@ -28,7 +28,6 @@
           :image="item"
           :scope="activeTab"
           @detail="handleDetail"
-          @public="handlePublic"
           @regenerate="(image: ImageVO) => emit('regenerate', image)"
           @delete="handleDelete"
           @inpaint="(image: ImageVO) => maskDialogRef?.open(image)"
@@ -125,23 +124,6 @@ const refreshMine = () => {
 const detailRef = ref<InstanceType<typeof ImageDetail>>()
 const handleDetail = (image: ImageVO) => {
   detailRef.value?.open(image.id, activeTab.value)
-}
-
-/** 公开、取消公开 */
-const handlePublic = async (image: ImageVO) => {
-  const publicStatus = !image.publicStatus
-  try {
-    await message.confirm(
-      publicStatus
-        ? '确认公开该作品？公开后同租户的用户可在公开画廊看到'
-        : '确认取消公开？取消后公开画廊不再展示'
-    )
-  } catch {
-    return
-  }
-  await ImageApi.updateImagePublicMy(image.id, publicStatus)
-  message.success(publicStatus ? '已公开' : '已取消公开')
-  await getList(true)
 }
 
 /** 删除 */

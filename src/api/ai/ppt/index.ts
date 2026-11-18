@@ -110,7 +110,7 @@ export const PptApi = {
     return await request.delete({ url: '/ai/ppt/delete-my?id=' + id })
   },
 
-  // ========== PPT 管理 ==========
+  // ========== PPT 生成管理 ==========
 
   // 查询 PPT 分页
   getPptPage: async (params: any) => {

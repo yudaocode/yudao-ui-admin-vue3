@@ -158,15 +158,6 @@
               <el-button link type="primary" @click="emit('edit', item)">
                 <Icon icon="ep:edit" class="mr-2px" /> 编辑
               </el-button>
-              <span class="inline-flex items-center text-12px text-[var(--el-text-color-regular)]">
-                公开
-                <el-switch
-                  :model-value="item.publicStatus"
-                  size="small"
-                  class="ml-4px"
-                  @change="(value) => emit('public', item, value as boolean)"
-                />
-              </span>
             </template>
             <el-button
               link
@@ -214,7 +205,6 @@ const emit = defineEmits<{
   concat: [item: MusicVO]
   edit: [item: MusicVO]
   delete: [item: MusicVO]
-  public: [item: MusicVO, value: boolean]
 }>()
 
 /** 是否可播放：已完成且有音频 */

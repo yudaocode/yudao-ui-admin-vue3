@@ -1,4 +1,4 @@
-<!-- AI 语音管理：详情弹窗；只查看，不提供再次生成 -->
+<!-- AI 语音生成管理：详情弹窗；只查看，不提供再次生成 -->
 <template>
   <Dialog v-model="dialogVisible" title="语音详情" width="800px" @closed="stopPlay">
     <el-descriptions v-loading="loading" :column="2" :label-width="120" border>
@@ -74,7 +74,7 @@ import {
   getSpeechVoiceLabel
 } from '@/views/ai/utils/speech'
 
-/** AI 语音管理：详情弹窗 */
+/** AI 语音生成管理：详情弹窗 */
 defineOptions({ name: 'AiSpeechDetail' })
 
 const message = useMessage() // 消息弹窗

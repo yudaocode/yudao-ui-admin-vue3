@@ -50,7 +50,6 @@
             @concat="handleConcat"
             @edit="openEdit"
             @delete="handleDelete"
-            @public="handlePublic"
           />
           <MusicList
             v-else
@@ -243,13 +242,6 @@ const handleDelete = async (item: MusicVO) => {
     playerRef.value?.close()
   }
   await getMyList()
-}
-
-/** 公开 / 取消公开 */
-const handlePublic = async (item: MusicVO, value: boolean) => {
-  await MusicApi.updateMyMusic({ id: item.id, publicStatus: value })
-  item.publicStatus = value
-  message.success(value ? '已公开到音乐广场' : '已取消公开')
 }
 
 // ========== 轮询 ==========

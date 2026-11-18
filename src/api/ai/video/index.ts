@@ -88,7 +88,7 @@ export const VideoApi = {
     return await request.delete({ url: '/ai/video/delete-my?id=' + id })
   },
 
-  // ========== 视频管理 ==========
+  // ========== 视频生成管理 ==========
 
   // 查询视频分页
   getVideoPage: async (params: any) => {
