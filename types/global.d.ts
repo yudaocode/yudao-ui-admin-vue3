@@ -13,7 +13,7 @@ declare global {
 
   type ComponentRef<T extends abstract new (...args: any) => any> = InstanceType<T>
 
-  // 支持的语言由 src/config/locale.ts 语言注册表推导（参考上游 c7f8db52d、14d2bec7b 的 LocaleCode）
+  // 支持的语言由 src/config/locale.ts 语言注册表推导
   type LocaleType = import('@/config/locale').LocaleCode
 
   declare type TimeoutHandle = ReturnType<typeof setTimeout>

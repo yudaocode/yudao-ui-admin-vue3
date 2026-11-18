@@ -14,7 +14,7 @@ const { wsCache } = useCache()
 
 /**
  * 主题分为主色、菜单、头部三部分：用户显式设置过的部分（customThemeParts）按已保存颜色以内联变量渲染；
- * 未设置的部分不写内联，由 var.css 按明暗提供默认值（参考上游 e66532cf9 var.css，上游已无 JS 主题引擎）
+ * 未设置的部分不写内联，由 var.css 按明暗提供默认值
  */
 export type ThemePart = 'primary' | 'menu' | 'header'
 
@@ -67,7 +67,7 @@ const resolveCustomThemeParts = (): ThemePart[] => {
   return [...THEME_PARTS]
 }
 
-// 按菜单背景色推导菜单主题（原 setMenuTheme 规则，由 Setting 移入，参考上游 59d4ed4dd）
+// 按菜单背景色推导菜单主题（原 setMenuTheme 规则，由 Setting 移入）
 const getMenuThemeByColor = (color: string): Recordable => {
   const primaryColor = useCssVar('--el-color-primary', document.documentElement)
   const isDarkColor = colorIsDark(color)
@@ -150,9 +150,9 @@ export const useAppStore = defineStore('app', {
 
       breadcrumb: true, // 面包屑
       breadcrumbIcon: true, // 面包屑图标
-      // 折叠菜单：刷新后恢复桌面端上次的折叠状态（参考上游 c7f8db52d 持久化 collapse），只认布尔 true
+      // 折叠菜单：刷新后恢复桌面端上次的折叠状态，只认布尔 true
       collapse: wsCache.get(CACHE_KEY.COLLAPSE) === true,
-      uniqueOpened: false, // 是否只保持一个子菜单的展开（默认值对齐最新上游 config/app.ts）
+      uniqueOpened: false, // 是否只保持一个子菜单的展开
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
       search: true, // 搜索图标
@@ -175,10 +175,10 @@ export const useAppStore = defineStore('app', {
       // 已显式自定义的主题部分（见 resolveCustomThemeParts），只有显式设置主题时才会增加
       customThemeParts: resolveCustomThemeParts(),
       // 已保存的主题缓存原样使用；仅无缓存时采用默认主题对象（仅作展示与拷贝，未自定义的部分不按它渲染）：
-      // 上游主色 #5b5bd6 + 浅色菜单（选中背景为主色 10%，Logo 标题 #172033）
+      // 主色 #409eff + 浅色菜单（选中背景为主色 10%，Logo 标题 #172033）
       theme: wsCache.get(CACHE_KEY.THEME) || {
         // 主题色
-        elColorPrimary: '#5b5bd6',
+        elColorPrimary: '#409eff',
         // 左侧菜单边框颜色
         leftMenuBorderColor: '#eee',
         // 左侧菜单背景颜色
@@ -186,9 +186,9 @@ export const useAppStore = defineStore('app', {
         // 左侧菜单浅色背景颜色
         leftMenuBgLightColor: '#fff',
         // 左侧菜单选中背景颜色
-        leftMenuBgActiveColor: 'RGBA(91,91,214,0.1)',
+        leftMenuBgActiveColor: 'RGBA(64,158,255,0.1)',
         // 左侧菜单收起选中背景颜色
-        leftMenuCollapseBgActiveColor: 'RGBA(91,91,214,0.1)',
+        leftMenuCollapseBgActiveColor: 'RGBA(64,158,255,0.1)',
         // 左侧菜单字体颜色
         leftMenuTextColor: '#333',
         // 左侧菜单选中字体颜色
@@ -295,12 +295,14 @@ export const useAppStore = defineStore('app', {
     setPrimaryLight() {
       if (this.customThemeParts.includes('primary') && this.theme.elColorPrimary) {
         const elColorPrimary = this.theme.elColorPrimary
-        const color = this.isDark ? '#000000' : '#ffffff'
+        // 与 Element Plus 一致：light-* 明色混白、暗色混暗色背景 #141414；dark-2 明色混黑、暗色混白
+        const lightBase = this.isDark ? '#141414' : '#ffffff'
+        const darkBase = this.isDark ? '#ffffff' : '#000000'
         const lightList = [3, 5, 7, 8, 9]
         lightList.forEach((v) => {
-          setCssVar(`--el-color-primary-light-${v}`, mix(color, elColorPrimary, v / 10))
+          setCssVar(`--el-color-primary-light-${v}`, mix(lightBase, elColorPrimary, v / 10))
         })
-        setCssVar(`--el-color-primary-dark-2`, mix(color, elColorPrimary, 0.2))
+        setCssVar(`--el-color-primary-dark-2`, mix(darkBase, elColorPrimary, 0.2))
       } else {
         // 未自定义主色：主色及色阶由 var.css 按明暗提供
         removeCssVar('--el-color-primary')
@@ -395,9 +397,20 @@ export const useAppStore = defineStore('app', {
         return
       }
       this.layout = normalizedLayout
-      wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      // 移动端强制的 sidebar-nav 只用于显示，不写入缓存，回到桌面端由 restoreLayout 恢复用户选择的布局
+      if (!this.mobile) {
+        wsCache.set(CACHE_KEY.LAYOUT, this.layout)
+      }
       // 顶部导航布局的菜单跟随头部色显示：只重新渲染，不改已保存的主题
       this.setCssVarTheme()
+    },
+    // 从移动端回到桌面端时，恢复缓存中用户选择的布局
+    restoreLayout() {
+      const layout = normalizeLayout(wsCache.get(CACHE_KEY.LAYOUT))
+      if (layout !== this.layout) {
+        this.layout = layout
+        this.setCssVarTheme()
+      }
     },
     setTitle(title: string) {
       this.title = title
@@ -468,12 +481,12 @@ export const useAppStore = defineStore('app', {
         removeCssVar('--top-tool-dark-bg-color')
       }
     },
-    // 按头部背景色设置头部主题（显式选色，由 Setting 移入，参考上游 59d4ed4dd）；
+    // 按头部背景色设置头部主题（显式选色，由 Setting 移入）；
     // 顶部导航布局下菜单显示跟随头部色由 setCssVarTheme 渲染，不改写已保存的菜单色
     setHeaderTheme(color: string) {
       this.setTheme(getHeaderThemeByColor(color))
     },
-    // 按菜单背景色设置菜单主题（显式选色，由 Setting 移入，参考上游 59d4ed4dd）
+    // 按菜单背景色设置菜单主题（显式选色，由 Setting 移入）
     setMenuTheme(color: string) {
       this.setTheme(getMenuThemeByColor(color))
     },

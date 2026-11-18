@@ -43,6 +43,27 @@ export const getUserPage = async (params) => {
   return await request.get<PageResult<UserVO[]>>({ url: `/member/user/page`, params })
 }
 
+// 查询可选择的会员分页
+export const getUserSelectPage = async (params: {
+  pageNo: number
+  pageSize: number
+  id?: number
+  nickname?: string
+}) => {
+  return await request.get<PageResult<UserVO[]>>({
+    url: '/member/user/select-page',
+    params
+  })
+}
+
+// 根据编号查询已选会员
+export const getUserSelectList = async (ids: number[]) => {
+  return await request.get<UserVO[]>({
+    url: '/member/user/select-list',
+    params: { ids: ids.join(',') }
+  })
+}
+
 // 查询会员用户详情
 export const getUser = async (id: number) => {
   return await request.get<UserVO>({ url: `/member/user/get?id=` + id })

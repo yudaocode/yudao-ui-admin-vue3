@@ -333,11 +333,17 @@ export function getLast7Days(): [dayjs.ConfigType, dayjs.ConfigType] {
 /**
  * 获取最近30天的开始时间、截止时间
  */
-export function getLast30Days(): [dayjs.ConfigType, dayjs.ConfigType] {
+export function getLast30Days(): [string, string] {
   const lastMonthDay = dayjs().subtract(30, 'd')
   const yesterday = dayjs().subtract(1, 'd')
   return getDateRange(lastMonthDay, yesterday)
 }
+
+/** 日期范围选择器默认起止时间 */
+export const DEFAULT_TIME_RANGE: [Date, Date] = [
+  new Date(2000, 0, 1, 0, 0, 0),
+  new Date(2000, 0, 1, 23, 59, 59)
+]
 
 /**
  * 获取最近1年的开始时间、截止时间

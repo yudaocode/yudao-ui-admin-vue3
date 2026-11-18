@@ -4,6 +4,7 @@ import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV
 export type Task = {
   id: string
   name: string
+  assigneeUser?: User
 }
 
 export type ProcessInstanceVO = {

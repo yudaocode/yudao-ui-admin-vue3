@@ -77,6 +77,7 @@
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 
 defineOptions({ name: 'InfraCodegenImportTable' })
 
@@ -127,7 +128,7 @@ const close = () => {
   tableList.value = []
 }
 
-const tableRef = ref<typeof ElTable>() // 表格的 Ref
+const tableRef = ref<TableInstance>() // 表格的 Ref
 const tableList = ref<string[]>([]) // 选中的表名
 
 /** 处理某一行的点击 */

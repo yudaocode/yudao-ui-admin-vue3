@@ -1,6 +1,6 @@
 import { Layout } from '@/utils/routerHelper'
 
-// 静态路由 meta.title 直接写语言 key（参考上游 2e5656055），由菜单、页签、面包屑、页面标题展示时再翻译，
+// 静态路由 meta.title 直接写语言 key，由菜单、页签、面包屑、页面标题展示时再翻译，
 // 随语言切换更新，不依赖模块加载时 i18n 是否已初始化；中文原文标题原样展示
 /**
  * redirect: noredirect        当设置 noredirect 的时候该路由在面包屑导航中不可被点击

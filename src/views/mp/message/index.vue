@@ -92,7 +92,7 @@ defineOptions({ name: 'MpMessage' })
 
 const loading = ref(false)
 const total = ref(0) // 数据的总页数
-const list = ref<any[]>([]) // 当前页的列表数据
+const list = ref<MpMessageApi.MpMessageVO[]>([]) // 当前页的列表数据
 
 // 搜索参数
 const queryParams = reactive({

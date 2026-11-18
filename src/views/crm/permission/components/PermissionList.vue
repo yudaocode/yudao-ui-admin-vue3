@@ -45,6 +45,7 @@
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import * as PermissionApi from '@/api/crm/permission'
 import { getCurrentUserId } from '@/utils/auth'
 import CrmPermissionForm from './PermissionForm.vue'
@@ -87,7 +88,7 @@ const getList = async () => {
   }
 }
 const multipleSelection = ref<PermissionApi.PermissionVO[]>([]) // 选择的团队成员
-const elTableRef = ref<InstanceType<typeof ElTable>>()
+const elTableRef = ref<TableInstance>()
 const handleSelectionChange = (val: PermissionApi.PermissionVO[]) => {
   if (val.findIndex((item) => item.level === PermissionApi.PermissionLevelEnum.OWNER) !== -1) {
     message.warning('不能选择负责人！')

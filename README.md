@@ -9,7 +9,8 @@
 
 ## 🐶 新手必读
 
-* nodejs ^20.19.0 || ^22.13.0 || >=24.0.0（与锁内 Vite / ESLint 的引擎要求一致）&& pnpm >= 10.28.0 (强制使用pnpm，版本由 packageManager 指定为 pnpm@10.28.0)
+* nodejs ^22.22.1 || >=24.11.0（最低 Node 22.22.1，推荐 `.nvmrc` / `.node-version` 中的 22.22.1，可 `nvm use`；本轮实测 Node 22.22.1、24.17.0，其它版本按 engines 范围选择）&& pnpm >= 10.28.0 (强制使用pnpm，版本由 packageManager 指定为 pnpm@10.28.0)
+* 可选开发容器：`docker compose -f docker-compose.dev.yaml up --build`，依赖默认从 npm 官方 registry 安装；如需公开镜像可加 `PNPM_REGISTRY`，例如 `PNPM_REGISTRY=https://registry.npmmirror.com docker compose -f docker-compose.dev.yaml up --build`
 * 演示地址【Vue3 + element-plus】：<http://dashboard-vue3.yudao.iocoder.cn>
 * 演示地址【Vue3 + vben5.0(ant-design-vue)】：<http://dashboard-vben.yudao.iocoder.cn>
 * 演示地址【Vue2 + element-ui】：<http://dashboard.yudao.iocoder.cn>

@@ -12,9 +12,9 @@ import {
   setToken
 } from '@/utils/auth'
 import errorCode from './errorCode'
-import { throwIfRequestCanceled } from './requestCancellation'
+import { isCanceledByRequestCancellation, throwIfRequestCanceled } from './requestCancellation'
 
-import { resetRouter } from '@/router'
+import router, { resetRouter } from '@/router'
 import { deleteUserCache } from '@/hooks/web/useCache'
 import { ApiEncrypt } from '@/utils/encrypt'
 
@@ -120,12 +120,11 @@ service.interceptors.response.use(
     let { data } = response
     const config = response.config
     const { t } = useI18n()
-    // 本处理函数主动抛出的错误不会进入下方的错误拦截器：与其一样提示后再抛出（参考上游 c7f8db52d：
-    // 响应转换出错同样经 onError 提示），被取消的请求不提示
+    // 本处理函数主动抛出的错误不会进入下方的错误拦截器：与其一样提示后再抛出，被取消的请求不提示
     const withMessage = (error: Error) => {
       // 取消优先：等待（如解析错误 blob）期间请求已被取消时不提示，不当作普通错误。
       // request 封装登记的取消改抛取消错误（沿用 throwIfRequestCanceled）；
-      // 调用方自管的 signal / cancelToken 已取消时原样抛出、不提示（与改动前一致）
+      // 调用方自管的 signal / cancelToken 已取消时原样抛出、不提示
       throwIfRequestCanceled(config)
       if (config.signal?.aborted || config.cancelToken?.reason) {
         return error
@@ -157,7 +156,7 @@ service.interceptors.response.use(
     }
 
     // 未设置状态码则默认成功状态
-    // 二进制数据则直接返回，例如说 Excel 导出。按请求配置的 responseType 判断（参考上游 c7f8db52d），
+    // 二进制数据则直接返回，例如说 Excel 导出。按请求配置的 responseType 判断，
     // 不依赖 XHR 对象；配置未设置时回退读取 XHR 的 responseType
     const responseType = config.responseType || response.request?.responseType
     if (responseType === 'blob' || responseType === 'arraybuffer') {
@@ -181,11 +180,11 @@ service.interceptors.response.use(
     } else if (code === 401) {
       // 如果未认证，并且未进行刷新令牌，说明可能是访问令牌过期了
       if (!isRefreshToken) {
-        isRefreshToken = true
-        // 1. 如果获取不到刷新令牌，则只能执行登出操作
+        // 1. 如果获取不到刷新令牌，则只能执行登出操作。不进入刷新状态，否则之后的 401 请求会一直排队等待
         if (!getRefreshToken()) {
           return handleAuthorized()
         }
+        isRefreshToken = true
         // 2. 进行刷新访问令牌
         try {
           const refreshTokenRes = await refreshToken()
@@ -256,9 +255,12 @@ service.interceptors.response.use(
     }
   },
   (error: AxiosError) => {
-    // 请求被取消（request.cancelRequest / cancelAllRequest，含刷新令牌后的回放；以及调用方自管 signal / cancelToken 的中止）时不提示，
-    // 原样拒绝，由调用方自行处理（参考上游 c7f8db52d：isCancel 的错误不弹提示）；网络错误、超时等仍按下方逻辑提示
-    if (axios.isCancel(error)) {
+    // request.cancelRequest / cancelAllRequest 主动取消的请求（含刷新令牌后的回放）不提示，原样拒绝；调用方自管 signal 的取消仍按原逻辑提示
+    // 请求选项 silentCancel 为 true 时，调用方自管 signal 的取消同样不提示（默认 false）
+    if (
+      isCanceledByRequestCancellation(error) ||
+      (axios.isCancel(error) && (error.config as Recordable | undefined)?.silentCancel === true)
+    ) {
       return Promise.reject(error)
     }
     console.log('err' + error) // for debug
@@ -285,13 +287,13 @@ const refreshToken = async () => {
     { headers: { 'tenant-id': getTenantId() } }
   )
 }
+// 登录类页面（账号登录、第三方登录回调）：未认证时不弹出重新登录提示
+const loginPagePaths = ['/login', '/social-login']
+
 const handleAuthorized = () => {
   const { t } = useI18n()
-  if (!isRelogin.show) {
-    // 如果已经到登录页面则不进行弹窗提示
-    if (window.location.href.includes('login')) {
-      return
-    }
+  // 按当前路由判断是否在登录页，不按地址包含 login 判断，避免 /system/login-log 等业务页被误判而不提示
+  if (!isRelogin.show && !loginPagePaths.includes(router.currentRoute.value.path)) {
     isRelogin.show = true
     ElMessageBox.confirm(t('sys.api.timeoutMessage'), t('common.confirmTitle'), {
       showCancelButton: false,

@@ -2,7 +2,7 @@ import { spawn } from 'child_process'
 import type { ChildProcess } from 'child_process'
 import type { Plugin, ViteDevServer } from 'vite'
 
-// dev 启动后复制服务地址（参考上游 f5ab9776a 的 vite-plugin-url-copy，本地实现、不新增依赖）：
+// dev 启动后复制服务地址（本地实现、不新增依赖）：
 // 仅 VITE_DEV_URL_COPY=local|network 时启用，复制 Vite 实际监听的首个 local / network 地址（端口被占用自动换口时为新端口）；
 // build、preview 及 CI 环境不触发。通过系统剪贴板命令的 stdin 写入，不经过 shell；任何失败只提示，不影响 dev 服务。
 

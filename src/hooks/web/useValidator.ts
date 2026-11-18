@@ -53,7 +53,7 @@ export const useValidator = () => {
   // 空值（''、null、undefined）不校验格式，是否必填交给 required
   const isEmptyValue = (val: unknown) => val === '' || val === null || val === undefined
 
-  // 手机号（参考上游 4146716655）：空值通过
+  // 手机号：空值通过
   const phone = (message?: string): FormItemRule => {
     return {
       validator: ((_, val) => {
@@ -65,7 +65,7 @@ export const useValidator = () => {
     }
   }
 
-  // 邮箱（参考上游 4146716655，沿用上游正则）：空值通过
+  // 邮箱：空值通过
   const email = (message?: string): FormItemRule => {
     return {
       validator: ((_, val) => {
@@ -77,7 +77,7 @@ export const useValidator = () => {
     }
   }
 
-  // 最大长度（参考上游 4146716655）
+  // 最大长度
   const maxlength = (max: number, message?: string): FormItemRule => {
     return {
       max,

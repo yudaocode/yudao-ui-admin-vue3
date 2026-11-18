@@ -4,10 +4,10 @@ import transformerVariantGroup from '@unocss/transformer-variant-group'
 export default defineConfig({
   // ...UnoCSS options
   rules: [
-    // 顶栏操作项悬停区域：header-action 为上游名称（参考上游 uno.config shortcuts，e66532cf9），custom-hover 保留为兼容别名。
-    // 样式沿用本地：过渡时长用 --transition-time-02（系统“减少动态效果”时为 0s），不加上游 pt-1px（本地已修正 1px 偏移）
+    // 顶栏操作项悬停区域。
+    // 过渡时长用 --transition-time-02（系统“减少动态效果”时为 0s），不加 pt-1px（本地已修正 1px 偏移）
     [
-      /^(header-action|custom-hover)$/,
+      /^header-action$/,
       ([], { rawSelector }) => {
         const selector = e(rawSelector)
         return `
@@ -103,15 +103,15 @@ ${selector}:after {
     ]
   ],
   presets: [presetUno({ dark: 'class', attributify: false })],
-  // 变体分组（参考上游 719317694）：展开 hover:(a b)、lt-xl:(a b) 等写法，如 Login.vue、MessageFiles.vue 中的分组类
+  // 变体分组：展开 hover:(a b)、lt-xl:(a b) 等写法，如 Login.vue、MessageFiles.vue 中的分组类
   transformers: [transformerVariantGroup()],
   shortcuts: {
     'wh-full': 'w-full h-full'
   },
-  // 与上游一致额外扫描 .ts 文件中的原子类（参考上游 608bf50e1）；其余为 UnoCSS 66 默认扫描范围，未改动
+  // 额外扫描 .ts 文件中的原子类
   content: {
     pipeline: {
-      include: [/\.(vue|svelte|[jt]sx|vine.ts|mdx?|astro|elm|php|phtml|marko|html|ts)($|\?)/]
+      include: [/\.(vue|svelte|[jt]sx|mdx?|astro|elm|php|phtml|html|ts)($|\?)/]
     }
   }
 })

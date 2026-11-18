@@ -1,11 +1,14 @@
 packages:
   - .
 
+catalog:
+  element-plus: '2.14.4'
+  rimraf: '^6.1.3'
+  typescript: '6.0.3'
+  vue: '3.5.41'
+
 allowBuilds:
   '@parcel/watcher': true
   core-js-pure: false
   es5-ext: false
   esbuild: true
-
-patchedDependencies:
-  monaco-editor@0.52.2: patches/monaco-editor@0.52.2.patch

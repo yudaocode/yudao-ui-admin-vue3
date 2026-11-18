@@ -6,7 +6,7 @@ import { normalizeLayout } from '@/utils/layout'
 import type { VbenLayoutType } from '@/types/layout'
 import LayoutRadioPicker from '@/layout/components/Setting/src/components/LayoutRadioPicker.vue'
 
-// 顶部工具栏快捷切换页面布局（参考上游 6b10db306 / e66532cf9 LayoutSwitcher）：
+// 顶部工具栏快捷切换页面布局：
 // 复用设置抽屉的 6 种布局选项与 appStore.setLayout（含缓存、移动端限制），不引入上游 4 种布局
 // 外部属性（如工具栏的 header-action）落到原生触发按钮上，使整个悬停区域都可点击打开弹层
 defineOptions({ name: 'LayoutSwitcher', inheritAttrs: false })
@@ -102,7 +102,7 @@ const restoreFocusAfterLayoutChange = () => {
   requestAnimationFrame(check)
 }
 
-// 点击任一布局选项（含当前布局）后关闭弹层，与上游一致
+// 点击任一布局选项（含当前布局）后关闭弹层
 const onPanelClick = (event: MouseEvent) => {
   if ((event.target as HTMLElement | null)?.closest('button')) {
     close()
@@ -147,7 +147,7 @@ watch(
       @after-enter="focusActiveOption"
     >
       <template #reference>
-        <!-- 原生 button 作为触发器，可键盘聚焦并带可访问名称（参考上游 LayoutSwitcher 触发器） -->
+        <!-- 原生 button 作为触发器，可键盘聚焦并带可访问名称 -->
         <button
           ref="triggerRef"
           v-bind="$attrs"

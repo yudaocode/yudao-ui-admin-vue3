@@ -13,7 +13,7 @@ export function hasPermi(app: App<Element>) {
         el.parentNode && el.parentNode.removeChild(el)
       }
     } else {
-      // 指令模块在 setupI18n 之前加载，翻译在抛错时再取，避免模块顶层绑定到原样返回 key 的函数（参考上游 c7f8db52d）
+      // 指令模块在 setupI18n 之前加载，翻译在抛错时再取，避免模块顶层绑定到原样返回 key 的函数
       const { t } = useI18n()
       throw new Error(t('permission.hasPermission'))
     }
@@ -21,10 +21,10 @@ export function hasPermi(app: App<Element>) {
 }
 
 /** 判断权限的方法 function */
-// 模块求值早于 setupStore，需显式传入 store
-const userStore = useUserStoreWithOut()
 const all_permission = '*:*:*'
 export const hasPermission = (permission: string[]) => {
+  // 调用时再获取 store：模块可能在 setupStore 之前加载，此时还没有激活的 Pinia
+  const userStore = useUserStoreWithOut()
   return (
     userStore.permissions.has(all_permission) ||
     permission.some((permission) => userStore.permissions.has(permission))

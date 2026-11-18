@@ -58,7 +58,7 @@ export default defineComponent({
           'w-[100%] h-[100%] relative'
         ]}
       >
-        {/* 移动端遮罩用原生 button，可键盘聚焦并带可访问名称（参考上游 6b10db306） */}
+        {/* 移动端遮罩用原生 button，可键盘聚焦并带可访问名称 */}
         {mobile.value && !collapse.value ? (
           <button
             aria-label={t('layout.closeNavigation')}
@@ -89,7 +89,7 @@ $prefix-cls: #{$namespace}-layout;
   background-color: var(--app-content-bg-color);
 
   // 只重置原生 button 默认盒模型，层级仍由上面的 class 决定；
-  // 遮罩外观对齐上游 6b10db306：半透明深色 + 轻度背景模糊（用背景色透明度代替 opacity，焦点框不被淡化）
+  // 遮罩外观：半透明深色 + 轻度背景模糊（用背景色透明度代替 opacity，焦点框不被淡化）
   &__mask {
     padding: 0;
     margin: 0;
@@ -106,7 +106,7 @@ $prefix-cls: #{$namespace}-layout;
   }
 
   // 顶栏（header-nav / header-sidebar-nav / mixed-nav / sidebar-mixed-nav / header-mixed-nav）：
-  // 浮于下方菜单与内容之上，以壳层阴影区分（参考上游 6b10db306 __topbar）；尺寸、背景色仍由原 class 与主题变量决定
+  // 浮于下方菜单与内容之上，以壳层阴影区分；尺寸、背景色仍由原 class 与主题变量决定
   &__topbar {
     z-index: 20;
     box-shadow: var(--layout-shadow);
@@ -117,7 +117,7 @@ $prefix-cls: #{$namespace}-layout;
     box-shadow: var(--layout-shadow);
   }
 
-  // 移动端展开的侧栏抽屉阴影（参考上游 is-mobile），宽度不变
+  // 移动端展开的侧栏抽屉阴影，宽度不变
   &__sidebar--mobile-open {
     box-shadow: 20px 0 50px rgb(15 23 42 / 25%);
   }

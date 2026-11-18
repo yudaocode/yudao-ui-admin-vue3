@@ -13,7 +13,7 @@ const { variables } = useDesign()
 
 const appStore = useAppStore()
 
-// 原生运行时 props 声明（上游已移除 propTypes），保留尺寸取值的运行时校验与默认 default；props 仍 provide 给 configGlobal 使用方
+// 原生运行时 props 声明，保留尺寸取值的运行时校验与默认 default；props 仍 provide 给 configGlobal 使用方
 const props = defineProps({
   size: {
     type: String as PropType<ComponentSize>,
@@ -36,7 +36,7 @@ watch(
   () => width.value,
   (width: number) => {
     if (width < 768) {
-      // 只在从桌面进入移动端时收起菜单；已处于移动端时宽度再变化，保留用户展开的菜单（参考上游 6b10db306）
+      // 只在从桌面进入移动端时收起菜单；已处于移动端时宽度再变化，保留用户展开的菜单
       if (!appStore.getMobile) {
         appStore.setMobile(true)
         appStore.setCollapse(true)
@@ -46,7 +46,11 @@ watch(
         ? appStore.setLayout('sidebar-nav')
         : undefined
     } else {
-      appStore.getMobile ? appStore.setMobile(false) : undefined
+      if (appStore.getMobile) {
+        appStore.setMobile(false)
+        // 移动端强制的 sidebar-nav 未写缓存，回到桌面端恢复用户选择的布局
+        appStore.restoreLayout()
+      }
       // 桌面端去掉移动端写入的内联值，回落 var.css 的折叠宽度（72px），尺寸只在 var.css 维护
       document.documentElement.style.removeProperty('--left-menu-min-width')
     }

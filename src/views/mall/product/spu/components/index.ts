@@ -51,4 +51,5 @@ const getPropertyList = (spu: Spu): PropertyAndValues[] => {
   return properties
 }
 
-export { SkuList, PropertyAndValues, RuleConfig, getPropertyList }
+export type { PropertyAndValues, RuleConfig }
+export { SkuList, getPropertyList }

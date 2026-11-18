@@ -47,3 +47,51 @@ export const getFileIcon = (filename: string): string => {
   }
   return 'ep:document'
 }
+
+/** 规范化为以 / 开头的 Web 文件路径 */
+export const normalizeFilePath = (path?: string): string => {
+  let normalizedPath = (path || '/').trim().replaceAll('\\', '/')
+  if (!normalizedPath.startsWith('/')) {
+    normalizedPath = '/' + normalizedPath
+  }
+  while (normalizedPath.includes('//')) {
+    normalizedPath = normalizedPath.replaceAll('//', '/')
+  }
+  if (normalizedPath.length > 1) {
+    normalizedPath = normalizedPath.replace(/\/$/, '')
+  }
+  return normalizedPath || '/'
+}
+
+const ACCEPT_EXTENSION_REGEX = /^\.[^./\\]+(\.[^./\\]+)*$/ // accept 扩展名项，如 .pdf、.tar.gz
+const ACCEPT_MIME_REGEX = /^[\w.+-]+\/(\*|[\w.+-]+)$/ // accept MIME 项，如 image/png、image/*
+
+/**
+ * 判断文件是否符合 accept 配置
+ *
+ * 支持扩展名（.pdf）、MIME（image/png）、MIME 通配（image/*）和逗号分隔的多项，任一项匹配即通过，均不区分大小写；
+ * 与浏览器 accept 一致，忽略无效项，为空、全部无效或包含 *\/* 时不限制
+ */
+export const isAcceptedFile = (file: File, accept?: string): boolean => {
+  const items = (accept || '').split(',').map((item) => item.trim().toLowerCase())
+  if (items.includes('*/*')) {
+    return true
+  }
+  const rules = items.filter(
+    (rule) => ACCEPT_EXTENSION_REGEX.test(rule) || ACCEPT_MIME_REGEX.test(rule)
+  )
+  if (rules.length === 0) {
+    return true
+  }
+  const name = (file.name || '').toLowerCase()
+  const type = (file.type || '').toLowerCase()
+  return rules.some((rule) => {
+    if (rule.startsWith('.')) {
+      return name.endsWith(rule)
+    }
+    if (rule.endsWith('/*')) {
+      return type.startsWith(rule.slice(0, -1))
+    }
+    return type === rule
+  })
+}

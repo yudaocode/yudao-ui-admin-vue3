@@ -13,12 +13,12 @@ const props = defineProps({
   title: { type: String, default: 'Dialog' },
   fullscreen: { type: Boolean, default: true },
   defaultFullscreen: { type: Boolean, default: false },
-  // 未传时不设默认值，由 ElDialog 使用 Element Plus 默认宽度 50%（与上游一致：上游 Dialog 不强制宽度）
+  // 未传时不设默认值，由 ElDialog 使用 Element Plus 默认宽度 50%
   width: { type: [String, Number] },
   scroll: { type: Boolean, default: false }, // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
   maxHeight: { type: [String, Number], default: '400px' },
   loading: { type: Boolean, default: false },
-  // 点击遮罩是否关闭：默认 false（与上游一致）。声明为 prop 后，未传与显式 undefined 都取默认值，
+  // 点击遮罩是否关闭：默认 false。声明为 prop 后，未传与显式 undefined 都取默认值，
   // close-on-click-modal / closeOnClickModal 由 Vue 统一归一化，空布尔属性按 true 处理
   closeOnClickModal: { type: Boolean, default: false }
 })
@@ -48,7 +48,7 @@ const getBindValue = () => {
   return obj
 }
 
-// 默认垂直居中（参考上游 3701a04231）：用 ElDialog 自带 align-center，不改全局遮罩样式，原生 el-dialog 不受影响。
+// 默认垂直居中：用 ElDialog 自带 align-center，不改全局遮罩样式，原生 el-dialog 不受影响。
 // 调用方传了 align-center（含 false）时原样透传；传了 top 时交回 ElDialog 默认；值为 undefined 视为未传。
 // 按键读取 attrs 会被追踪，动态增删这些属性时同样更新
 const alignCenter = computed(() => {

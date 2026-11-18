@@ -112,6 +112,7 @@
 
 <script setup lang="ts" name="PromotionCoupon">
 import { deleteCoupon, getCouponPage } from '@/api/mall/promotion/coupon/coupon'
+import type { CouponVO } from '@/api/mall/promotion/coupon/coupon'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { discountFormat } from '@/views/mall/promotion/coupon/formatter'
@@ -122,7 +123,7 @@ const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 字典表格数据
+const list = ref<CouponVO[]>([]) // 字典表格数据
 // 查询参数
 const queryParams = reactive({
   pageNo: 1,

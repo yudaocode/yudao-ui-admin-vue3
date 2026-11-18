@@ -23,7 +23,7 @@ const toggleCollapse = () => {
 </script>
 
 <template>
-  <!-- 原生 button，可键盘聚焦并带可访问名称及展开状态（参考上游 6b10db306） -->
+  <!-- 原生 button，可键盘聚焦并带可访问名称及展开状态 -->
   <button
     :aria-expanded="!collapse"
     :aria-label="t(collapse ? 'layout.expandNavigation' : 'layout.collapseNavigation')"

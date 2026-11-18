@@ -15,10 +15,11 @@ defineOptions({ name: 'Editor' })
 setupWangEditorPlugin()
 
 type InsertFnType = (url: string, alt: string, href: string) => void
+type InsertVideoFnType = (src: string, poster: string) => void // 视频插入回调：视频地址、封面地址
 
 const localeStore = useLocaleStore()
 
-// wangEditor 界面语言跟随无刷新语言切换（参考上游 c7f8db52d）：immediate 保持初始化时设置一次
+// wangEditor 界面语言跟随无刷新语言切换：immediate 保持初始化时设置一次
 watch(
   () => localeStore.getCurrentLocale.lang,
   (lang) => i18nChangeLanguage(lang),
@@ -34,7 +35,9 @@ const props = defineProps({
   },
   readonly: { type: Boolean, default: false },
   modelValue: { type: String, default: '' },
-  directory: { type: String, default: 'editor-default' }
+  directory: { type: String, default: 'editor-default' },
+  uploadImage: Function as PropType<(file: File) => Promise<string>>,
+  uploadVideo: Function as PropType<(file: File) => Promise<string>>
 })
 
 const emit = defineEmits(['change', 'update:modelValue'])
@@ -158,14 +161,15 @@ const editorConfig = computed((): IEditorConfig => {
           // 使用 customUpload 实现逐个文件上传，复用项目的 httpRequest
           async customUpload(file: File, insertFn: InsertFnType) {
             try {
-              const res = await imageHttpRequest({
-                file: file as any,
-                onProgress: () => {},
-                onSuccess: () => {},
-                onError: () => {}
-              } as any)
-              // 兼容前端直连上传和后端上传两种模式的返回格式
-              const url = (res as any).data?.data || (res as any).data
+              const url = props.uploadImage
+                ? await props.uploadImage(file)
+                : await imageHttpRequest({
+                    file: file as any,
+                    onProgress: () => {},
+                    onSuccess: () => {},
+                    onError: () => {}
+                  } as any).then((res: any) => res.data?.data || res.data)
+              // 兼容前端直连上传和后端上传两种模式的返回格式（res.data?.data || res.data）
               insertFn(url, 'image', url)
             } catch (error: any) {
               ElMessage.error(error.msg || '图片上传失败')
@@ -182,17 +186,19 @@ const editorConfig = computed((): IEditorConfig => {
           allowedFileTypes: ['video/*'],
 
           // 使用 customUpload 实现逐个文件上传，复用项目的 httpRequest
-          async customUpload(file: File, insertFn: InsertFnType) {
+          async customUpload(file: File, insertFn: InsertVideoFnType) {
             try {
-              const res = await videoHttpRequest({
-                file: file as any,
-                onProgress: () => {},
-                onSuccess: () => {},
-                onError: () => {}
-              } as any)
-              // 兼容前端直连上传和后端上传两种模式的返回格式
-              const url = (res as any).data?.data || (res as any).data
-              insertFn(url, 'mp4', url)
+              const url = props.uploadVideo
+                ? await props.uploadVideo(file)
+                : await videoHttpRequest({
+                    file: file as any,
+                    onProgress: () => {},
+                    onSuccess: () => {},
+                    onError: () => {}
+                  } as any).then((res: any) => res.data?.data || res.data)
+              // 兼容前端直连上传和后端上传两种模式的返回格式（res.data?.data || res.data）
+              // 上传的视频没有封面，封面地址传空
+              insertFn(url, '')
             } catch (error: any) {
               ElMessage.error(error.msg || '视频上传失败')
               console.error('Upload error:', error)

@@ -1,10 +1,9 @@
 # Dependencies
-node_modules
+node_modules/
 .pnpm-store/
 
 # Build outputs
-dist
-dist-ssr
+dist/
 dist-*/
 /dist*
 coverage/
@@ -14,7 +13,6 @@ coverage/
 **/.vitepress/cache/
 
 # Logs
-pnpm-debug
 *.log
 *-debug.log*
 *-error.log*
@@ -26,10 +24,11 @@ pnpm-debug
 # OS and IDE files
 .DS_Store
 Thumbs.db
-.idea
+.idea/
 .history
 
 # Generated / local tooling
 auto-*.d.ts
-output/
-.playwright-cli/
+output
+.playwright-cli
+.playwright-mcp

@@ -7,7 +7,6 @@ export const useRenderMenuTitle = () => {
     const { icon } = meta
     const title = meta.title === undefined ? 'Please set title' : getRouteTitle(meta)
 
-    // truncate 与原 overflow-hidden text-ellipsis whitespace-nowrap 生成相同样式，类名与上游一致（参考上游 e66532cf9）
     return icon ? (
       <>
         <Icon icon={meta.icon}></Icon>

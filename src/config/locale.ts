@@ -1,4 +1,4 @@
-// 语言注册表：支持的语言、显示名称、i18n 语言包与 Element Plus 语言对象的唯一来源（参考上游 c7f8db52d、14d2bec7b）。
+// 语言注册表：支持的语言、显示名称、i18n 语言包与 Element Plus 语言对象的唯一来源。
 // 新增语言时在这里登记；全局 LocaleType 由此推导，useTimeAgo 等按语言配置的词表会在类型检查时提示补齐
 // 支持的语言包体积很小，静态引入后切换语言无需再按需加载 chunk（避免加载失败触发整页刷新、丢失未保存的输入）
 import zhCNMessages from '@/locales/zh-CN'
@@ -24,8 +24,8 @@ export type LocaleCode = keyof typeof localeRegistry
 // 默认语言，也是 i18n 缺失文案时的回退语言
 export const DEFAULT_LOCALE: LocaleCode = 'zh-CN'
 
-// 只认注册表自身登记的语言：上游用 `value in localeRegistry` 会沿原型链把 'toString'、'constructor' 等判为合法，
-// 这里保留本地原有的非法缓存防护，非字符串（null、数字、对象等）与原型链上的键一律返回 false
+// 只认注册表自身登记的语言：`in` 会沿原型链把 'toString'、'constructor' 等判为合法；
+// 非字符串（null、数字、对象等）与原型链上的键一律返回 false
 export const isLocale = (value: unknown): value is LocaleCode =>
   typeof value === 'string' && Object.prototype.hasOwnProperty.call(localeRegistry, value)
 

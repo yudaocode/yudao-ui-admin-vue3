@@ -64,7 +64,7 @@ export const useTagsViewStore = defineStore('tagsView', {
       const cacheMap: Set<string> = new Set()
       for (const v of this.visitedViews) {
         const item = getRawRoute(v)
-        // 空路由项（null / undefined）直接跳过，避免读取 meta、name 时报错（参考上游 4169e52ba）
+        // 空路由项（null / undefined）直接跳过，避免读取 meta、name 时报错
         if (!item) {
           continue
         }
@@ -72,7 +72,7 @@ export const useTagsViewStore = defineStore('tagsView', {
         if (!needCache) {
           continue
         }
-        // 无名称（undefined / 空字符串，如兜底 404 路由）的路由无法被 KeepAlive 按名称匹配，不加入缓存列表（参考上游 8a68d60）
+        // 无名称（undefined / 空字符串，如兜底 404 路由）的路由无法被 KeepAlive 按名称匹配，不加入缓存列表
         const name = item.name
         if (typeof name !== 'string' || !name) {
           continue
@@ -97,8 +97,7 @@ export const useTagsViewStore = defineStore('tagsView', {
         }
       }
     },
-    // 删除缓存（按路由名）：传入 view 时删除该页的缓存（参考上游 e66532cf9 refreshTag），
-    // 未传入时删除当前路由的缓存
+    // 删除缓存（按路由名）：传入 view 时删除该页的缓存，未传入时删除当前路由的缓存
     delCachedView(view?: RouteLocationNormalizedLoaded) {
       const route = view || router.currentRoute.value
       const index = findIndex<string>(this.getCachedViews, (v) => v === route.name)
@@ -175,14 +174,6 @@ export const useTagsViewStore = defineStore('tagsView', {
           return v?.meta?.affix || v.fullPath === view.fullPath || i < index
         })
         this.addCachedView()
-      }
-    },
-    updateVisitedView(view: RouteLocationNormalizedLoaded) {
-      for (let v of this.visitedViews) {
-        if (v.fullPath === view.fullPath) {
-          v = Object.assign(v, view)
-          break
-        }
       }
     },
     // 设置当前选中的 tag

@@ -20,10 +20,10 @@ function getRelativeScssUsePath(filename: string, targetPath: string) {
 // https://vitejs.dev/config/
 export default ({ command, mode }: ConfigEnv): UserConfig => {
   const isBuild = command === 'build'
-  // 统一使用 Vite 解析后的 mode（参考上游 61d7ef642 的环境模式选择），兼容 --mode=x、--host 在前等任意参数顺序
+  // 统一使用 Vite 解析后的 mode，兼容 --mode=x、--host 在前等任意参数顺序
   const env = loadEnv(mode, root) as any
   const variablesScssPath = pathResolve('src/styles/variables.scss')
-  // CSS 产物目标（参考上游 4b43c8794）：VITE_CSS_TARGET 为逗号分隔的目标（如 chrome87,safari14），设置时用于 CSS 转换与压缩，
+  // CSS 产物目标：VITE_CSS_TARGET 为逗号分隔的目标（如 chrome87,safari14），设置时用于 CSS 转换与压缩，
   // 避免 autoprefixer 加的前缀按默认现代目标被剔除；未设置保持 Vite 默认。只影响 CSS，不代表 JS 及依赖兼容这些浏览器；无效目标构建报错
   const cssTarget = String(env.VITE_CSS_TARGET || '')
     .split(',')
@@ -71,11 +71,11 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         }
       }
     },
-    // 与上游一致使用 Vite 默认的 resolve.extensions；样式文件导入均带扩展名
+    // 使用 Vite 默认的 resolve.extensions；样式文件导入需带扩展名
     resolve: {
       alias: [
         {
-          find: /\@\//,
+          find: /@\//,
           replacement: `${pathResolve('src')}/`
         }
       ]
@@ -85,12 +85,12 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       minify: 'oxc',
       outDir: env.VITE_OUT_DIR || 'dist',
       reportCompressedSize: false,
-      // 参考上游 3a5db42c9：开启时生成独立的 .map 文件，不再内联进产物 JS
+      // 开启时生成独立的 .map 文件
       sourcemap: env.VITE_SOURCEMAP === 'true',
-      // CSS 分包开关（参考上游 b2cee10cc）：未配置时保持现有按 chunk 拆分 CSS，仅 VITE_USE_CSS_SPLIT=false 时合并为单个 CSS 文件
+      // CSS 分包开关：未配置时保持现有按 chunk 拆分 CSS，仅 VITE_USE_CSS_SPLIT=false 时合并为单个 CSS 文件
       cssCodeSplit: env.VITE_USE_CSS_SPLIT !== 'false',
       ...(cssTarget.length ? { cssTarget } : {}),
-      // Vite 8 中 rollupOptions 是 rolldownOptions 的弃用别名，改用正式键名，内部配置不变（参考上游 28901407f）
+      // Vite 8 中 rollupOptions 是 rolldownOptions 的弃用别名
       rolldownOptions: {
         output: {
           minify: {
@@ -103,7 +103,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
             // 目标：ECharts、表单渲染/设计器等重库随使用它们的页面加载，避免阻塞不使用它们的页面；
             // vendor-initial 只减少入口已静态依赖的第三方包的请求碎片，并不是把异步重库合进入口
             groups: [
-              // ECharts 及其渲染引擎 zrender 各自独立成 chunk（参考上游 28901407f）。priority 高于 vendor-initial，避免被其兜底规则吞掉；
+              // ECharts 及其渲染引擎 zrender 各自独立成 chunk。priority 高于 vendor-initial，避免被其兜底规则吞掉；
               // includeDependenciesRecursively 只对这两组关闭，防止 echarts 组把依赖 zrender 一并收入，vendor-initial 仍保持默认行为
               {
                 name: 'zrender',

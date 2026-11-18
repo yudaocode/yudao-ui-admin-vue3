@@ -1,6 +1,6 @@
 <template>
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 搜索栏 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -108,6 +108,7 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -116,6 +117,7 @@
     />
   </ContentWrap>
 
+  <!-- 表单弹窗：添加/修改 -->
   <SensitiveWordForm ref="formRef" @success="getList" />
 </template>
 
@@ -140,9 +142,9 @@ const queryParams = reactive({
   status: undefined as number | undefined,
   createTime: [] as string[]
 })
-const queryFormRef = ref() // 搜索的表单
+const queryFormRef = ref() // 搜索的表单 Ref
 
-/** 查询敏感词分页 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -162,11 +164,11 @@ const handleQuery = () => {
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  queryFormRef.value.resetFields()
+  queryFormRef.value?.resetFields()
   handleQuery()
 }
 
-/** 添加 / 修改操作 */
+/** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -191,7 +193,7 @@ const checkedIds = ref<number[]>([]) // 当前勾选的编号集合
 
 /** 表格选中变化 */
 const handleRowCheckboxChange = (rows: ManagerSensitiveWordApi.ImManagerSensitiveWordVO[]) => {
-  checkedIds.value = rows.map((row) => row.id)
+  checkedIds.value = rows.map((row) => row.id!)
 }
 
 /** 批量删除按钮操作 */
@@ -210,7 +212,7 @@ const handleDeleteBatch = async () => {
   await getList()
 }
 
-/** 初始化 */
+/** 初始化 **/
 onMounted(() => {
   getList()
 })

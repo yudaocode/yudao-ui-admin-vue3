@@ -8,7 +8,7 @@ defineOptions({ name: 'Logo' })
 
 const props = withDefaults(
   defineProps<{
-    // 紧凑模式：只显示图片、隐藏标题（参考上游 6b10db306）；默认 false，标题按布局与折叠规则显示
+    // 紧凑模式：只显示图片、隐藏标题；默认 false，标题按布局与折叠规则显示
     compact?: boolean
   }>(),
   { compact: false }
@@ -16,7 +16,7 @@ const props = withDefaults(
 
 const { getPrefixCls } = useDesign()
 
-// 顶栏（非 classic 渲染模式）中的 Logo 加 `${prefixCls}--header` 修饰类，类名与上游一致（参考上游 6b10db306），判断仍按芋道布局
+// 顶栏（非 classic 渲染模式）中的 Logo 加 `${prefixCls}--header` 修饰类，判断按芋道布局
 const prefixCls = getPrefixCls('logo')
 
 const appStore = useAppStore()
@@ -27,7 +27,7 @@ const layout = computed(() => appStore.getLayout)
 
 const collapse = computed(() => appStore.getCollapse)
 
-// 标题显隐只由当前布局与折叠状态决定（参考上游 6b10db306）：顶部 Logo（非 classic）始终显示，
+// 标题显隐只由当前布局与折叠状态决定：顶部 Logo（非 classic）始终显示，
 // 侧栏 Logo（classic）随折叠隐藏；不依赖挂载时机与切换历史；compact 时始终隐藏
 const show = computed(
   () => !props.compact && (getLayoutRenderMode(unref(layout)) !== 'classic' || !unref(collapse))
@@ -46,7 +46,7 @@ const show = computed(
       ]"
       to="/"
     >
-      <!-- 图片 38px、左右内距 10px（上游 e66532cf9 Logo）；标题空间不足时省略，顶栏让位给菜单“更多”入口 -->
+      <!-- 图片 38px、左右内距 10px；标题空间不足时省略，顶栏让位给菜单“更多”入口 -->
       <img class="h-38px w-38px flex-none" src="@/assets/imgs/logo.png" />
       <div
         v-if="show"

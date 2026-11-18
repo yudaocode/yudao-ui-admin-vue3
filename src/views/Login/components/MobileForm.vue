@@ -93,7 +93,7 @@ import { useIcon } from '@/hooks/web/useIcon'
 import { setTenantId, setToken } from '@/utils/auth'
 import { getTenantIdByName, sendSmsCode, smsLogin } from '@/api/login'
 import LoginFormTitle from './LoginFormTitle.vue'
-import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
+import { LoginStateEnum, resolveLoginRedirect, useFormValid, useLoginState } from './useLogin'
 import { ElLoading } from 'element-plus'
 
 defineOptions({ name: 'MobileForm' })
@@ -191,10 +191,8 @@ const signIn = async () => {
       if (!redirect.value) {
         redirect.value = '/'
       }
-      // 整串交给路由解析，原样保留 query、hash（{ path } 形式会丢弃 query 并重复编码 hash）；
-      // 与扫码登录一致，只接受站内绝对路径
-      const target = redirect.value
-      push(target.startsWith('/') && !target.startsWith('//') ? target : '/')
+      // 整串交给路由解析，原样保留 query、hash（{ path } 形式会丢弃 query 并重复编码 hash）；只接受站内绝对路径
+      push(resolveLoginRedirect(redirect.value))
     })
     .catch(() => {})
     .finally(() => {

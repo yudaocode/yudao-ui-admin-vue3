@@ -8,10 +8,10 @@ import { useAppStore } from '@/store/modules/app'
 import { useI18n } from '@/hooks/web/useI18n'
 import { filterAffixTags } from './helper'
 import { ContextMenu, ContextMenuExpose } from '@/layout/components/ContextMenu'
+import type { ContextMenuSchema } from '@/layout/components/ContextMenu'
 import { useDesign } from '@/hooks/web/useDesign'
 import { useTemplateRefsList } from '@vueuse/core'
 import { ElScrollbar } from 'element-plus'
-import { useScrollTo } from '@/hooks/event/useScrollTo'
 import { useTagsView } from '@/hooks/web/useTagsView'
 import { getRouteTitle } from '@/utils/routeTitle'
 import { cloneDeep } from 'lodash-es'
@@ -39,7 +39,7 @@ const visitedViews = computed(() => tagsViewStore.getVisitedViews)
 const affixTagArr = ref<RouteLocationNormalizedLoaded[]>([])
 
 // 当前路由对应的 tag（按 fullPath 匹配，保留同一路径不同 query 的多实例）：工具栏的刷新与“更多”操作以它为准，
-// 不受右键其它 tag 的影响（参考上游 e66532cf9 activeTag）；当前页不显示 tag（noTagsView）时为 undefined
+// 不受右键其它 tag 的影响；当前页不显示 tag（noTagsView）时为 undefined
 const activeTag = computed(() =>
   unref(visitedViews).find((v) => v.fullPath === unref(currentRoute).fullPath)
 )
@@ -51,8 +51,6 @@ const appStore = useAppStore()
 const tagsViewImmerse = computed(() => appStore.getTagsViewImmerse)
 
 const tagsViewIcon = computed(() => appStore.getTagsViewIcon)
-
-const isDark = computed(() => appStore.getIsDark)
 
 // 初始化tag
 const initTags = () => {
@@ -126,7 +124,7 @@ const toLastView = () => {
 }
 
 // 当前页的 tag 将被关闭时，先跳转到关闭后应显示的页面：
-// 关闭单个 tag（传入 adjacentTo）时为其右侧最近的、剩余且路由仍注册的 tag，没有时为左侧最近的（参考上游 e66532cf9）；
+// 关闭单个 tag（传入 adjacentTo）时为其右侧最近的、剩余且路由仍注册的 tag，没有时为左侧最近的；
 // 批量关闭时与 toLastView 一致，为剩余且路由仍注册的 tag 的最后一个。
 // 都没有时为首个路由；没有剩余且已在首个路由时不跳转，返回 true 并由调用方保留当前页的 tag。
 // 跳转成功且已离开当前页返回 true；被守卫拒绝、被其它导航取代或出错返回 false，调用方不关闭任何 tag
@@ -170,7 +168,7 @@ const closeAllTags = async () => {
 
 type CloseRange = 'left' | 'right' | 'other' | 'all'
 
-// 对应范围内可关闭（非固定）的 tag，范围与 store 的批量删除一致（参考上游 e66532cf9）：
+// 对应范围内可关闭（非固定）的 tag，范围与 store 的批量删除一致：
 // left / right 为 view 左侧 / 右侧，other 为 view 以外，all 为全部
 const getClosableViews = (view: RouteLocationNormalizedLoaded | undefined, range: CloseRange) => {
   const views = unref(visitedViews)
@@ -188,7 +186,7 @@ const hasClosableView = (view: RouteLocationNormalizedLoaded | undefined, range:
   return getClosableViews(view, range).length > 0
 }
 
-// 批量关闭（其它 / 左侧 / 右侧）以触发操作的 tag 为基准：右键菜单为所属 tag，工具栏为当前页的 tag（参考上游 e66532cf9）。
+// 批量关闭（其它 / 左侧 / 右侧）以触发操作的 tag 为基准：右键菜单为所属 tag，工具栏为当前页的 tag。
 // 当前页的 tag 会被关闭时，先跳转到基准 tag，跳转成功且最终路由不在关闭范围内才关闭；
 // 跳转被守卫拒绝、被其它导航取代或出错时不关闭，保留当前页的 tag 与缓存。
 // 当前页没有 tag 或其 tag 不在关闭范围内时直接关闭，不导航
@@ -227,14 +225,88 @@ const closeRightTags = (view?: RouteLocationNormalizedLoaded) => {
   closeTagsAround('right', closeRight, view)
 }
 
+// 右键菜单与工具栏“更多”菜单共用：view 为右键所属 tag，或工具栏的当前页 tag（activeTag）。
+// 工具栏传入 fromToolbar：当前页没有 tag（view 为 undefined）时刷新仍刷新当前路由，
+// 关闭 / 左侧 / 右侧 / 其它禁用，关闭全部按是否还有可关闭的 tag 判断
+const createContextMenu = (
+  view?: RouteLocationNormalizedLoaded,
+  fromToolbar = false
+): ContextMenuSchema[] => [
+  {
+    icon: 'ep:refresh',
+    label: 'common.reload',
+    disabled: !fromToolbar && !view?.name,
+    command: () => {
+      refreshSelectedTag(view)
+    }
+  },
+  {
+    icon: 'ep:close',
+    label: 'common.closeTab',
+    disabled: !view || !!view.meta?.affix,
+    command: () => {
+      if (view) closeSelectedTag(view)
+    }
+  },
+  {
+    divided: true,
+    icon: 'ep:d-arrow-left',
+    label: 'common.closeTheLeftTab',
+    disabled: !hasClosableView(view, 'left'),
+    command: () => {
+      closeLeftTags(view)
+    }
+  },
+  {
+    icon: 'ep:d-arrow-right',
+    label: 'common.closeTheRightTab',
+    disabled: !hasClosableView(view, 'right'),
+    command: () => {
+      closeRightTags(view)
+    }
+  },
+  {
+    divided: true,
+    icon: 'ep:discount',
+    label: 'common.closeOther',
+    disabled: !view || !hasClosableView(view, 'other'),
+    command: () => {
+      closeOthersTags(view)
+    }
+  },
+  {
+    icon: 'ep:minus',
+    label: 'common.closeAll',
+    disabled: !hasClosableView(view, 'all'),
+    command: () => {
+      closeAllTags()
+    }
+  }
+]
+
 // 根元素：只在本组件内查找当前 tag（不使用 document 全局 class 查询）
 const tagsViewRef = ref<HTMLElement>()
 
-// 滚动到当前 tag：按可见性取“最近”位置（参考上游 e66532cf9 moveActiveIntoView 的 scrollIntoView nearest），
-// 已完整可见时不滚动；只滚动标签栏横向滚动容器，不连带滚动外层页面。系统“减少动态效果”时立即滚动
+// elscroll 实例
+const scrollbarRef = ref<ComponentRef<typeof ElScrollbar>>()
+
+const getScrollWrap = () => unref(scrollbarRef)?.wrapRef as HTMLElement | undefined
+
+// 系统开启“减少动态效果”时立即滚动
+const getScrollBehavior = (): ScrollBehavior => {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+}
+
+// 左右按钮：只滚动标签栏横向滚动容器
+const scrollTags = (left: number) => {
+  getScrollWrap()?.scrollBy({ left, behavior: getScrollBehavior() })
+}
+
+// 滚动到当前 tag：按可见性取“最近”位置，已完整可见时不滚动；
+// 只滚动标签栏横向滚动容器，不连带滚动外层页面
 const moveToCurrentTag = async () => {
   await nextTick()
-  const wrap$ = unref(scrollbarRef)?.wrapRef as HTMLElement | undefined
+  const wrap$ = getScrollWrap()
   const active$ = unref(tagsViewRef)?.querySelector<HTMLElement>(`.${prefixCls}__item.is-active`)
   if (!wrap$ || !active$) return
   const wrapRect = wrap$.getBoundingClientRect()
@@ -246,13 +318,18 @@ const moveToCurrentTag = async () => {
         ? activeRect.right - wrapRect.right
         : 0
   if (!offset) return
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  wrap$.scrollBy({ left: offset, behavior: reduceMotion ? 'auto' : 'smooth' })
+  wrap$.scrollBy({ left: offset, behavior: getScrollBehavior() })
 }
 
 // 是否是当前tag
 const isActive = (route: RouteLocationNormalizedLoaded): boolean => {
   return route.fullPath === unref(currentRoute).fullPath
+}
+
+// tag 展示标题：后端菜单原文不翻译（getRouteTitle），同一路径同名标题的多实例带序号后缀
+const getTagTitle = (route: RouteLocationNormalizedLoaded): string => {
+  const title = getRouteTitle(route?.meta)
+  return route?.meta?.titleSuffix ? `${title} (${route.meta.titleSuffix})` : title
 }
 
 // 未扁平的路由树中，各路由名所在分支由自身向上最近的非空图标（没有时为 ''）；同名出现多次、分支不唯一的记为 null。
@@ -273,7 +350,7 @@ const branchIconMap = computed(() => {
   return map
 })
 
-// tag 图标：取自身到祖先最近的非空图标（参考上游 8a68d60bb）。已注册的路由按原树中唯一分支查找；
+// tag 图标：取自身到祖先最近的非空图标。已注册的路由按原树中唯一分支查找；
 // 查不到唯一分支时按实际 matched 由近到远查找，最后回退 meta.icon。没有 matched 的固定 tag 沿用自身图标
 const getTagIcon = (route: RouteLocationNormalizedLoaded): string | undefined => {
   if (!route?.matched) return route?.meta?.icon
@@ -288,8 +365,8 @@ const getTagIcon = (route: RouteLocationNormalizedLoaded): string | undefined =>
 // 所有右键菜单组件的元素
 const itemRefs = useTemplateRefsList<ComponentRef<typeof ContextMenu & ContextMenuExpose>>()
 
-// 右键菜单打开时关闭其它 tag 的菜单。菜单命令与禁用状态直接取所属 tag（参考上游 e66532cf9 createContextMenu(view)），
-// 不再改写选中的 tag：selectedTag 始终为当前路由，供 setTitle 等按当前页定位
+// 右键菜单打开时关闭其它 tag 的菜单（同一时刻只显示一个右键菜单）。菜单命令与禁用状态直接取所属 tag，
+// 不改写选中的 tag：selectedTag 始终为当前路由，供 setTitle 等按当前页定位
 const visibleChange = (visible: boolean, tagItem: RouteLocationNormalizedLoaded) => {
   if (!visible) return
   for (const v of unref(itemRefs)) {
@@ -299,29 +376,21 @@ const visibleChange = (visible: boolean, tagItem: RouteLocationNormalizedLoaded)
   }
 }
 
-// elscroll 实例
-const scrollbarRef = ref<ComponentRef<typeof ElScrollbar>>()
-
-// 保存滚动位置
-const scrollLeftNumber = ref(0)
-
-const scroll = ({ scrollLeft }) => {
-  scrollLeftNumber.value = scrollLeft as number
+// 正文链接点击：路由已被移除时阻止默认行为，不走可能残留的旧 href；否则由 RouterLink 的 navigate 导航
+// （带修饰键时交给浏览器）
+const onLinkClick = (
+  e: MouseEvent,
+  item: RouteLocationNormalizedLoaded,
+  navigate: (e?: MouseEvent) => unknown
+) => {
+  if (isRegisteredView(item)) {
+    navigate(e)
+  } else {
+    e.preventDefault()
+  }
 }
 
-// 移动到某个位置
-const move = (to: number) => {
-  const wrap$ = unref(scrollbarRef)?.wrapRef
-  const { start } = useScrollTo({
-    el: wrap$!,
-    position: 'scrollLeft',
-    to: unref(scrollLeftNumber) + to,
-    duration: 500
-  })
-  start()
-}
-
-const closeTabOnMouseMidClick = (e: MouseEvent, item) => {
+const closeTabOnMouseMidClick = (e: MouseEvent, item: RouteLocationNormalizedLoaded) => {
   // 中键：button === 1
   if (e.button === 1) {
     e.preventDefault()
@@ -345,151 +414,77 @@ watch(
 </script>
 
 <template>
+  <!-- 根节点的定位、宽度由布局（useRenderLayout）按菜单布局传入的工具类控制，这里只用同级工具类，
+    不在 scoped 样式中声明 position / width，避免压过布局传入的 absolute、fixed 与 w-[calc()] -->
   <div
     ref="tagsViewRef"
     :id="prefixCls"
     :class="prefixCls"
     class="relative w-full flex bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
-    <!-- 工具栏为原生按钮，可键盘聚焦并带可访问名称（参考上游 e66532cf9）；图标按钮同时以 title 悬停提示（参考上游 8a68d60） -->
     <button
       :aria-label="t('common.scrollTagsLeft')"
       :title="t('common.scrollTagsLeft')"
       :class="[
-        tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`,
-        `${prefixCls}__tool-button`
+        `${prefixCls}__tool`,
+        tagsViewImmerse ? `${prefixCls}__tool--immerse` : `${prefixCls}__tool--first`
       ]"
-      class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       type="button"
-      @click="move(-200)"
+      @click="scrollTags(-200)"
     >
-      <Icon
-        :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
-        color="var(--el-text-color-placeholder)"
-        icon="ep:d-arrow-left"
-      />
+      <Icon icon="ep:d-arrow-left" />
     </button>
-    <div class="flex-1 overflow-hidden">
-      <ElScrollbar ref="scrollbarRef" class="h-full" @scroll="scroll">
-        <div class="h-[var(--tags-view-height)] flex">
+    <div :class="`${prefixCls}__viewport`">
+      <ElScrollbar ref="scrollbarRef" :class="`${prefixCls}__scrollbar`">
+        <div :class="[`${prefixCls}__list`, tagsViewImmerse ? `${prefixCls}__list--immerse` : '']">
           <ContextMenu
             v-for="item in visitedViews"
             :key="item.fullPath"
             :ref="itemRefs.set"
-            @auxclick="closeTabOnMouseMidClick($event, item)"
             :class="[
               `${prefixCls}__item`,
               tagsViewImmerse ? `${prefixCls}__item--immerse` : '',
-              tagsViewIcon ? `${prefixCls}__item--icon` : '',
-              tagsViewImmerse && tagsViewIcon ? `${prefixCls}__item--immerse--icon` : '',
               item?.meta?.affix ? `${prefixCls}__item--affix` : '',
               {
                 'is-active': isActive(item)
               }
             ]"
-            :schema="[
-              {
-                icon: 'ep:refresh',
-                label: 'common.reload',
-                disabled: !item.name,
-                command: () => {
-                  refreshSelectedTag(item)
-                }
-              },
-              {
-                icon: 'ep:close',
-                label: 'common.closeTab',
-                disabled: !!item.meta?.affix,
-                command: () => {
-                  closeSelectedTag(item)
-                }
-              },
-              {
-                divided: true,
-                icon: 'ep:d-arrow-left',
-                label: 'common.closeTheLeftTab',
-                disabled: !hasClosableView(item, 'left'),
-                command: () => {
-                  closeLeftTags(item)
-                }
-              },
-              {
-                icon: 'ep:d-arrow-right',
-                label: 'common.closeTheRightTab',
-                disabled: !hasClosableView(item, 'right'),
-                command: () => {
-                  closeRightTags(item)
-                }
-              },
-              {
-                divided: true,
-                icon: 'ep:discount',
-                label: 'common.closeOther',
-                disabled: !hasClosableView(item, 'other'),
-                command: () => {
-                  closeOthersTags(item)
-                }
-              },
-              {
-                icon: 'ep:minus',
-                label: 'common.closeAll',
-                disabled: !hasClosableView(item, 'all'),
-                command: () => {
-                  closeAllTags()
-                }
-              }
-            ]"
+            :schema="createContextMenu(item)"
             :tag-item="item"
+            @auxclick="closeTabOnMouseMidClick($event, item)"
             @visible-change="visibleChange"
           >
-            <div>
-              <!-- 路由已被移除的 tag 按名称解析会抛错：link 改用 fullPath（解析不抛错，开发环境 devtools 会在创建时解析），
-                点击时不跳转，停留在当前路由 -->
-              <router-link
-                v-slot="{ href, navigate }"
-                :to="isRegisteredView(item) ? { ...item } : item.fullPath"
-                custom
-              >
-                <!-- 点击时重新检查路由是否仍注册：已移除时阻止默认行为，不走可能残留的旧 href -->
-                <div
-                  :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
-                  @click="isRegisteredView(item) ? navigate($event) : $event.preventDefault()"
+            <div :class="`${prefixCls}__item-body`">
+              <!-- 链接目标统一用 fullPath：路由已被移除时按名称解析会抛错，fullPath 解析不抛错；
+                只有路由仍注册才带 href。Enter 的 keydown 不冒泡到 ContextMenu 触发器，由链接原生激活触发 click -->
+              <router-link v-slot="{ href, navigate }" :to="item.fullPath" custom>
+                <a
+                  :aria-current="isActive(item) ? 'page' : undefined"
+                  :class="`${prefixCls}__link`"
+                  :href="isRegisteredView(item) ? href : undefined"
+                  @click="onLinkClick($event, item, navigate)"
+                  @keydown.enter.stop
                 >
-                  <!-- 正文为真实链接，与关闭按钮并列（参考上游 e66532cf9）：只有路由仍注册才带 href；
-                    点击冒泡到外层由 navigate 导航（带修饰键时交给浏览器）。Enter 的 keydown 不冒泡到 ContextMenu 触发器，
-                    由链接原生激活触发 click -->
-                  <a
-                    :aria-current="isActive(item) ? 'page' : undefined"
-                    :class="`${prefixCls}__item--link`"
-                    :href="isRegisteredView(item) ? href : undefined"
-                    @keydown.enter.stop
-                  >
-                    <Icon
-                      v-if="tagsViewIcon && getTagIcon(item)"
-                      :icon="getTagIcon(item)"
-                      :size="12"
-                      class="mr-5px"
-                    />
-                    {{
-                      getRouteTitle(item?.meta) +
-                      (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
-                    }}
-                  </a>
-                  <!-- 原生按钮便于键盘聚焦与读屏（参考上游 8a68d60bb）；固定标签不渲染。
-                    Enter/Space 的 keydown 不冒泡到 ContextMenu 触发器（其会 preventDefault 并打开菜单），
-                    由按钮原生激活触发一次 click -->
-                  <button
-                    v-if="!item?.meta?.affix"
-                    type="button"
-                    :class="`${prefixCls}__item--close`"
-                    :aria-label="`${t('common.closeTab')}: ${getRouteTitle(item?.meta)}${item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : ''}`"
-                    @click.prevent.stop="closeSelectedTag(item)"
-                    @keydown.enter.space.stop
-                  >
-                    <Icon :size="12" color="#333" icon="ep:close" />
-                  </button>
-                </div>
+                  <Icon
+                    v-if="tagsViewIcon && getTagIcon(item)"
+                    :icon="getTagIcon(item)"
+                    :size="13"
+                  />
+                  <span>{{ getTagTitle(item) }}</span>
+                </a>
               </router-link>
+              <!-- 固定标签不渲染关闭按钮。Enter/Space 的 keydown 不冒泡到 ContextMenu 触发器
+                （其会 preventDefault 并打开菜单），由按钮原生激活触发一次 click -->
+              <button
+                v-if="!item?.meta?.affix"
+                type="button"
+                :class="`${prefixCls}__close`"
+                :aria-label="`${t('common.closeTab')}: ${getTagTitle(item)}`"
+                @click.prevent.stop="closeSelectedTag(item)"
+                @keydown.enter.space.stop
+              >
+                <Icon :size="13" icon="ep:close" />
+              </button>
             </div>
           </ContextMenu>
         </div>
@@ -498,99 +493,32 @@ watch(
     <button
       :aria-label="t('common.scrollTagsRight')"
       :title="t('common.scrollTagsRight')"
-      :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
-      class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
+      :class="[`${prefixCls}__tool`, tagsViewImmerse ? `${prefixCls}__tool--immerse` : '']"
       type="button"
-      @click="move(200)"
+      @click="scrollTags(200)"
     >
-      <Icon
-        :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
-        color="var(--el-text-color-placeholder)"
-        icon="ep:d-arrow-right"
-      />
+      <Icon icon="ep:d-arrow-right" />
     </button>
     <button
       :aria-label="t('common.reload')"
       :title="t('common.reload')"
-      :class="[tagsViewImmerse ? '' : `${prefixCls}__tool`, `${prefixCls}__tool-button`]"
-      class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
+      :class="[`${prefixCls}__tool`, tagsViewImmerse ? `${prefixCls}__tool--immerse` : '']"
       type="button"
       @click="refreshSelectedTag(activeTag)"
     >
-      <Icon
-        :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
-        color="var(--el-text-color-placeholder)"
-        icon="ep:refresh-right"
-      />
+      <Icon icon="ep:refresh-right" />
     </button>
-    <!-- 工具栏“更多”作用于当前页的 tag（activeTag，参考上游 e66532cf9）：当前页没有 tag 时，
+    <!-- 工具栏“更多”作用于当前页的 tag（activeTag）：当前页没有 tag 时，
       刷新仍刷新当前路由，关闭 / 左侧 / 右侧 / 其它禁用，关闭全部可用 -->
-    <ContextMenu
-      :schema="[
-        {
-          icon: 'ep:refresh',
-          label: 'common.reload',
-          command: () => {
-            refreshSelectedTag(activeTag)
-          }
-        },
-        {
-          icon: 'ep:close',
-          label: 'common.closeTab',
-          disabled: !activeTag || !!activeTag.meta?.affix,
-          command: () => {
-            if (activeTag) closeSelectedTag(activeTag)
-          }
-        },
-        {
-          divided: true,
-          icon: 'ep:d-arrow-left',
-          label: 'common.closeTheLeftTab',
-          disabled: !hasClosableView(activeTag, 'left'),
-          command: () => {
-            closeLeftTags(activeTag)
-          }
-        },
-        {
-          icon: 'ep:d-arrow-right',
-          label: 'common.closeTheRightTab',
-          disabled: !hasClosableView(activeTag, 'right'),
-          command: () => {
-            closeRightTags(activeTag)
-          }
-        },
-        {
-          divided: true,
-          icon: 'ep:discount',
-          label: 'common.closeOther',
-          disabled: !activeTag || !hasClosableView(activeTag, 'other'),
-          command: () => {
-            closeOthersTags(activeTag)
-          }
-        },
-        {
-          icon: 'ep:minus',
-          label: 'common.closeAll',
-          disabled: !hasClosableView(activeTag, 'all'),
-          command: () => {
-            closeAllTags()
-          }
-        }
-      ]"
-      trigger="click"
-    >
-      <!-- ElDropdown 已为触发器提供 role=button / tabindex 及 Enter、Space 打开，这里补可访问名称 -->
+    <ContextMenu :schema="createContextMenu(activeTag, true)" trigger="click">
+      <!-- 触发器保持非 button 元素：ElDropdown 已为触发器提供 role=button / tabindex 及 Enter、Space 打开，
+        这里补可访问名称 -->
       <span
         :aria-label="t('common.moreTabActions')"
         :title="t('common.moreTabActions')"
-        :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
-        class="block h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
+        :class="[`${prefixCls}__tool`, tagsViewImmerse ? `${prefixCls}__tool--immerse` : '']"
       >
-        <Icon
-          :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
-          color="var(--el-text-color-placeholder)"
-          icon="ep:menu"
-        />
+        <Icon icon="ep:menu" />
       </span>
     </ContextMenu>
   </div>
@@ -604,245 +532,204 @@ $prefix-cls: #{$namespace}-tags-view;
     height: 100%;
   }
 
-  // 工具栏原生按钮：去掉浏览器默认样式，尺寸、边线与原 span 一致；键盘聚焦时在按钮内侧显示焦点框
-  &__tool-button {
+  &__viewport {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__scrollbar {
+    height: 100%;
+  }
+
+  &__list {
+    display: flex;
+    height: var(--tags-view-height);
+    padding: 3px 4px;
+    box-sizing: border-box;
+    gap: 4px;
+  }
+
+  // 沉浸式标签彼此叠放，贴齐标签栏
+  &__list--immerse {
+    padding: 0;
+    gap: 0;
+  }
+
+  // 工具栏按钮：颜色、悬停与键盘聚焦全部由样式控制
+  &__tool {
+    display: grid;
+    flex: none;
+    width: var(--tags-view-height);
+    height: var(--tags-view-height);
     padding: 0;
     margin: 0;
     font: inherit;
-    color: inherit;
-    background: none;
-    border: none;
+    color: var(--el-text-color-placeholder);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-left: 1px solid var(--layout-border-color);
+    box-sizing: border-box;
+    transition:
+      color 160ms ease,
+      background-color 160ms ease;
+    place-items: center;
 
+    &:hover,
     &:focus-visible {
-      outline: 1px solid var(--el-color-primary);
-      outline-offset: -2px;
-    }
-  }
-
-  &__tool {
-    position: relative;
-
-    &::before {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-left: 1px solid var(--layout-border-color);
-      content: '';
+      color: var(--el-color-primary);
+      background: var(--el-fill-color-light);
+      outline: none;
     }
 
     &--first {
-      &::before {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        border-right: 1px solid var(--layout-border-color);
-        border-left: none;
-        content: '';
-      }
+      border-right: 1px solid var(--layout-border-color);
+      border-left: 0;
+    }
+
+    &--immerse {
+      border: 0;
     }
   }
 
   &__item {
     position: relative;
-    top: 3px;
-    height: calc(100% - 6px);
-    padding-right: 15px;
-    margin-left: 4px;
+    flex: none;
+    height: 100%;
     font-size: 12px;
     cursor: pointer;
-    border: 1px solid #d9d9d9;
-    border-radius: 2px;
     box-sizing: border-box;
+  }
 
-    // 未悬停时透明且不响应鼠标，但仍可 Tab 聚焦；不占布局宽度
-    &--close {
-      position: absolute;
-      top: 50%;
-      right: 5px;
-      display: inline-flex;
-      padding: 0;
-      color: inherit;
-      pointer-events: none;
-      cursor: pointer;
-      background: none;
-      border: none;
-      opacity: 0;
-      transform: translate(0, -50%);
-      align-items: center;
-      justify-content: center;
+  &__item-body,
+  &__link {
+    display: flex;
+    height: 100%;
+    align-items: center;
+  }
 
-      &:focus-visible {
-        pointer-events: auto;
-        outline: 1px solid currentcolor;
-        outline-offset: 1px;
-        opacity: 1;
-      }
-    }
+  &__link {
+    padding: 0 12px;
+    color: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    gap: 5px;
 
-    &:not(.#{$prefix-cls}__item--affix):hover {
-      .#{$prefix-cls}__item--close {
-        pointer-events: auto;
-        opacity: 1;
-      }
-    }
-
-    // 正文链接：外观与原标签文字一致，键盘聚焦时在内侧显示焦点框
-    &--link {
-      display: inline-flex;
-      height: 100%;
-      color: inherit;
-      text-decoration: none;
-      align-items: center;
-
-      &:focus-visible {
-        outline: 1px solid currentcolor;
-        outline-offset: -1px;
-      }
+    &:focus-visible {
+      outline: 2px solid var(--el-color-primary-light-7);
+      outline-offset: -2px;
     }
   }
 
-  &__item--icon {
-    padding-right: 20px;
+  // 可关闭标签的文字右侧紧邻关闭按钮（沉浸式的关闭按钮悬浮，不适用）
+  &__item:not(.#{$prefix-cls}__item--affix):not(.#{$prefix-cls}__item--immerse)
+    .#{$prefix-cls}__link {
+    padding-right: 4px;
   }
 
-  &__item:not(.is-active) {
-    &:hover {
-      color: var(--el-color-primary);
-    }
-  }
+  // 关闭按钮：未悬停时透明且不响应鼠标，但仍可 Tab 聚焦
+  &__close {
+    display: grid;
+    width: 24px;
+    height: 100%;
+    padding: 0;
+    color: inherit;
+    pointer-events: none;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    opacity: 0;
+    transition:
+      color 160ms ease,
+      opacity 160ms ease;
+    place-items: center;
 
-  &__item.is-active {
-    color: var(--el-color-white);
-    background-color: var(--el-color-primary);
-    border: 1px solid var(--el-color-primary);
-
-    .#{$prefix-cls}__item--close {
-      :deep(svg) {
-        color: var(--el-color-white) !important;
-      }
-    }
-  }
-
-  &__item--immerse {
-    top: 2px;
-    height: calc(100% - 3px);
-    padding-right: 35px;
-    margin: 0 -10px;
-    border: none !important;
-    -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg width='68' height='34' viewBox='0 0 68 34' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='m27,0c-7.99582,0 -11.95105,0.00205 -12,12l0,6c0,8.284 -0.48549,16.49691 -8.76949,16.49691l54.37857,-0.11145c-8.284,0 -8.60908,-8.10146 -8.60908,-16.38546l0,-6c0.11145,-12.08445 -4.38441,-12 -12,-12l-13,0z' fill='%23409eff'/%3E%3C/svg%3E")
-      12 27 15;
-
-    .#{$prefix-cls}__item--label {
-      padding-left: 35px;
-    }
-
-    .#{$prefix-cls}__item--close {
-      right: 20px;
+    &:hover,
+    &:focus-visible {
+      color: var(--el-color-danger);
+      outline: none;
     }
   }
 
-  &__item--immerse--icon {
-    padding-right: 35px;
+  &__item:hover .#{$prefix-cls}__close,
+  &__close:focus-visible {
+    pointer-events: auto;
+    opacity: 1;
   }
 
-  &__item--immerse:not(.is-active) {
-    &:hover {
-      color: var(--el-color-white);
-      background-color: var(--el-color-primary);
-
-      .#{$prefix-cls}__item--close {
-        :deep(svg) {
-          color: var(--el-color-white) !important;
-        }
-      }
-    }
-  }
-}
-
-.dark {
-  .#{$prefix-cls} {
-    &__tool {
-      &--first {
-        &::after {
-          display: none;
-        }
-      }
-    }
-
-    &__item {
-      border: 1px solid var(--el-border-color);
-    }
-
-    &__item:not(.is-active) {
-      &:hover {
-        color: var(--el-color-primary);
-      }
-    }
-
-    &__item.is-active {
-      color: var(--el-color-white);
-      background-color: var(--el-color-primary);
-      border: 1px solid var(--el-color-primary);
-
-      .#{$prefix-cls}__item--close {
-        :deep(svg) {
-          color: var(--el-color-white) !important;
-        }
-      }
-    }
-
-    &__item--immerse:not(.is-active) {
-      &:hover {
-        color: var(--el-color-white);
-      }
-    }
-  }
-}
-
-// 普通（非沉浸）标签的卡片外观（参考上游 e66532cf9 / 8a68d60bb TagsView 样式段）：
-// 圆角卡片、壳层分隔色边框，选中为主色浅底 + 主色字，选中的可关闭标签常显关闭按钮；
-// 尺寸、结构、事件与沉浸式标签均不变；放在 .dark 规则之后，明暗两套共用
-.#{$prefix-cls} {
+  // 普通（非沉浸）标签：圆角卡片，选中为主色浅底 + 主色字，选中的可关闭标签常显关闭按钮
   &__item:not(.#{$prefix-cls}__item--immerse) {
+    overflow: hidden;
     color: var(--el-text-color-regular);
     border: 1px solid var(--layout-border-color);
     border-radius: 8px;
     transition:
-      color var(--transition-time-02),
-      background-color var(--transition-time-02),
-      border-color var(--transition-time-02);
+      color 160ms ease,
+      background-color 160ms ease,
+      border-color 160ms ease;
 
-    // 键盘聚焦标签内的链接或关闭按钮时与悬停一样高亮（参考上游 e66532cf9 &:focus-within）
     &:hover,
     &:focus-within {
       color: var(--el-color-primary);
     }
 
     &.is-active {
+      font-weight: 600;
       color: var(--el-color-primary);
       background-color: var(--el-color-primary-light-9);
-      border: 1px solid var(--el-color-primary-light-7);
+      border-color: var(--el-color-primary-light-7);
 
-      .#{$prefix-cls}__item--close {
-        :deep(svg) {
-          color: currentcolor !important;
-        }
+      .#{$prefix-cls}__close {
+        pointer-events: auto;
+        opacity: 1;
+      }
+    }
+  }
+
+  // 沉浸式标签：梯形遮罩、相邻标签叠放，选中与悬停为主色底白字；关闭按钮悬浮在右侧，不占文字宽度
+  &__item--immerse {
+    top: 2px;
+    height: calc(100% - 3px);
+    padding-right: 35px;
+    margin: 0 -10px;
+    border: none;
+    -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg width='68' height='34' viewBox='0 0 68 34' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='m27,0c-7.99582,0 -11.95105,0.00205 -12,12l0,6c0,8.284 -0.48549,16.49691 -8.76949,16.49691l54.37857,-0.11145c-8.284,0 -8.60908,-8.10146 -8.60908,-16.38546l0,-6c0.11145,-12.08445 -4.38441,-12 -12,-12l-13,0z' fill='%23409eff'/%3E%3C/svg%3E")
+      12 27 15;
+
+    .#{$prefix-cls}__link {
+      padding: 0 0 0 35px;
+    }
+
+    .#{$prefix-cls}__close {
+      position: absolute;
+      top: 50%;
+      right: 20px;
+      width: auto;
+      height: auto;
+      transform: translate(0, -50%);
+
+      // 主色底上保持白色前景，键盘聚焦以描边提示
+      &:hover,
+      &:focus-visible {
+        color: inherit;
+      }
+
+      &:focus-visible {
+        outline: 1px solid currentcolor;
+        outline-offset: 1px;
       }
     }
 
-    &.is-active:not(.#{$prefix-cls}__item--affix) .#{$prefix-cls}__item--close {
-      pointer-events: auto;
-      opacity: 1;
+    &.is-active,
+    &:hover {
+      color: var(--el-color-white);
+      background-color: var(--el-color-primary);
     }
   }
 }
 
-// 暗色下普通选中标签前景改用正文主色：主色浅底（light-9）在暗色为深色色阶，主色字对比不足；
-// 背景与边框仍沿用上游新版，沉浸式标签不受影响
+// 暗色下普通选中标签前景改用正文主色：主色浅底（light-9）在暗色为深色色阶，主色字对比不足
 .dark .#{$prefix-cls}__item:not(.#{$prefix-cls}__item--immerse).is-active {
   color: var(--el-text-color-primary);
 }

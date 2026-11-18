@@ -1,10 +1,11 @@
 import { CouponTemplateValidityTypeEnum, PromotionDiscountTypeEnum } from '@/utils/constants'
 import { formatDate } from '@/utils/formatTime'
 import { CouponTemplateVO } from '@/api/mall/promotion/coupon/couponTemplate'
+import { CouponVO } from '@/api/mall/promotion/coupon/coupon'
 import { floatToFixed2 } from '@/utils'
 
 // 格式化【优惠金额/折扣】
-export const discountFormat = (row: CouponTemplateVO) => {
+export const discountFormat = (row: CouponTemplateVO | CouponVO) => {
   if (row.discountType === PromotionDiscountTypeEnum.PRICE.type) {
     return `￥${floatToFixed2(row.discountPrice)}`
   }

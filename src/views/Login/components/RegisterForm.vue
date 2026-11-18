@@ -99,9 +99,8 @@ import LoginFormTitle from './LoginFormTitle.vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useIcon } from '@/hooks/web/useIcon'
 import * as authUtil from '@/utils/auth'
-import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
-import { LoginStateEnum, useLoginState, useFormValid } from './useLogin'
+import { LoginStateEnum, resolveLoginRedirect, useLoginState, useFormValid } from './useLogin'
 
 defineOptions({ name: 'RegisterForm' })
 
@@ -113,7 +112,6 @@ const formLogin = ref()
 const { validForm } = useFormValid(formLogin)
 const { handleBackLogin, getLoginState } = useLoginState()
 const { currentRoute, push } = useRouter()
-const permissionStore = usePermissionStore()
 const redirect = ref<string>('')
 const loginLoading = ref(false)
 const verify = ref()
@@ -212,7 +210,8 @@ const handleRegister = async (params: any) => {
     if (redirect.value.indexOf('sso') !== -1) {
       window.location.href = window.location.href.replace('/login?redirect=', '')
     } else {
-      await push({ path: redirect.value || permissionStore.addRouters[0].path })
+      // 与账号登录一致：整串交给路由解析，原样保留 query、hash；只接受站内绝对路径
+      await push(resolveLoginRedirect(redirect.value))
     }
   } finally {
     registerPending = false

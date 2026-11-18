@@ -20,18 +20,18 @@ const localeStore = useLocaleStore()
 
 const langMap = computed(() => localeStore.getLocaleMap)
 
-// 当前语言，对应菜单项禁用（参考上游 c7f8db52d）
+// 当前语言，对应菜单项禁用
 const currentLang = computed(() => localeStore.getCurrentLocale.lang)
 
 const { changeLocale } = useLocale()
 
-// 不刷新页面切换语言（参考上游 d4cb48036、2e5656055），保留当前路由、标签页缓存与未保存的输入；
+// 不刷新页面切换语言，保留当前路由、标签页缓存与未保存的输入；
 // changeLocale 同步切换 vue-i18n、Element Plus 语言、html lang 并持久化，是否已是当前语言由其判断
 const setLang = (lang: LocaleType) => {
   changeLocale(lang)
 }
 
-// 外部属性分配（参考上游 c7f8db52d 将属性透传到原生触发按钮）：
+// 外部属性分配（将属性透传到原生触发按钮）：
 // - class 与原先一样同时作用在 ElDropdown 外层和触发按钮上；
 // - ElDropdown 自身的 props（trigger、placement、disabled、id、tabindex 等，id / tabindex 由 ElDropdown 设到触发按钮上）
 //   及其 visible-change、command 事件仍交给 ElDropdown；
@@ -77,7 +77,7 @@ const onTriggerClick = (event: MouseEvent) => {
     @command="setLang"
     v-bind="getDropdownAttrs()"
   >
-    <!-- 原生 button 作为触发器，可键盘聚焦并带可访问名称（参考上游 c7f8db52d）；外部 class 继续落在触发器上，
+    <!-- 原生 button 作为触发器，可键盘聚焦并带可访问名称；外部 class 继续落在触发器上，
          调用方传入的 aria-label 等可覆盖默认值，type 始终为 button -->
     <button
       :aria-label="t('layout.switchLanguage')"

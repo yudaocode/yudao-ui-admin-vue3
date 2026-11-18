@@ -13,17 +13,35 @@ import {
 } from '@/utils/routeParams'
 
 const modules = import.meta.glob('../views/**/*.{vue,tsx}')
+
+/**
+ * 按视图路径（相对 src/views，可带前导 /、可带扩展名）查找组件模块的键：
+ * 先精确匹配 .vue、.tsx 文件，未命中再按原有的包含规则匹配。
+ * 精确优先，避免 oa/leave/index 这类路径先命中后缀相同的 bpm/oa/leave/index.vue
+ */
+const resolveViewModuleKey = (
+  viewPath: string,
+  modulesKeys: string[] = Object.keys(modules)
+): string | undefined => {
+  const normalizedPath = viewPath.replace(/^\/+/, '')
+  const exactKey = [
+    `../views/${normalizedPath}`,
+    `../views/${normalizedPath}.vue`,
+    `../views/${normalizedPath}.tsx`
+  ].find((key) => key in modules)
+  return exactKey ?? modulesKeys.find((key) => key.includes(viewPath))
+}
+
 /**
  * 注册一个异步组件
  * @param componentPath 例:/bpm/oa/leave/detail
  */
 export const registerComponent = (componentPath: string) => {
-  for (const item in modules) {
-    if (item.includes(componentPath)) {
-      // 使用异步组件的方式来动态加载组件
-      // @ts-ignore
-      return defineAsyncComponent(modules[item])
-    }
+  const key = resolveViewModuleKey(componentPath)
+  if (key) {
+    // 使用异步组件的方式来动态加载组件
+    // @ts-ignore
+    return defineAsyncComponent(modules[key])
   }
 }
 /* Layout */
@@ -73,22 +91,24 @@ export const getRawRoute = (route: RouteLocationNormalized): RouteLocationNormal
 }
 
 /**
- * 查找后端菜单对应的视图组件：后端传了 component 时按 component 匹配，未传时按 path 匹配（模糊包含，规则同原逻辑）。
- * 找不到时输出诊断（参考上游 generateRoutesByServer 的“未找到…请创建”），仍返回 undefined，不阻断路由注册与登录；
+ * 查找后端菜单对应的视图组件：后端传了 component 时按 component 匹配（精确路径优先，未命中再模糊包含），
+ * 未传时按 path 匹配（模糊包含，规则同原逻辑）。
+ * 找不到时输出诊断，仍返回 undefined，不阻断路由注册与登录；
  * 构建时去除 console（VITE_DROP_CONSOLE）的环境看不到该日志
  */
 const findViewComponent = (route: AppCustomRouteRecordRaw, modulesRoutesKeys: string[]) => {
-  const index = route?.component
-    ? modulesRoutesKeys.findIndex((ev) => ev.includes(route.component))
-    : modulesRoutesKeys.findIndex((ev) => ev.includes(route.path))
-  if (index < 0) {
+  const key = route?.component
+    ? resolveViewModuleKey(route.component, modulesRoutesKeys)
+    : modulesRoutesKeys.find((ev) => ev.includes(route.path))
+  if (!key) {
     const component = route.component || '未配置，按 path 匹配'
     console.error(
       `[菜单路由] 未找到菜单「${route.name}」的视图组件（path: ${route.path}，component: ${component}），` +
         '请在 src/views 下创建对应的 .vue 或 .tsx 文件'
     )
+    return undefined
   }
-  return modules[modulesRoutesKeys[index]]
+  return modules[key]
 }
 
 // 后端控制路由生成
@@ -360,7 +380,7 @@ const generateRoutePath = (parentPath: string, path: string) => {
 export const pathResolve = (parentPath: string, path: string) => {
   if (isUrl(path)) return path
   if (!path) return parentPath // 修复 path 为空时返回 parentPath，避免拼接出错 https://t.zsxq.com/QVr6b
-  // 以 / 开头的子路由由 vue-router 按绝对路径注册，不拼接父路径（参考上游 e66532cf9），菜单索引、面包屑等与注册路径一致；
+  // 以 / 开头的子路由由 vue-router 按绝对路径注册，不拼接父路径，菜单索引、面包屑等与注册路径一致；
   // 不做 trim：注册路径保留原始空白，菜单侧单独 trim 会与注册路径不一致
   if (path.startsWith('/')) return path.replace(/\/+/g, '/')
   return `${parentPath}/${path}`.replace(/\/+/g, '/')

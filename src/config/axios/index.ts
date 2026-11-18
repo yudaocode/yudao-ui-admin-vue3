@@ -11,7 +11,7 @@ import {
 const { default_headers } = config
 
 const request = (option: any) => {
-  // requestKey 只用于取消登记，不传给 axios（参考上游 c7f8db52d 发送前移除 requestKey）
+  // requestKey 只用于取消登记，不传给 axios
   const { headersType, headers, requestKey, ...otherOption } = option
   const send = (signal?: AbortSignal) =>
     service({
@@ -23,7 +23,7 @@ const request = (option: any) => {
       }
     })
   // 调用方自行传入 signal / cancelToken 时保持原样，不纳入 cancelRequest / cancelAllRequest 管理；
-  // 取消键：传入 requestKey 时按它登记，同一 url 的不同业务请求可分别取消；未传时沿用 url（参考上游 c7f8db52d requestKey ?? url）
+  // 取消键：传入 requestKey 时按它登记，同一 url 的不同业务请求可分别取消；未传时沿用 url
   return hasCallerCancellation(option)
     ? send()
     : runCancellableRequest(requestKey ?? option.url, send)

@@ -131,6 +131,7 @@
 
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
+import type { TableInstance } from 'element-plus'
 import { InventoryApi, InventoryVO } from '@/api/wms/inventory'
 import { formatQuantity } from '@/views/wms/utils/format'
 
@@ -153,7 +154,7 @@ const list = ref<InventorySelectRow[]>([]) // 库存列表
 const total = ref(0) // 列表的总条数
 const selectedMap = ref<Map<string, InventorySelectRow>>(new Map()) // 跨页已选择库存
 const disabledInventoryKeys = ref<Set<string>>(new Set()) // 已在业务明细中使用的库存
-const tableRef = ref<InstanceType<typeof ElTable>>() // 表格 Ref
+const tableRef = ref<TableInstance>() // 表格 Ref
 const queryFormRef = ref() // 搜索的表单
 
 /** 获得默认的查询参数 */

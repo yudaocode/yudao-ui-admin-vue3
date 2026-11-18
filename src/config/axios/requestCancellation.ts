@@ -1,12 +1,12 @@
-import { CanceledError } from 'axios'
+import axios, { CanceledError } from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
 
 /**
- * request 封装的请求取消能力（参考上游 32381408b 的 cancelRequest / cancelAllRequest，按芋道 service 适配）
+ * request 封装的请求取消能力（cancelRequest / cancelAllRequest）
  *
  * 只登记通过 request 封装发起、且调用方没有自行传入 signal / cancelToken 的请求；
  * 调用方自管的取消方式保持原样，不登记、不受 cancelRequest / cancelAllRequest 影响。
- * 按取消键登记：调用方传入 requestKey 时为 requestKey，否则为 url（参考上游 c7f8db52d requestKey ?? url）。
+ * 按取消键登记：调用方传入 requestKey 时为 requestKey，否则为 url。
  * 不做自动取消或去重：同一取消键并发的多个请求各自登记，按该键取消时一并取消。
  */
 
@@ -91,4 +91,11 @@ export const throwIfRequestCanceled = (config: InternalAxiosRequestConfig) => {
     error.config = config
     throw error
   }
+}
+
+/** 是否为本能力创建、且已被 cancelRequest / cancelAllRequest 中止的请求错误；调用方自管 signal 的取消不在此列 */
+export const isCanceledByRequestCancellation = (error: unknown): boolean => {
+  if (!axios.isCancel(error)) return false
+  const signal = (error as CanceledError<unknown>).config?.signal
+  return !!signal && managedSignals.has(signal as AbortSignal) && !!signal.aborted
 }

@@ -124,7 +124,7 @@
     <el-table
       id="fms-cash-flow-statement-table"
       v-loading="loading"
-      :data="adjustmentMode ? adjustmentList : list"
+      :data="tableList"
       border
       height="calc(100vh - 240px)"
     >
@@ -246,6 +246,9 @@ const statementAdjustmentMode = ref(false) // 是否为现金流量表人工调�
 const list = ref<FmsReportItemVO[]>([]) // 现金流量表的项目列表
 const checkResult = ref<FmsCashFlowCheckVO>() // 检查结果
 const adjustmentList = ref<FmsCashFlowAdjustmentVO[]>([]) // 现金流量辅助数据列表
+const tableList = computed<Array<FmsReportItemVO | FmsCashFlowAdjustmentVO>>(() =>
+  adjustmentMode.value ? adjustmentList.value : list.value
+) // 表格数据：辅助数据调整模式展示辅助数据列表，否则展示项目列表
 const periodLabel = ref('') // 会计期间文本，用于导出文件名
 const formulaFormRef = ref<InstanceType<typeof FmsReportFormulaForm>>() // 公式编辑弹窗
 const queryParams = reactive<FmsReportListReqVO>({

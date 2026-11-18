@@ -5,7 +5,7 @@ if (append) $.fn.append = append
 if (click) $.fn.click = click
 if (on) $.fn.on = on
 
-export { Dom7Array } from 'dom7'
+export type { Dom7Array } from 'dom7'
 export default $
 
 // COMPAT: This is required to prevent TypeScript aliases from doing some very

@@ -69,7 +69,7 @@ const iconCount = computed(() => filterIconList.value.length)
 
 const { configGlobal } = useConfigGlobal()
 
-// 预览框与图标单元格尺寸跟随全局组件尺寸（参考上游 4490d5eee）：
+// 预览框与图标单元格尺寸跟随全局组件尺寸：
 // 优先 ConfigGlobal 注入的 size，未注入时回退 app store 的 currentSize，均没有时按 default
 const iconSize = computed(() => {
   const size = configGlobal?.size ?? useAppStoreWithOut().getCurrentSize
@@ -115,7 +115,7 @@ function handleClick({ props }) {
 
 function onChangeIcon(item) {
   const icon = currentActiveType.value + item
-  // 开启 clearable 时，再次点击已选中的图标视为清空（参考上游 c2dde2522）
+  // 开启 clearable 时，再次点击已选中的图标视为清空
   emit('update:modelValue', props.clearable && icon === props.modelValue ? '' : icon)
   visible.value = false
 }
@@ -148,7 +148,7 @@ function getIconPage(name: string) {
   return iconIndex >= 0 ? Math.floor(iconIndex / pageSize.value) + 1 : 1
 }
 
-// 定位到绑定图标所属分类及所在页（参考上游 4490d5eee init）；空值或未知前缀时保持当前浏览位置
+// 定位到绑定图标所属分类及所在页；空值或未知前缀时保持当前浏览位置
 // 页码按当前搜索过滤后的列表计算，选中图标不在过滤结果中时回到第 1 页
 function locateSelected() {
   const selected = parseModelValue()
@@ -169,7 +169,7 @@ watch(
   },
   { immediate: true }
 )
-// 每次打开弹层时重新定位（参考上游 4490d5eee @show），浏览其它分类/页后未选择而关闭，再次打开仍回到选中图标
+// 每次打开弹层时重新定位，浏览其它分类/页后未选择而关闭，再次打开仍回到选中图标
 watch(visible, (value) => {
   if (value) {
     locateSelected()

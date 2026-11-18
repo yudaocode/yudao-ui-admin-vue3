@@ -14,7 +14,7 @@ export interface UseResizeOptions {
 // 距离对话框边缘多少像素内可以拖拽调整尺寸
 const EDGE_SIZE = 8
 
-// 内容区最大高度需要给标题栏、底部按钮及上下边距预留的空间（与上游一致）
+// 内容区最大高度需要给标题栏、底部按钮及上下边距预留的空间
 const RESERVED_HEIGHT = 165
 
 const CURSOR_MAP: Record<string, string> = {
@@ -29,9 +29,9 @@ const CURSOR_MAP: Record<string, string> = {
 }
 
 /**
- * 对话框拖拽调整尺寸（参考上游 e6affad67 的 useResize）
+ * 对话框拖拽调整尺寸
  *
- * 与上游不同：不注册全局指令、不使用 MutationObserver；由调用方在对话框打开后 attach 到自己的 .el-dialog 元素，
+ * 不注册全局指令、不使用 MutationObserver；由调用方在对话框打开后 attach 到自己的 .el-dialog 元素，
  * 关闭、卸载时 detach。document 上的 mousemove / mouseup 只在拖拽期间通过 addEventListener 添加，
  * 不覆盖 document.onmousemove / onmouseup。全屏时不响应拖拽，也不写入宽高内联样式
  */

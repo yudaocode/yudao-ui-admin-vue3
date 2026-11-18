@@ -55,7 +55,7 @@
                 v-for="item in seckillConfigList"
                 :key="item.id"
                 v-bind="omit(item, ['label', 'value'])"
-                :label="t(item.name)"
+                :label="item.name"
                 :value="item.id"
               />
             </el-select>
@@ -91,7 +91,7 @@
         <el-col :span="24">
           <el-form-item label="秒杀活动商品" prop="spuId">
             <!-- 先选择 -->
-            <el-button @click="spuSelectRef.open()">选择商品</el-button>
+            <el-button :disabled="formLoading" @click="spuSelectRef.open()">选择商品</el-button>
             <SpuAndSkuList
               ref="spuAndSkuListRef"
               :rule-config="ruleConfig"
@@ -213,9 +213,15 @@ const ruleConfig: RuleConfig[] = [
 ]
 const spuList = ref<SeckillActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<SeckillActivityApi.SpuExtension>[]>([])
-const selectSpu = (spuId: number, skuIds: number[]) => {
-  formData.value.spuId = spuId
-  getSpuDetails(spuId, skuIds)
+const selectSpu = async (spuId: number, skuIds: number[]) => {
+  // 加载或保存期间不处理新的选择；商品详情加载完成前保持加载，不可提交
+  if (formLoading.value) return
+  formLoading.value = true
+  try {
+    await getSpuDetails(spuId, skuIds)
+  } finally {
+    formLoading.value = false
+  }
 }
 /**
  * 获取 SPU 详情
@@ -230,6 +236,8 @@ const getSpuDetails = async (
   if (res.length == 0) {
     return
   }
+  // 商品编号与商品详情一起写入，保持一致
+  formData.value.spuId = spuId
   spuList.value = []
   // 因为只能选择一个
   const spu = res[0]
@@ -265,6 +273,8 @@ const getSpuDetails = async (
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
+  // 上一次的加载或保存未结束时不重新打开，避免旧请求的结果写入新表单
+  if (formLoading.value) return
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -293,13 +303,14 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  // 校验表单
-  if (!formRef.value) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
-  // 提交请求
+  if (!formRef.value || formLoading.value) return
+  // 校验与提交期间保持加载，不可重复提交、选择商品或重新打开
   formLoading.value = true
   try {
+    // 校验表单
+    const valid = await formRef.value.validate()
+    // 校验期间已关闭弹窗：不再提交
+    if (!valid || !dialogVisible.value) return
     // 获取秒杀商品配置
     const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
     products.forEach((item: SeckillProductVO) => {
