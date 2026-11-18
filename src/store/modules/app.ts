@@ -295,12 +295,14 @@ export const useAppStore = defineStore('app', {
     setPrimaryLight() {
       if (this.customThemeParts.includes('primary') && this.theme.elColorPrimary) {
         const elColorPrimary = this.theme.elColorPrimary
-        const color = this.isDark ? '#000000' : '#ffffff'
+        // 与 Element Plus 一致：light-* 明色混白、暗色混暗色背景 #141414；dark-2 明色混黑、暗色混白
+        const lightBase = this.isDark ? '#141414' : '#ffffff'
+        const darkBase = this.isDark ? '#ffffff' : '#000000'
         const lightList = [3, 5, 7, 8, 9]
         lightList.forEach((v) => {
-          setCssVar(`--el-color-primary-light-${v}`, mix(color, elColorPrimary, v / 10))
+          setCssVar(`--el-color-primary-light-${v}`, mix(lightBase, elColorPrimary, v / 10))
         })
-        setCssVar(`--el-color-primary-dark-2`, mix(color, elColorPrimary, 0.2))
+        setCssVar(`--el-color-primary-dark-2`, mix(darkBase, elColorPrimary, 0.2))
       } else {
         // 未自定义主色：主色及色阶由 var.css 按明暗提供
         removeCssVar('--el-color-primary')

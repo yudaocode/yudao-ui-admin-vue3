@@ -2,11 +2,8 @@
 import { useLockStore } from '@/store/modules/lock'
 import { useNow } from '@/hooks/web/useNow'
 import { useDesign } from '@/hooks/web/useDesign'
-import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
 import avatarImg from '@/assets/imgs/avatar.gif'
-
-const tagsViewStore = useTagsViewStore()
 
 const { replace } = useRouter()
 
@@ -48,9 +45,8 @@ async function unLock() {
 
 // 返回登录
 async function goLogin() {
-  // 登出时统一清理 token、用户缓存与本会话的动态路由（接口失败时同样清理）
+  // 登出时统一清理 token、用户缓存、标签页与本会话的动态路由（接口失败时同样清理）
   await userStore.loginOut().catch(() => {})
-  tagsViewStore.delAllViews()
   lockStore.resetLockInfo()
   replace('/login')
 }

@@ -3,7 +3,6 @@
     <el-table-column type="expand" width="30">
       <template #default="{ row }">
         <SkuList
-          ref="skuListRef"
           :is-activity-component="true"
           :prop-form-data="spuPropertyList.find((item) => item.spuId === row.id)?.spuDetail"
           :property-list="spuPropertyList.find((item) => item.spuId === row.id)?.propertyList"
@@ -42,7 +41,9 @@
   </el-table>
 </template>
 <script generic="T extends Spu" lang="ts" setup>
+import { get } from 'lodash-es'
 import { formatToFraction } from '@/utils'
+import { isEmpty } from '@/utils/is'
 import { createImageViewer } from '@/components/ImageViewer'
 import { Spu } from '@/api/mall/product/spu'
 import { RuleConfig, SkuList } from '@/views/mall/product/spu/components'
@@ -60,9 +61,32 @@ const props = defineProps<{
 }>()
 
 const spuData = ref<Spu[]>([]) // spu 详情数据列表
-const skuListRef = ref() // 商品属性列表Ref
 const spuPropertyList = ref<SpuProperty<T>[]>([]) // spuId 对应的 sku 的属性列表
 const expandRowKeys = ref<string[]>([]) // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
+
+/**
+ * 校验全部 spu 的属性值和 sku 活动配置，规则同 SkuList 的 validateSku
+ *
+ * 直接遍历 spuPropertyList，不依赖展开行里挂载的 SkuList，折叠、删除行后仍校验全部商品
+ */
+const validateSkus = () => {
+  for (const item of spuPropertyList.value) {
+    // 校验商品属性属性值是否为空，有一个为空都不给过
+    if (item.propertyList?.some((property) => !property.values || isEmpty(property.values))) {
+      const warningInfo = '存在属性属性值为空，请先检查完善属性值后重试！！！'
+      message.warning(warningInfo)
+      throw new Error(warningInfo)
+    }
+    for (const sku of item.spuDetail.skus ?? []) {
+      const failedRule = props.ruleConfig.find((rule) => !rule.rule(get(sku, rule.name)))
+      if (failedRule) {
+        const warningInfo = '请检查商品各行相关属性配置，' + failedRule.message
+        message.warning(warningInfo)
+        throw new Error(warningInfo)
+      }
+    }
+  }
+}
 
 /**
  * 获取所有 sku 活动配置
@@ -70,13 +94,19 @@ const expandRowKeys = ref<string[]>([]) // 控制展开行需要设置 row-key �
  * @param extendedAttribute 在 sku 上扩展的属性，例：秒杀活动 sku 扩展属性 productConfig 请参考 seckillActivity.ts
  */
 const getSkuConfigs = (extendedAttribute: string) => {
-  skuListRef.value.validateSku()
+  validateSkus()
   const seckillProducts: any[] = []
   spuPropertyList.value.forEach((item) => {
     item.spuDetail.skus?.forEach((sku: any) => {
       seckillProducts.push(sku[extendedAttribute] as any)
     })
   })
+  // 没有任何 sku（未选商品或商品详情尚未加载完成）时拒绝提交，不能提交空商品
+  if (seckillProducts.length === 0) {
+    const warningInfo = '请选择商品'
+    message.warning(warningInfo)
+    throw new Error(warningInfo)
+  }
   return seckillProducts
 }
 // 暴露出给表单提交时使用

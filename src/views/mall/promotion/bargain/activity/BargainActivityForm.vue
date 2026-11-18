@@ -151,7 +151,7 @@
         </el-col>
         <el-col :span="24">
           <el-form-item label="砍价商品" prop="spuId">
-            <el-button @click="spuSelectRef.open()">选择商品</el-button>
+            <el-button :disabled="formLoading" @click="spuSelectRef.open()">选择商品</el-button>
             <SpuAndSkuList
               ref="spuAndSkuListRef"
               :rule-config="ruleConfig"
@@ -269,9 +269,15 @@ const ruleConfig: RuleConfig[] = [
     message: '商品活动库存不能小于 1 ！！！'
   }
 ]
-const selectSpu = (spuId: number, skuIds: number[]) => {
-  formData.value.spuId = spuId
-  getSpuDetails(spuId, skuIds)
+const selectSpu = async (spuId: number, skuIds: number[]) => {
+  // 加载或保存期间不处理新的选择；商品详情加载完成前保持加载，不可提交
+  if (formLoading.value) return
+  formLoading.value = true
+  try {
+    await getSpuDetails(spuId, skuIds)
+  } finally {
+    formLoading.value = false
+  }
 }
 /**
  * 获取 SPU 详情
@@ -286,6 +292,8 @@ const getSpuDetails = async (
   if (res.length == 0) {
     return
   }
+  // 商品编号与商品详情一起写入，保持一致
+  formData.value.spuId = spuId
   spuList.value = []
   // 因为只能选择一个
   const spu = res[0]
@@ -323,6 +331,8 @@ const getSpuDetails = async (
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
+  // 上一次的加载或保存未结束时不重新打开，避免旧请求的结果写入新表单
+  if (formLoading.value) return
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -373,15 +383,20 @@ const resetForm = async () => {
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  // 校验表单
-  if (!formRef.value) return
-  const valid = await formRef.value.validate()
-  if (!valid) return
-  // 提交请求
+  if (!formRef.value || formLoading.value) return
+  // 校验与提交期间保持加载，不可重复提交、选择商品或重新打开
   formLoading.value = true
   try {
+    // 校验表单
+    const valid = await formRef.value.validate()
+    // 校验期间已关闭弹窗：不再提交
+    if (!valid || !dialogVisible.value) return
+    if (spuList.value.length === 0) {
+      message.warning('请选择商品')
+      return
+    }
     const data = cloneDeep(formData.value) as BargainActivityApi.BargainActivityVO
-    const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
+    const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
     products.forEach((item: BargainProductVO) => {
       // 砍价价格元转分
       item.bargainFirstPrice = convertToInteger(item.bargainFirstPrice)

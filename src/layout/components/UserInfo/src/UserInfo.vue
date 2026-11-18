@@ -3,7 +3,6 @@ import { ElMessageBox } from 'element-plus'
 
 import avatarImg from '@/assets/imgs/avatar.gif'
 import { useDesign } from '@/hooks/web/useDesign'
-import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
 import LockDialog from './components/LockDialog.vue'
 import LockPage from './components/LockPage.vue'
@@ -16,8 +15,6 @@ const { t } = useI18n()
 const { push, replace } = useRouter()
 
 const userStore = useUserStore()
-
-const tagsViewStore = useTagsViewStore()
 
 const { getPrefixCls } = useDesign()
 
@@ -44,9 +41,8 @@ const loginOut = async () => {
   } catch {
     return
   }
-  // 登出接口失败时本地登录态已清理，同样关闭标签并回到登录页
+  // 登出接口失败时本地登录态（含标签页）已清理，同样回到登录页
   await userStore.loginOut().catch(() => {})
-  tagsViewStore.delAllViews()
   replace('/login?redirect=/index')
 }
 const toProfile = async () => {

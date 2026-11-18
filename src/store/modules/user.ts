@@ -5,6 +5,8 @@ import { CACHE_KEY, useCache, deleteUserCache } from '@/hooks/web/useCache'
 import { getInfo, loginOut } from '@/api/login'
 import { resetRouter } from '@/router'
 import { usePermissionStoreWithOut } from './permission'
+// 与 tagsView 互相引用：双方只在 action 运行时取对方 store，模块加载阶段不访问，循环引用安全
+import { useTagsViewStoreWithOut } from './tagsView'
 
 const { wsCache } = useCache()
 
@@ -106,13 +108,15 @@ export const useUserStore = defineStore('admin-user', {
         this.clearSession()
       }
     },
-    // 清理本地会话：token、用户缓存与状态、菜单状态，并重置为初始静态路由表；
+    // 清理本地会话：token、用户缓存与状态、标签页与页面缓存、菜单状态，并重置为初始静态路由表；
     // 递增会话代号，使进行中的加载（用户信息、菜单路由）结果作废
     clearSession() {
       sessionEpoch++
       removeToken()
       deleteUserCache() // 删除用户缓存
       this.resetState()
+      // 须在 resetState 之后：此时已非登录态，固定标签一并清空
+      useTagsViewStoreWithOut().delAllViews()
       usePermissionStoreWithOut().$reset()
       resetRouter()
     },
