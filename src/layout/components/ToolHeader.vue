@@ -8,7 +8,7 @@ import { Screenfull } from '@/layout/components/Screenfull'
 import { Breadcrumb } from '@/layout/components/Breadcrumb'
 import { SizeDropdown } from '@/layout/components/SizeDropdown'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
-import { LayoutSwitcher } from '@/layout/components/LayoutSwitcher'
+// import { LayoutSwitcher } from '@/layout/components/LayoutSwitcher'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import RouterSearch from '@/components/RouterSearch/index.vue'
 import TenantVisit from '@/layout/components/TenantVisit/index.vue'
@@ -82,8 +82,7 @@ export default defineComponent({
     )
     const showBreadcrumb = computed(() => !isHorizontalMenuLayout(layout.value))
 
-    // 快捷切换布局、暗黑模式：与设置抽屉共用 6 种布局与 ThemeSwitch；
-    // 随全局设置一起隐藏（布局切换后的头部配色重置由设置组件监听）；移动端固定垂直布局，仍走设置抽屉
+    // 暗黑模式快捷入口与设置抽屉共用 ThemeSwitch；全局设置隐藏时或移动端不展示
     const showQuickActions = computed(() => !hideSetting && !mobile.value)
 
     // 按工具栏实际可用宽度决定是否显示快捷入口：左右两组加上快捷入口放得下才显示，
@@ -251,11 +250,13 @@ export default defineComponent({
                 { [`${prefixCls}__quick--hidden`]: !quickActionsFit.value }
               ]}
             >
+              {/* 布局切换统一从设置抽屉进入
               <LayoutSwitcher
                 class="header-action"
                 color="var(--top-header-text-color)"
                 available={quickActionsFit.value}
               ></LayoutSwitcher>
+              */}
               <ThemeSwitch
                 modelValue={appStore.getIsDark}
                 {...{ 'onUpdate:modelValue': (value: boolean) => appStore.setIsDark(value) }}
