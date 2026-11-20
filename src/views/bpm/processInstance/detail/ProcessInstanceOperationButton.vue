@@ -941,7 +941,8 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
         reason: approveReasonForm.reason,
         attachments: approveReasonForm.attachments,
         variables, // 审批通过, 把修改的字段值赋于流程实例变量
-        nextAssignees: approveReasonForm.nextAssignees // 下个自选节点选择的审批人信息
+        nextAssignees: approveReasonForm.nextAssignees, // 下个自选节点选择的审批人信息
+        revisionId: runningTask.value.revisionId // 退回修改的批次，避免使用修改前的页面审批
       } as any
       // 签名
       if (runningTask.value.signEnable) {
@@ -965,7 +966,8 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       const data = {
         id: runningTask.value.id,
         reason: rejectReasonForm.reason,
-        attachments: rejectReasonForm.attachments
+        attachments: rejectReasonForm.attachments,
+        revisionId: runningTask.value.revisionId // 退回修改的批次，避免使用修改前的页面审批
       }
       await TaskApi.rejectTask(data)
       popOverVisible.value.reject = false

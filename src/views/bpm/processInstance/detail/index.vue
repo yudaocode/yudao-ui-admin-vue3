@@ -121,6 +121,7 @@
         <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
+            v-show="!revisionTaskId"
             ref="operationButtonRef"
             :process-instance="processInstance"
             :process-definition="processDefinition"
@@ -130,6 +131,15 @@
             :writable-fields="writableFields"
             @success="refresh"
           />
+          <!-- 退回修改：当前用户是修改人时，修改表单后重新提交。按钮权限和后端 /bpm/task/resubmit 一致 -->
+          <div
+            v-if="revisionTaskId && checkPermi(['bpm:task:update', 'bpm:process-instance:query'])"
+            class="h-50px flex items-center"
+          >
+            <el-button type="primary" :loading="resubmitLoading" @click="handleResubmit">
+              <Icon icon="ep:promotion" />&nbsp; 重新提交
+            </el-button>
+          </div>
         </div>
       </el-scrollbar>
     </div>
@@ -145,8 +155,11 @@ import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { useFormCreate } from '@/plugins/formCreate'
 import { registerComponent } from '@/utils/routerHelper'
+import { checkPermi } from '@/utils/permission'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 import type { Api as FormCreateApi } from '@form-create/element-ui'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
@@ -175,6 +188,11 @@ const props = defineProps<{
   activityId?: string //流程活动编号，用于抄送查看
 }>()
 const message = useMessage() // 消息弹窗
+const { push, currentRoute } = useRouter() // 路由
+const { delView } = useTagsViewStore() // 视图操作
+const revisionTaskId = ref<string>() // 退回修改中的任务编号：当前用户是修改人时，由后端返回
+const revisionId = ref<string>() // 退回修改的批次编号：重新提交时传递，避免过期的页面提交
+const resubmitLoading = ref(false) // 重新提交的加载中
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
@@ -230,6 +248,8 @@ const getApprovalDetail = async () => {
     }
     processInstance.value = data.processInstance
     processDefinition.value = data.processDefinition
+    revisionTaskId.value = data.revisionTaskId
+    revisionId.value = data.revisionId
 
     // 设置表单信息
     if (processDefinition.value.formType === BpmModelFormType.NORMAL) {
@@ -300,8 +320,10 @@ const setFieldPermission = (field: string, permission: string) => {
   }
   if (permission === FieldPermissionType.WRITE) {
     fApi.value?.disabled(false, field)
-    // 加入可以编辑的字段
-    writableFields.push(field)
+    // 加入可以编辑的字段。子字段全部隐藏的子表单已经隐藏，不加入，避免提交看不到的值
+    if (!fApi.value?.getRule(field)?.hidden) {
+      writableFields.push(field)
+    }
   }
   if (permission === FieldPermissionType.NONE) {
     fApi.value?.hidden(true, field)
@@ -314,6 +336,44 @@ const refresh = () => {
   getDetail()
   // 重新获取评论
   commentListRef.value?.getList()
+}
+
+/** 退回修改后，重新提交 */
+const handleResubmit = async () => {
+  if (!revisionTaskId.value) {
+    return
+  }
+  // 校验流程表单
+  try {
+    await fApi.value?.validate()
+  } catch {
+    message.warning('表单校验不通过，请先完善表单!!')
+    return
+  }
+  resubmitLoading.value = true
+  try {
+    // 只提交可编辑的字段，后端会按退回目标节点的表单字段权限校验
+    const variables: Record<string, any> = {}
+    writableFields.forEach((field) => {
+      variables[field] = fApi.value?.getValue(field)
+    })
+    await TaskApi.resubmitTask({
+      taskId: revisionTaskId.value,
+      revisionId: revisionId.value!,
+      variables
+    })
+    message.success('重新提交成功，等待审批人继续审批')
+    // 只有待办权限的修改人，提交后不能再查看该流程详情，所以关闭当前页，回到待办列表
+    if (!checkPermi(['bpm:process-instance:query'])) {
+      delView(unref(currentRoute))
+      await push({ name: 'BpmTodoTask' })
+      return
+    }
+    // 刷新后，后端不再返回 revisionTaskId，切换回普通的操作栏
+    refresh()
+  } finally {
+    resubmitLoading.value = false
+  }
 }
 
 /** 处理打印 */

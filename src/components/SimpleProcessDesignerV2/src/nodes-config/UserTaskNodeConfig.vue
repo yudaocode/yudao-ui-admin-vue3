@@ -286,6 +286,28 @@
               </el-form-item>
             </div>
 
+            <!-- 仅流程表单支持：修改人只能修改目标节点有编辑权限的表单字段 -->
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE && formType === 10">
+              <el-divider content-position="left">退回后的审批方式</el-divider>
+              <el-form-item prop="returnApproveMode">
+                <div>
+                  <el-radio-group v-model="configForm.returnApproveMode">
+                    <div class="flex-col">
+                      <div v-for="(item, index) in RETURN_APPROVE_MODES" :key="index">
+                        <el-radio :key="item.value" :value="item.value" :label="item.label" />
+                      </div>
+                    </div>
+                  </el-radio-group>
+                  <div class="text-12px text-gray-500">
+                    从当前节点审批：退回后由目标节点审批通过的处理人修改表单并重新提交，再回到当前节点审批
+                  </div>
+                  <div class="text-12px text-gray-500">
+                    仅当前节点只有一位审批人时生效；多人审批（会签、或签、依次审批）、加签中的任务，或目标节点没有处理人（例如自动通过）时，仍重新依次审批
+                  </div>
+                </div>
+              </el-form-item>
+            </div>
+
             <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
               <el-divider content-position="left">审批人超时未处理时</el-divider>
               <el-form-item label="启用开关" prop="timeoutHandlerEnable">
@@ -486,9 +508,11 @@ import {
   ApproveMethodType,
   TimeUnitType,
   RejectHandlerType,
+  ReturnApproveMode,
   TIMEOUT_HANDLER_TYPES,
   TIME_UNIT_TYPES,
   REJECT_HANDLER_TYPES,
+  RETURN_APPROVE_MODES,
   DEFAULT_BUTTON_SETTING,
   OPERATION_BUTTON_NAME,
   ButtonSetting,
@@ -687,6 +711,8 @@ const saveConfig = async () => {
     type: configForm.value.rejectHandlerType!,
     returnNodeId: configForm.value.returnNodeId
   }
+  currentNode.value.returnApproveMode =
+    configForm.value.returnApproveMode ?? ReturnApproveMode.RESTART
   // 设置超时处理
   currentNode.value.timeoutHandler = {
     enable: configForm.value.timeoutHandlerEnable!,
@@ -762,6 +788,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   }
   // 2.3 设置审批拒绝处理
   configForm.value.rejectHandlerType = node.rejectHandler?.type
+  configForm.value.returnApproveMode = node.returnApproveMode ?? ReturnApproveMode.RESTART
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
   const matchNodeList = []
   emits('find:returnTaskNodes', matchNodeList)
@@ -926,7 +953,6 @@ function useTimeoutHandler() {
     cTimeoutMaxRemindCount
   }
 }
-
 </script>
 
 <style lang="scss" scoped>

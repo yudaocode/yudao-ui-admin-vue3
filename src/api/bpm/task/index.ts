@@ -42,11 +42,32 @@ export enum TaskStatusEnum {
   /**
    * 审批通过中
    */
-  APPROVING = 7
+  APPROVING = 7,
+  /**
+   * 已退回，等待修改：修改人重新提交后，由审批人继续审批
+   */
+  WAIT_REVISION = 8
+}
+
+/** 退回修改后，重新提交的请求 */
+export interface TaskResubmitReqVO {
+  taskId: string // 任务编号
+  revisionId: string // 退回修改的批次编号，来自审批详情
+  variables: Record<string, any> // 修改的表单变量，只能包含退回目标节点可编辑的字段
 }
 
 export const getTaskTodoPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/todo-page', params })
+}
+
+// 获取退回修改中的任务分页（待我修改）
+export const getTaskRevisionPage = async (params: PageParam) => {
+  return await request.get({ url: '/bpm/task/revision-page', params })
+}
+
+// 退回修改后，重新提交
+export const resubmitTask = async (data: TaskResubmitReqVO) => {
+  return await request.put({ url: '/bpm/task/resubmit', data })
 }
 
 export const getTaskDonePage = async (params: any) => {

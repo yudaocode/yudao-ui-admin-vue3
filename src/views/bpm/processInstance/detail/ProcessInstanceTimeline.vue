@@ -132,8 +132,22 @@
                 v-if="shouldShowTaskEvidence(task, activity.nodeType, index)"
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
+                <div
+                  v-if="task.status === TaskStatusEnum.WAIT_REVISION"
+                  class="mb-1 text-orange-600"
+                >
+                  已退回至 【{{ task.revisionTargetNodeName || '目标' }}】 节点
+                  <span v-if="task.revisionAssigneeUser?.nickname"
+                    >，等待 {{ task.revisionAssigneeUser.nickname }} 修改</span
+                  >
+                  <span v-else>，等待目标处理人修改</span>
+                </div>
                 <div v-if="task.reason">
-                  {{ getTaskEvidenceReasonLabel(activity.nodeType) }}：{{ task.reason }}
+                  {{
+                    task.status === TaskStatusEnum.WAIT_REVISION
+                      ? '退回原因'
+                      : getTaskEvidenceReasonLabel(activity.nodeType)
+                  }}：{{ task.reason }}
                 </div>
                 <TaskEvidenceCell
                   v-if="task.attachments?.length || task.signPicUrl"
@@ -226,7 +240,9 @@ const statusIconMap2 = {
   // 委派中
   '6': { color: '#448ef7', icon: 'ep:loading' },
   // 审批通过中
-  '7': { color: '#00b32a', icon: 'ep:circle-check-filled' }
+  '7': { color: '#00b32a', icon: 'ep:circle-check-filled' },
+  // 已退回，等待退回目标处理人修改
+  '8': { color: '#f46b6c', icon: 'ep:remove-filled' }
 }
 
 const statusIconMap = {
@@ -248,7 +264,9 @@ const statusIconMap = {
   // 委派中
   '6': { color: '#448ef7', icon: Loading },
   // 审批通过中
-  '7': { color: '#00b32a', icon: Check }
+  '7': { color: '#00b32a', icon: Check },
+  // 已退回，等待退回目标处理人修改
+  '8': { color: '#f46b6c', icon: Loading }
 }
 
 const nodeTypeSvgMap = {
@@ -270,8 +288,13 @@ const nodeTypeSvgMap = {
   [NodeType.CHILD_PROCESS_NODE]: { color: '#14bb83', svg: childProcessSvg }
 }
 
-// 只有只有状态是 -1、0、1 才展示头像右小角状态小icon
-const onlyStatusIconShow = [-1, 0, 1]
+// 只有只有状态是 -1、0、1、8 才展示头像右小角状态小icon
+const onlyStatusIconShow = [
+  TaskStatusEnum.NOT_START,
+  TaskStatusEnum.WAIT,
+  TaskStatusEnum.RUNNING,
+  TaskStatusEnum.WAIT_REVISION
+]
 
 // timeline时间线上icon图标
 const getApprovalNodeImg = (nodeType: NodeType) => {
@@ -321,7 +344,12 @@ const shouldShowTaskEvidence = (
     return false
   }
   return (
-    Boolean(task.reason || task.attachments?.length || task.signPicUrl) &&
+    Boolean(
+      task.status === TaskStatusEnum.WAIT_REVISION ||
+      task.reason ||
+      task.attachments?.length ||
+      task.signPicUrl
+    ) &&
     [NodeType.START_USER_NODE, NodeType.USER_TASK_NODE, NodeType.TRANSACTOR_NODE].includes(nodeType)
   )
 }

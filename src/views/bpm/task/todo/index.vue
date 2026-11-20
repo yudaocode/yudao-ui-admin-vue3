@@ -8,6 +8,13 @@
   <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />
 
   <ContentWrap>
+    <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+      <el-tab-pane label="待我审批" name="approval" />
+      <el-tab-pane label="待我修改" name="revision" />
+    </el-tabs>
+  </ContentWrap>
+
+  <ContentWrap v-if="activeTab === 'approval'">
     <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
@@ -106,7 +113,7 @@
   </ContentWrap>
 
   <!-- 列表 -->
-  <ContentWrap>
+  <ContentWrap v-if="activeTab === 'approval'">
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="流程" prop="processInstance.name" width="180" />
       <el-table-column label="摘要" prop="processInstance.summary" width="180">
@@ -163,6 +170,58 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <ContentWrap v-else>
+    <el-table v-loading="revisionLoading" :data="revisionList" empty-text="暂无待修改任务">
+      <el-table-column align="center" label="流程" prop="processInstance.name" min-width="180" />
+      <el-table-column
+        align="center"
+        label="发起人"
+        prop="processInstance.startUser.nickname"
+        width="120"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="发起时间"
+        prop="processInstance.createTime"
+        width="180"
+      />
+      <el-table-column align="center" label="当前审批节点" prop="name" min-width="180" />
+      <el-table-column
+        align="center"
+        label="退回原因"
+        prop="reason"
+        min-width="240"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        align="center"
+        label="流程编号"
+        prop="processInstanceId"
+        min-width="240"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        align="center"
+        label="任务编号"
+        prop="id"
+        min-width="240"
+        show-overflow-tooltip
+      />
+      <el-table-column align="center" label="操作" fixed="right" width="100">
+        <template #default="scope">
+          <el-button link type="primary" @click="handleRevision(scope.row)">修改</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <Pagination
+      v-model:limit="revisionQueryParams.pageSize"
+      v-model:page="revisionQueryParams.pageNo"
+      :total="revisionTotal"
+      @pagination="getRevisionList"
+    />
+  </ContentWrap>
 </template>
 
 <script lang="ts" setup>
@@ -175,6 +234,11 @@ defineOptions({ name: 'BpmTodoTask' })
 
 const { push } = useRouter() // 路由
 
+const activeTab = ref('approval')
+const revisionLoading = ref(false)
+const revisionList = ref<any[]>([])
+const revisionTotal = ref(0)
+const revisionQueryParams = reactive({ pageNo: 1, pageSize: 10 })
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -203,6 +267,27 @@ const getList = async () => {
   }
 }
 
+/** 查询待我修改的任务列表 */
+const getRevisionList = async () => {
+  revisionLoading.value = true
+  try {
+    const data = await TaskApi.getTaskRevisionPage(revisionQueryParams)
+    revisionList.value = data.list
+    revisionTotal.value = data.total
+  } finally {
+    revisionLoading.value = false
+  }
+}
+
+/** 切换 Tab，刷新对应列表 */
+const handleTabChange = () => {
+  if (activeTab.value === 'revision') {
+    getRevisionList()
+  } else {
+    getList()
+  }
+}
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -225,6 +310,22 @@ const handleAudit = (row: any) => {
     }
   })
 }
+
+/** 处理修改按钮 */
+const handleRevision = (row: any) => {
+  push({
+    name: 'BpmProcessInstanceDetail',
+    query: {
+      id: row.processInstanceId,
+      taskId: row.id
+    }
+  })
+}
+
+/** 激活时（如从详情页重新提交后返回），刷新当前 Tab 的列表 **/
+onActivated(() => {
+  handleTabChange()
+})
 
 /** 初始化 **/
 onMounted(async () => {
