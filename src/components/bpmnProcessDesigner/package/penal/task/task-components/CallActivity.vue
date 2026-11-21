@@ -10,14 +10,25 @@
         />
       </el-form-item>
 
-      <!-- TODO 需要可选择已存在的流程 -->
+      <!-- 可选择已部署的流程（流程标识），也可以手动输入，兼容表达式、历史值 -->
       <el-form-item label="被调用流程" prop="calledElement">
-        <el-input
+        <el-select
           v-model="formData.calledElement"
           clearable
-          placeholder="请输入被调用流程"
+          filterable
+          allow-create
+          default-first-option
+          placeholder="请选择或输入被调用流程"
+          class="w-full"
           @change="updateCallActivityAttr('calledElement')"
-        />
+        >
+          <el-option
+            v-for="item in processDefinitionOptions"
+            :key="item.key"
+            :label="`${item.name}（${item.key}）`"
+            :value="item.key"
+          />
+        </el-select>
       </el-form-item>
 
       <el-form-item label="继承变量" prop="inheritVariables">
@@ -143,6 +154,8 @@
 </template>
 
 <script lang="ts" setup>
+import * as DefinitionApi from '@/api/bpm/definition'
+
 defineOptions({ name: 'CallActivity' })
 const props = defineProps({
   id: String,
@@ -274,6 +287,20 @@ watch(
   },
   { immediate: true }
 )
+
+/**
+ * 加载已部署的流程，按流程标识去重
+ *
+ * 原因：simple-list 返回所有激活的流程定义，同一流程标识会有多个部署版本；而调用活动按流程标识调用，选项的 key、value 都是流程标识
+ */
+type ProcessDefinitionOption = { id: string; key: string; name: string }
+const processDefinitionOptions = ref<ProcessDefinitionOption[]>([])
+onMounted(async () => {
+  const list: ProcessDefinitionOption[] = await DefinitionApi.getSimpleProcessDefinitionList()
+  processDefinitionOptions.value = [
+    ...new Map((list || []).map((item) => [item.key, item])).values()
+  ]
+})
 </script>
 
 <style lang="scss" scoped></style>

@@ -98,11 +98,6 @@ const handleNameUpdate = (value) => {
     updateBaseInfo('name')
   }, 100)
 }
-// const handleDescriptionUpdate=(value)=> {
-// TODO 芋艿：documentation 暂时无法修改，后续在看看
-// this.elementBaseInfo['documentation'] = value;
-// this.updateBaseInfo('documentation');
-// }
 const updateBaseInfo = (key) => {
   console.log(key, 'key')
   // 触发 elementBaseInfo 对应的字段

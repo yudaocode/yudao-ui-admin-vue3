@@ -248,6 +248,8 @@ export type TimeoutHandler = {
   timeDuration?: string
   // 执行动作是自动提醒, 最大提醒次数
   maxRemindCount?: number
+  // 执行动作是自动跳转, 跳转的目标节点 Id
+  jumpNodeId?: string
 }
 
 /**
@@ -331,7 +333,11 @@ export enum TimeoutHandlerType {
   /**
    * 自动拒绝
    */
-  REJECT = 3
+  REJECT = 3,
+  /**
+   * 自动跳转：跳转到指定的审批节点，仅仿钉钉设计器支持
+   */
+  AUTO_JUMP = 4
 }
 // 用户任务的审批人为空时，处理类型枚举
 export enum AssignEmptyHandlerType {
@@ -600,6 +606,11 @@ export const TIMEOUT_HANDLER_TYPES: DictDataVO[] = [
   { label: '自动提醒', value: 1 },
   { label: '自动同意', value: 2 },
   { label: '自动拒绝', value: 3 }
+]
+// 仿钉钉设计器的超时处理执行动作类型，比 BPMN 设计器多了【自动跳转】
+export const SIMPLE_TIMEOUT_HANDLER_TYPES: DictDataVO[] = [
+  ...TIMEOUT_HANDLER_TYPES,
+  { label: '自动跳转', value: TimeoutHandlerType.AUTO_JUMP }
 ]
 export const REJECT_HANDLER_TYPES: DictDataVO[] = [
   { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },

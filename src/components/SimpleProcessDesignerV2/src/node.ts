@@ -143,6 +143,7 @@ export type UserTaskFormType = {
   returnNodeId?: string
   timeoutHandlerEnable?: boolean
   timeoutHandlerType?: number
+  timeoutJumpNodeId?: string
   assignEmptyHandlerType?: AssignEmptyHandlerType
   assignEmptyHandlerUserIds?: number[]
   assignStartUserHandlerType?: AssignStartUserHandlerType

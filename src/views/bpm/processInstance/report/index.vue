@@ -72,15 +72,47 @@
         :label="item.title"
         :prop="item.field"
       >
-        <!-- TODO @lesan：目前只支持input类型的字符串搜索 -->
-        <el-input
-          :disabled="item.type !== 'input'"
-          v-model="queryParams.formFieldsParams[item.field]"
-          :placeholder="`请输入${item.title}`"
-          clearable
-          @keyup.enter="handleQuery"
+        <!-- 模糊匹配：输入框（包括多行输入框） -->
+        <el-tooltip
+          v-if="item.queryOp === 'like'"
+          content="模糊匹配：% 匹配任意多个字符，_ 匹配任意一个字符"
+          placement="top"
+        >
+          <el-input
+            v-model="queryParams.formFieldsParams[item.field].value"
+            :placeholder="`请输入${item.title}`"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-240px"
+          />
+        </el-tooltip>
+        <!-- 数字范围：计数器 -->
+        <div v-else-if="item.queryOp === 'numberRange'" class="flex items-center !w-240px">
+          <el-input-number
+            v-model="queryParams.formFieldsParams[item.field].value[0]"
+            :controls="false"
+            placeholder="最小值"
+            class="!w-110px"
+          />
+          <span class="mx-5px">-</span>
+          <el-input-number
+            v-model="queryParams.formFieldsParams[item.field].value[1]"
+            :controls="false"
+            placeholder="最大值"
+            class="!w-110px"
+          />
+        </div>
+        <!-- 日期区间：日期、日期时间 -->
+        <el-date-picker
+          v-else-if="item.queryOp === 'dateRange'"
+          v-model="queryParams.formFieldsParams[item.field].value"
+          value-format="YYYY-MM-DD"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
           class="!w-240px"
         />
+        <el-input v-else disabled :placeholder="`暂不支持搜索（${item.type}）`" class="!w-240px" />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -162,7 +194,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
 import * as DefinitionApi from '@/api/bpm/definition'
-import { parseFormFields } from '@/components/FormCreate/src/utils'
+import { collectFieldRules, parseFormFields } from '@/components/FormCreate/src/utils'
 import { ElMessageBox } from 'element-plus'
 
 defineOptions({ name: 'BpmProcessInstanceReport' })
@@ -186,23 +218,30 @@ const queryParams = reactive({
   status: undefined,
   createTime: [],
   endTime: [],
-  formFieldsParams: {}
+  formFieldsParams: {} as Record<string, any> // 表单字段的查询条件，见 initFormFieldsParams 方法
 })
 const queryFormRef = ref() // 搜索的表单
 const userList = ref<any[]>([]) // 用户列表
+let listRequestId = 0 // 列表请求的序号，避免较早的请求较晚返回时，覆盖较新的结果
 
 /** 查询列表 */
 const getList = async () => {
+  const requestId = ++listRequestId
   loading.value = true
   try {
     const data = await ProcessInstanceApi.getProcessInstanceManagerPage({
       ...queryParams,
       formFieldsParams: JSON.stringify(queryParams.formFieldsParams)
     })
+    if (requestId !== listRequestId) {
+      return
+    }
     list.value = data.list
     total.value = data.total
   } finally {
-    loading.value = false
+    if (requestId === listRequestId) {
+      loading.value = false
+    }
   }
 }
 
@@ -210,17 +249,63 @@ const getList = async () => {
 const getProcessDefinition = async () => {
   const processDefinition = await DefinitionApi.getProcessDefinition(processDefinitionId)
   formFields.value = parseFormCreateFields(processDefinition.formFields)
+  initFormFieldsParams()
 }
 
-/** 解析表单字段 */
+/** 解析表单字段，并设置每个字段的查询方式（queryOp） */
 const parseFormCreateFields = (formFields?: string[]) => {
   const result: Array<Record<string, any>> = []
   if (formFields) {
-    formFields.forEach((fieldStr: string) => {
-      parseFormFields(JSON.parse(fieldStr), result)
+    const rules = formFields.map((fieldStr: string) => JSON.parse(fieldStr))
+    rules.forEach((rule) => parseFormFields(rule, result))
+    const ruleMap = new Map<string, Record<string, any>>(
+      collectFieldRules(rules).map((rule) => [rule.field, rule])
+    )
+    result.forEach((item) => {
+      const rule = ruleMap.get(item.field)
+      item.queryOp = rule ? getFormFieldQueryOp(rule) : undefined
     })
   }
   return result
+}
+
+/**
+ * 获得表单字段的查询方式，与后端 formFieldsParams 的 op 一致；返回 undefined 时，表示暂不支持
+ *
+ * 1. 输入框（多行输入框的 type 也是 input）：模糊匹配
+ * 2. 计数器：数字范围
+ * 3. 日期（date、datetime 类型），并且是默认的值格式：日期区间。值按 YYYY-MM-DD、YYYY-MM-DD HH:mm:ss 字符串比较
+ */
+const getFormFieldQueryOp = (rule: Record<string, any>) => {
+  if (rule.type === 'input') {
+    return 'like'
+  }
+  if (rule.type === 'inputNumber') {
+    return 'numberRange'
+  }
+  const { type = 'date', valueFormat } = rule.props || {}
+  if (
+    rule.type === 'datePicker' &&
+    ['date', 'datetime'].includes(type) &&
+    (!valueFormat || ['YYYY-MM-DD', 'YYYY-MM-DD HH:mm:ss'].includes(valueFormat))
+  ) {
+    return 'dateRange'
+  }
+  return undefined
+}
+
+/** 初始化表单字段的查询条件：{ op, value }，其中范围的 value 为 [开始, 结束]，为空时不筛选 */
+const initFormFieldsParams = () => {
+  const params: Record<string, any> = {}
+  formFields.value?.forEach((item: Record<string, any>) => {
+    if (item.queryOp) {
+      params[item.field] = {
+        op: item.queryOp,
+        value: item.queryOp === 'numberRange' ? [undefined, undefined] : undefined
+      }
+    }
+  })
+  queryParams.formFieldsParams = params
 }
 
 /** 搜索按钮操作 */
@@ -232,7 +317,7 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryParams.formFieldsParams = {}
+  initFormFieldsParams()
   handleQuery()
 }
 
