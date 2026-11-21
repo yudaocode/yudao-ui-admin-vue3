@@ -74,7 +74,7 @@
             v-model="queryParams.collectMode"
             placeholder="请选择采集方式"
             clearable
-            class="!w-200px"
+            class="!w-240px"
           >
             <el-option
               v-for="item in OpcUaCollectModeOptions"
@@ -97,8 +97,14 @@
       </el-form>
 
       <!-- 点位列表 -->
-      <el-table v-loading="pointLoading" :data="pointList" :stripe="true" class="mt-4">
-        <el-table-column label="属性名称" align="center" prop="name" min-width="100">
+      <el-table
+        v-loading="pointLoading"
+        :data="pointList"
+        :stripe="true"
+        :show-overflow-tooltip="true"
+        class="mt-4"
+      >
+        <el-table-column label="属性名称" align="center" prop="name" min-width="120">
           <template #default="scope">
             <span v-if="scope.row.thingModelValid">{{ scope.row.name }}</span>
             <el-tooltip
@@ -110,7 +116,7 @@
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column label="标识符" align="center" prop="identifier" min-width="100">
+        <el-table-column label="标识符" align="center" prop="identifier" min-width="120">
           <template #default="scope">
             <el-tag v-if="scope.row.thingModelValid" size="small" type="primary">
               {{ scope.row.identifier }}
@@ -118,24 +124,25 @@
             <el-tag v-else size="small" type="danger">-</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="NodeId" align="left" prop="nodeId" min-width="220">
+        <el-table-column label="NodeId" align="left" prop="nodeId" min-width="260">
           <template #default="scope">
-            <span class="font-mono">{{ scope.row.nodeId }}</span>
+            <!-- 告警图标放在前面：NodeId 过长省略时仍然可见 -->
             <el-tooltip
               v-if="isNamespaceIndexBased(scope.row.nodeId)"
               content="ns= 索引可能随服务端重启变化，建议改为 nsu= 写法"
               placement="top"
             >
-              <Icon icon="ep:warning" class="ml-1 text-orange-500" />
+              <Icon icon="ep:warning" class="mr-1 text-orange-500" />
             </el-tooltip>
+            <span class="font-mono">{{ scope.row.nodeId }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="采集方式" align="center" prop="collectMode" min-width="120">
+        <el-table-column label="采集方式" align="center" prop="collectMode" min-width="180">
           <template #default="scope">
             {{ formatOption(OpcUaCollectModeOptions, scope.row.collectMode) }}
           </template>
         </el-table-column>
-        <el-table-column label="采集间隔" align="center" prop="collectInterval" min-width="90">
+        <el-table-column label="采集间隔" align="center" prop="collectInterval" min-width="100">
           <template #default="scope"> {{ scope.row.collectInterval }} ms </template>
         </el-table-column>
         <el-table-column label="状态" align="center" prop="status" min-width="80">
