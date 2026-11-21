@@ -665,7 +665,7 @@ const approveReasonForm = reactive({
   reason: '',
   signPicUrl: '',
   attachments: [] as string[],
-  nextAssignees: {}
+  nextAssignees: {} as Record<string, number[]>
 })
 const approveReasonRule = computed(() => {
   return {
@@ -838,11 +838,13 @@ const closePopover = (type: string, formRef: FormInstance | undefined) => {
     rejectReasonForm.attachments = []
   }
   popOverVisible.value[type] = false
+  resetNextAssignees()
+}
+
+/** 重置下一个节点的自选审批人：节点清空后 Timeline 不再渲染，其中已选择的审批人随之清空 */
+const resetNextAssignees = () => {
   nextAssigneesActivityNode.value = []
-  // 清理 Timeline 组件中的自定义审批人数据
-  if (nextAssigneesTimelineRef.value) {
-    nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
-  }
+  approveReasonForm.nextAssignees = {}
 }
 
 /** 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
@@ -889,6 +891,13 @@ const initNextAssigneesFormField = async () => {
       nextAssigneesTimelineRef.value.batchSetCustomApproveUsers(customApproveUsersData)
     }
   }
+  // 分支重新计算后，清理不在最新节点中的自选审批人（包括 Timeline 中已选择的），避免提交无效的 nextAssignees
+  Object.keys(approveReasonForm.nextAssignees)
+    .filter((id) => !nextAssigneesActivityNode.value.some((node) => String(node.id) === id))
+    .forEach((id) => {
+      delete approveReasonForm.nextAssignees[id]
+      nextAssigneesTimelineRef.value?.setCustomApproveUsers(id, [])
+    })
 }
 
 /** onChange 高频触发时合并 300ms 内的连续按键，减少网关查询请求 */
@@ -954,11 +963,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       }
       await TaskApi.approveTask(data)
       popOverVisible.value.approve = false
-      nextAssigneesActivityNode.value = []
-      // 清理 Timeline 组件中的自定义审批人数据
-      if (nextAssigneesTimelineRef.value) {
-        nextAssigneesTimelineRef.value.batchSetCustomApproveUsers({})
-      }
+      resetNextAssignees()
       message.success('审批通过成功')
     } else {
       // 审批不通过数据
@@ -1238,6 +1243,7 @@ const loadTodoTask = (task: any) => {
   // 切换任务时重置请求序号与 pending 重算，避免旧任务飞行中的请求/Promise 串到新任务
   nextApprovalRequestId += 1
   pendingNextNodesTask = null
+  resetNextAssignees()
   reasonRequire.value = task?.reasonRequire ?? false
   nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
   // 处理 approve 表单

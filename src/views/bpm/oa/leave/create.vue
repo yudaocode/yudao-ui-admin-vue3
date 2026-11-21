@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="20">
-    <el-col :span="16">
+    <el-col :span="isUpdate ? 24 : 16">
       <ContentWrap title="申请信息">
         <el-form
           ref="formRef"
@@ -49,8 +49,8 @@
       </ContentWrap>
     </el-col>
 
-    <!-- 审批相关：流程信息 -->
-    <el-col :span="8">
+    <!-- 审批相关：流程信息。编辑时，不发起流程，所以不展示 -->
+    <el-col v-if="!isUpdate" :span="8">
       <ContentWrap title="审批流程" :bodyStyle="{ padding: '0 20px 0' }">
         <ProcessInstanceTimeline
           ref="timelineRef"
@@ -80,8 +80,9 @@ defineOptions({ name: 'BpmOALeaveCreate' })
 
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
-const { push, currentRoute } = useRouter() // 路由
+const { push, back, currentRoute } = useRouter() // 路由
 const { query } = useRoute() // 查询参数
+const isUpdate = query.type === 'update' && !!query.id // 是否编辑：只修改请假申请，审批由流程详情的【通过】处理
 
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
@@ -97,6 +98,7 @@ const formRules = reactive({
   endTime: [{ required: true, message: '请假结束时间不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
+const originalData = ref<Record<string, any>>({}) // 加载的请假数据，编辑时用于判断修改了哪些字段
 
 // 审批相关：变量
 type StartUserSelectTask = {
@@ -119,6 +121,11 @@ const submitForm = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  // 编辑：只保存请假申请，不发起流程
+  if (isUpdate) {
+    await submitUpdateForm()
+    return
+  }
   // 1.2 审批相关：校验指定审批人
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
@@ -144,6 +151,27 @@ const submitForm = async () => {
     // 关闭当前 Tab
     delView(unref(currentRoute))
     await push({ name: 'BpmOALeave' })
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 编辑：只提交修改了的字段，保存后关闭编辑页，返回详情 */
+const submitUpdateForm = async () => {
+  formLoading.value = true
+  try {
+    // 1. 只传业务编号和修改了的字段，流程信息由后端从请假申请中读取
+    const data: Record<string, any> = { id: parseId(query.id) }
+    ;(Object.keys(formData.value) as (keyof typeof formData.value)[]).forEach((field) => {
+      if (formData.value[field] !== originalData.value[field]) {
+        data[field] = formData.value[field]
+      }
+    })
+    await LeaveApi.updateLeave(data as LeaveApi.LeaveUpdateVO)
+    message.success('保存成功')
+    // 2. 关闭编辑页，返回详情（流程详情不缓存，返回后重新加载）
+    delView(unref(currentRoute))
+    back()
   } finally {
     formLoading.value = false
   }
@@ -200,13 +228,13 @@ const daysDifference = () => {
   return Math.floor(diffTime / oneDay)
 }
 
-/** 获取请假数据，用于重新发起时自动填充 */
+/** 获取请假数据，用于重新发起、编辑时自动填充 */
 const getDetail = async (id: number) => {
   try {
     formLoading.value = true
     const data = await LeaveApi.getLeave(id)
     if (!data) {
-      message.error('重新发起请假失败，原因：请假数据不存在')
+      message.error('加载请假失败，原因：请假数据不存在')
       return
     }
     formData.value = {
@@ -215,6 +243,7 @@ const getDetail = async (id: number) => {
       startTime: data.startTime,
       endTime: data.endTime
     }
+    originalData.value = { ...formData.value }
   } finally {
     formLoading.value = false
   }
@@ -222,6 +251,11 @@ const getDetail = async (id: number) => {
 
 /** 初始化 */
 onMounted(async () => {
+  // 编辑：只加载请假数据，不需要流程信息
+  if (isUpdate) {
+    await getDetail(parseId(query.id) as number)
+    return
+  }
   // TODO @小北：这里可以简化，统一通过 getApprovalDetail 处理么？
   const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
     undefined,
@@ -248,7 +282,7 @@ onMounted(async () => {
 watch(
   formData.value,
   (newValue, oldValue) => {
-    if (!oldValue) {
+    if (!oldValue || isUpdate) {
       return
     }
     if (newValue && Object.keys(newValue).length > 0) {
