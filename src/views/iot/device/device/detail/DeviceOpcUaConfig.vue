@@ -145,6 +145,13 @@
         <el-table-column label="采集间隔" align="center" prop="collectInterval" min-width="100">
           <template #default="scope"> {{ scope.row.collectInterval }} ms </template>
         </el-table-column>
+        <el-table-column label="是否可写" align="center" prop="writable" min-width="90">
+          <template #default="scope">
+            <el-tag :type="scope.row.writable ? 'success' : 'info'">
+              {{ scope.row.writable ? '可写' : '只读' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="状态" align="center" prop="status" min-width="80">
           <template #default="scope">
             <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

@@ -11,6 +11,7 @@ export interface DeviceOpcUaPointVO {
   nodeId: string // NodeId，推荐 nsu= 写法
   collectMode: number // 采集方式
   collectInterval: number // 采集间隔，单位：毫秒
+  writable?: boolean // 是否可写（默认 false；物模型属性需要为读写）
   status: number // 状态
 }
 

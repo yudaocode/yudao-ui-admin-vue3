@@ -69,6 +69,19 @@
           class="!w-full"
         />
       </el-form-item>
+      <el-form-item label="是否可写" prop="writable">
+        <template #label>
+          <Tooltip
+            message="开启后允许属性设置（thing.property.set）写入该节点的 Value；需要物模型属性为读写，网关还会校验节点的数据类型和访问级别"
+            title="是否可写"
+          />
+        </template>
+        <!-- 已开启但物模型属性变为只读时（历史数据）仍可关闭，只禁止开启 -->
+        <el-switch v-model="formData.writable" :disabled="!writableAllowed && !formData.writable" />
+        <span v-if="formData.thingModelId && !writableAllowed" class="ml-2 text-xs text-gray-400">
+          物模型属性为只读，不能开启
+        </span>
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -92,6 +105,7 @@
 import { ThingModelData } from '@/api/iot/thingmodel'
 import { DeviceOpcUaPointApi, DeviceOpcUaPointVO } from '@/api/iot/device/opcua/point'
 import {
+  IoTThingModelAccessModeEnum,
   IoTThingModelTypeEnum,
   OpcUaCollectModeEnum,
   OpcUaCollectModeOptions
@@ -158,6 +172,27 @@ const propertyList = computed(() => {
   return props.thingModelList.filter((item) => item.type === IoTThingModelTypeEnum.PROPERTY)
 })
 
+/** 选中的物模型属性 */
+const selectedProperty = computed(() =>
+  propertyList.value.find((item) => item.id === formData.value.thingModelId)
+)
+
+/** 选中的物模型属性是否为读写：只有读写属性的点位才能开启可写 */
+const writableAllowed = computed(
+  () =>
+    selectedProperty.value?.property?.accessMode === IoTThingModelAccessModeEnum.READ_WRITE.value
+)
+
+/** 不可写时（物模型属性为只读、已删除或未选择）关闭可写 */
+const clearWritableIfNotAllowed = () => {
+  if (!writableAllowed.value && formData.value.writable) {
+    formData.value.writable = false
+  }
+}
+
+/** 切换物模型属性、属性的读写模式变化时：只要不可写就关闭可写 */
+watch([() => formData.value.thingModelId, writableAllowed], clearWritableIfNotAllowed)
+
 /** 是否使用 ns= 索引写法 */
 const isNamespaceIndexBased = computed(() => (formData.value.nodeId || '').trim().startsWith('ns='))
 
@@ -172,6 +207,8 @@ const open = async (type: 'create' | 'update', id?: number) => {
     formLoading.value = true
     try {
       formData.value = await DeviceOpcUaPointApi.getOpcUaPoint(id)
+      // 物模型属性后来改为只读或已删除：加载后立即关闭可写（watch 只在变化时触发，加载前后都不可写时不会触发）
+      clearWritableIfNotAllowed()
     } finally {
       formLoading.value = false
     }
@@ -187,7 +224,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = { ...formData.value, nodeId: formData.value.nodeId.trim() }
+    // 可写只在物模型属性为读写时提交 true，避免提交残留的 true
+    const data = {
+      ...formData.value,
+      nodeId: formData.value.nodeId.trim(),
+      writable: writableAllowed.value && !!formData.value.writable
+    }
     if (formType.value === 'create') {
       await DeviceOpcUaPointApi.createOpcUaPoint(data)
       message.success('创建成功')
@@ -211,6 +253,7 @@ function buildDefaultFormData(): DeviceOpcUaPointVO {
     nodeId: '',
     collectMode: OpcUaCollectModeEnum.SUBSCRIBE,
     collectInterval: 1000,
+    writable: false,
     status: CommonStatusEnum.ENABLE
   }
 }
