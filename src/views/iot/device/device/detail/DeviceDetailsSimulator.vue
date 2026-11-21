@@ -234,7 +234,7 @@
             <ContentWrap>
               <el-alert
                 v-if="!rawSupported"
-                title="HTTP / CoAP 协议的产品不支持透传下发"
+                title="HTTP / CoAP / OPC UA 协议的产品不支持透传下发"
                 type="info"
                 show-icon
                 :closable="false"
@@ -491,10 +491,10 @@ const isModbusProduct = computed(() =>
   )
 )
 
-/** 是否支持透传下发：HTTP、CoAP 不支持 */
+/** 是否支持透传下发：HTTP、CoAP 不支持；OPC UA 一期只读，也不支持 */
 const rawSupported = computed(
   () =>
-    ![ProtocolTypeEnum.HTTP, ProtocolTypeEnum.COAP].includes(
+    ![ProtocolTypeEnum.HTTP, ProtocolTypeEnum.COAP, ProtocolTypeEnum.OPC_UA_CLIENT].includes(
       props.product.protocolType as ProtocolTypeEnum
     )
 )

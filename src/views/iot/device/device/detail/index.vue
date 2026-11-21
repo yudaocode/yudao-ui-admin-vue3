@@ -65,6 +65,17 @@
           :thing-model-list="thingModelList"
         />
       </el-tab-pane>
+      <el-tab-pane
+        label="OPC UA 配置"
+        name="opcua"
+        v-if="product.protocolType === ProtocolTypeEnum.OPC_UA_CLIENT"
+      >
+        <DeviceOpcUaConfig
+          v-if="activeTab === 'opcua'"
+          :device="device"
+          :thing-model-list="thingModelList"
+        />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -84,6 +95,7 @@ import DeviceDetailsShadow from './DeviceDetailsShadow.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
 import DeviceDetailConfig from './DeviceDetailConfig.vue'
 import DeviceModbusConfig from './DeviceModbusConfig.vue'
+import DeviceOpcUaConfig from './DeviceOpcUaConfig.vue'
 import DeviceDetailsSubDevice from './DeviceDetailsSubDevice.vue'
 
 defineOptions({ name: 'IoTDeviceDetail' })

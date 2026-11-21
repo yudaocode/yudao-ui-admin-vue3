@@ -712,6 +712,47 @@ export const getByteOrderOptions = (rawDataType: string) => {
   return ModbusByteOrder16Options
 }
 
+// ========== OPC UA 常量 ==========
+
+/** OPC UA 安全策略选项：不包含已废弃的 SHA-1 策略（Basic128Rsa15、Basic256） */
+export const OpcUaSecurityPolicyOptions = [
+  { value: 'Basic256Sha256', label: 'Basic256Sha256' },
+  { value: 'Aes128_Sha256_RsaOaep', label: 'Aes128_Sha256_RsaOaep' },
+  { value: 'Aes256_Sha256_RsaPss', label: 'Aes256_Sha256_RsaPss' },
+  { value: 'None', label: 'None（仅开发联调）' }
+]
+
+/** OPC UA 安全模式选项 */
+export const OpcUaSecurityModeOptions = [
+  { value: 'SignAndEncrypt', label: 'SignAndEncrypt（签名并加密）' },
+  { value: 'Sign', label: 'Sign（签名）' },
+  { value: 'None', label: 'None（不签名不加密）' }
+]
+
+/** OPC UA 认证方式枚举 */
+export const OpcUaAuthTypeEnum = {
+  ANONYMOUS: 1, // 匿名
+  USERNAME: 2 // 用户名（账号口令保存在网关本地，按凭据别名引用）
+} as const
+
+/** OPC UA 认证方式选项 */
+export const OpcUaAuthTypeOptions = [
+  { value: OpcUaAuthTypeEnum.ANONYMOUS, label: '匿名' },
+  { value: OpcUaAuthTypeEnum.USERNAME, label: '用户名（网关本地凭据）' }
+]
+
+/** OPC UA 采集方式枚举 */
+export const OpcUaCollectModeEnum = {
+  POLL: 1, // Read 轮询
+  SUBSCRIBE: 2 // MonitoredItem 订阅
+} as const
+
+/** OPC UA 采集方式选项 */
+export const OpcUaCollectModeOptions = [
+  { value: OpcUaCollectModeEnum.SUBSCRIBE, label: '订阅（MonitoredItem）' },
+  { value: OpcUaCollectModeEnum.POLL, label: '轮询（Read）' }
+]
+
 /** Redis 数据结构 */
 export const IotRedisDataStructureEnum = {
   STREAM: 1,

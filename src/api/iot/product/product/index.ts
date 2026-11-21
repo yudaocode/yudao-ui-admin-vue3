@@ -70,7 +70,8 @@ export enum ProtocolTypeEnum {
   EMQX = 'emqx',
   COAP = 'coap',
   MODBUS_TCP_CLIENT = 'modbus_tcp_client',
-  MODBUS_TCP_SERVER = 'modbus_tcp_server'
+  MODBUS_TCP_SERVER = 'modbus_tcp_server',
+  OPC_UA_CLIENT = 'opc_ua_client'
 }
 
 // IoT 序列化类型枚举
