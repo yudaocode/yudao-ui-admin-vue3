@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
 
 <template>
   <el-dialog v-model="dialogVisible" title="自定义模板" fullscreen>
-    <div style="margin: 0 10px">
+    <div class="mx-10px">
       <el-alert
         title="输入 @ 可选择插入流程表单选项和默认选项"
         type="info"
@@ -89,16 +89,15 @@ onBeforeUnmount(() => {
         :closable="false"
       />
     </div>
-    <!-- TODO @unocss 简化 style -->
-    <div style="margin: 10px; border: 1px solid #ccc">
+    <div class="m-10px border border-[#ccc] border-solid">
       <Toolbar
-        style="border-bottom: 1px solid #ccc"
+        class="border-b border-b-[#ccc] border-b-solid"
         :editor="editorRef"
         :editorId="editorId"
         :defaultConfig="toolbarConfig"
       />
       <Editor
-        style="height: 500px; overflow-y: hidden"
+        class="h-500px overflow-y-hidden"
         v-model="valueHtml"
         :defaultConfig="editorConfig"
         :editorId="editorId"
@@ -110,7 +109,7 @@ onBeforeUnmount(() => {
         @insert-mention="insertMention"
       />
     </div>
-    <div style="float: right; margin-right: 10px">
+    <div class="float-right mr-10px">
       <el-button @click="dialogVisible = false">取 消</el-button>
       <el-button type="primary" @click="handleConfirm">确 定</el-button>
     </div>

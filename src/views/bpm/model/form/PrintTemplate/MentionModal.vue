@@ -64,13 +64,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="mention-modal" :style="{ top: top, left: left }">
-    <!-- TODO @lesan：css 可以用 unocss 哇？ -->
-    <input id="mention-input" v-model="searchVal" ref="inputRef" @keyup="inputKeyupHandler" />
-    <ul id="mention-list">
+  <div
+    id="mention-modal"
+    class="absolute border border-[#ccc] border-solid bg-white p-5px"
+    :style="{ top: top, left: left }"
+  >
+    <input
+      id="mention-input"
+      v-model="searchVal"
+      ref="inputRef"
+      class="w-100px outline-none"
+      @keyup="inputKeyupHandler"
+    />
+    <ul id="mention-list" class="m-0 p-0">
       <li
         v-for="item in searchedList"
         :key="item.id"
+        class="cursor-pointer list-none py-3px text-left hover:underline"
         @click="insertMentionHandler(item.id, item.name)"
       >
         {{ item.name }}
@@ -78,33 +88,3 @@ onMounted(() => {
     </ul>
   </div>
 </template>
-
-<style>
-#mention-modal {
-  position: absolute;
-  padding: 5px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-}
-
-#mention-modal input {
-  width: 100px;
-  outline: none;
-}
-
-#mention-modal ul {
-  padding: 0;
-  margin: 0;
-}
-
-#mention-modal ul li {
-  padding: 3px 0;
-  text-align: left;
-  list-style: none;
-  cursor: pointer;
-}
-
-#mention-modal ul li:hover {
-  text-decoration: underline;
-}
-</style>

@@ -63,6 +63,7 @@
   </el-row>
 </template>
 <script lang="ts" setup>
+import dayjs from 'dayjs'
 import { parseId } from '@/utils/id'
 
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -192,12 +193,13 @@ const selectUserConfirm = (id: string, userList: any[]) => {
   startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
-// 计算天数差
-// TODO @小北：可以搞到 formatTime 里面去，然后看看 dayjs 里面有没有现成的方法，或者辅助计算的方法。
+/** 计算请假天数：开始、结束时间相差的完整天数，不足一天的部分舍去；时间未选择时为 null */
 const daysDifference = () => {
-  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
-  const diffTime = Math.abs(Number(formData.value.endTime) - Number(formData.value.startTime))
-  return Math.floor(diffTime / oneDay)
+  const { startTime, endTime } = formData.value
+  if (!startTime || !endTime) {
+    return null
+  }
+  return Math.abs(dayjs(Number(endTime)).diff(Number(startTime), 'day'))
 }
 
 /** 获取请假数据，用于重新发起时自动填充 */

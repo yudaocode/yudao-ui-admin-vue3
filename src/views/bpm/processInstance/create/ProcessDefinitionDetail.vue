@@ -193,7 +193,8 @@ watch(
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
-    // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）；@jason：这里可以去掉 activityId 么？
+    // 获取审批详情。activityId 不能去掉：流程未发起时，后端按它获取发起人节点的表单字段权限
+    // 补充说明：没有“发起人节点”的流程（例如说，BPMN 设计器未创建该节点），返回的权限为空，表单不做限制
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: row.id,
       activityId: NodeId.START_USER_NODE_ID,

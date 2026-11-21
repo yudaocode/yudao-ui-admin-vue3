@@ -148,6 +148,8 @@ const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
 
   try {
     processData.value = simpleModelNode
+    // 导入等场景会替换整棵树，同步给 provide 的 processNodeTree，避免节点配置与校验使用旧树
+    processNodeTree.value = simpleModelNode
     emits('success', simpleModelNode)
   } catch (error) {
     console.error('保存失败:', error)
