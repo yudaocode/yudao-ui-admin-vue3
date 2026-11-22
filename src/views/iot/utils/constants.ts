@@ -714,30 +714,35 @@ export const getByteOrderOptions = (rawDataType: string) => {
 
 // ========== OPC UA 常量 ==========
 
-/** OPC UA 安全策略选项：不包含已废弃的 SHA-1 策略（Basic128Rsa15、Basic256） */
+/**
+ * OPC UA 安全策略选项：OPC UA Client 只支持用户名认证，口令必须加密传输，因此不提供 None；
+ * 也不包含已废弃的 SHA-1 策略（Basic128Rsa15、Basic256）
+ */
 export const OpcUaSecurityPolicyOptions = [
   { value: 'Basic256Sha256', label: 'Basic256Sha256' },
   { value: 'Aes128_Sha256_RsaOaep', label: 'Aes128_Sha256_RsaOaep' },
-  { value: 'Aes256_Sha256_RsaPss', label: 'Aes256_Sha256_RsaPss' },
-  { value: 'None', label: 'None（仅开发联调）' }
+  { value: 'Aes256_Sha256_RsaPss', label: 'Aes256_Sha256_RsaPss' }
 ]
+
+/** OPC UA 安全模式：用户名认证只能使用 SignAndEncrypt */
+export const OpcUaSecurityModeEnum = {
+  SIGN_AND_ENCRYPT: 'SignAndEncrypt'
+} as const
 
 /** OPC UA 安全模式选项 */
 export const OpcUaSecurityModeOptions = [
-  { value: 'SignAndEncrypt', label: 'SignAndEncrypt（签名并加密）' },
-  { value: 'Sign', label: 'Sign（签名）' },
-  { value: 'None', label: 'None（不签名不加密）' }
+  { value: OpcUaSecurityModeEnum.SIGN_AND_ENCRYPT, label: 'SignAndEncrypt（签名并加密）' }
 ]
 
 /** OPC UA 认证方式枚举 */
 export const OpcUaAuthTypeEnum = {
-  ANONYMOUS: 1, // 匿名
+  ANONYMOUS: 1, // 匿名：OPC UA Client 已不支持，只用于识别历史数据
   USERNAME: 2 // 用户名（账号口令保存在网关本地，按凭据别名引用）
 } as const
 
-/** OPC UA 认证方式选项 */
+/** OPC UA 认证方式选项：只支持用户名认证；匿名只用于展示历史数据 */
 export const OpcUaAuthTypeOptions = [
-  { value: OpcUaAuthTypeEnum.ANONYMOUS, label: '匿名' },
+  { value: OpcUaAuthTypeEnum.ANONYMOUS, label: '匿名（不支持）' },
   { value: OpcUaAuthTypeEnum.USERNAME, label: '用户名（网关本地凭据）' }
 ]
 

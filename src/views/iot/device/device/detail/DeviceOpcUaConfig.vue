@@ -11,8 +11,8 @@
       </div>
 
       <el-alert
-        v-if="opcUaConfig.securityPolicy === 'None'"
-        title="当前使用 None 安全策略：通信不签名不加密，只适用于开发联调；网关默认拒绝，需要显式开启 security-none-allowed"
+        v-if="isUnsupportedConfig"
+        title="当前配置不受支持：OPC UA Client 只支持用户名认证（非 None 安全策略 + SignAndEncrypt），网关会拒绝该设备，请编辑为用户名认证并填写凭据别名"
         type="warning"
         show-icon
         :closable="false"
@@ -137,7 +137,7 @@
             <span class="font-mono">{{ scope.row.nodeId }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="采集方式" align="center" prop="collectMode" min-width="180">
+        <el-table-column label="采集方式" align="center" prop="collectMode" min-width="200">
           <template #default="scope">
             {{ formatOption(OpcUaCollectModeOptions, scope.row.collectMode) }}
           </template>
@@ -152,7 +152,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="状态" align="center" prop="status" min-width="80">
+        <el-table-column label="状态" align="center" prop="status" min-width="90">
           <template #default="scope">
             <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
           </template>
@@ -206,7 +206,12 @@ import { DeviceVO } from '@/api/iot/device/device'
 import { ThingModelData } from '@/api/iot/thingmodel'
 import { DeviceOpcUaConfigApi, DeviceOpcUaConfigVO } from '@/api/iot/device/opcua/config'
 import { DeviceOpcUaPointApi, DeviceOpcUaPointVO } from '@/api/iot/device/opcua/point'
-import { OpcUaAuthTypeOptions, OpcUaCollectModeOptions } from '@/views/iot/utils/constants'
+import {
+  OpcUaAuthTypeEnum,
+  OpcUaAuthTypeOptions,
+  OpcUaCollectModeOptions,
+  OpcUaSecurityModeEnum
+} from '@/views/iot/utils/constants'
 import { DICT_TYPE } from '@/utils/dict'
 import DeviceOpcUaConfigForm from './DeviceOpcUaConfigForm.vue'
 import DeviceOpcUaPointForm from './DeviceOpcUaPointForm.vue'
@@ -237,6 +242,15 @@ const isNamespaceIndexBased = (nodeId?: string) => !!nodeId && nodeId.startsWith
 
 // ======================= 连接配置 =======================
 const opcUaConfig = ref<DeviceOpcUaConfigVO>({} as DeviceOpcUaConfigVO)
+
+/** 是否为不受支持的历史配置：匿名认证、None 安全策略或非 SignAndEncrypt 模式 */
+const isUnsupportedConfig = computed(
+  () =>
+    !!opcUaConfig.value.id &&
+    (opcUaConfig.value.authType !== OpcUaAuthTypeEnum.USERNAME ||
+      opcUaConfig.value.securityPolicy === 'None' ||
+      opcUaConfig.value.securityMode !== OpcUaSecurityModeEnum.SIGN_AND_ENCRYPT)
+)
 
 /** 获取连接配置 */
 const getOpcUaConfig = async () => {
