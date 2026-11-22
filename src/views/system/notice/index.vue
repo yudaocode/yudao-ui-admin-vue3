@@ -114,12 +114,16 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <NoticeForm ref="formRef" @success="getList" />
+
+  <!-- 表单弹窗：推送 -->
+  <NoticePushForm ref="pushFormRef" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NoticeApi from '@/api/system/notice'
 import NoticeForm from './NoticeForm.vue'
+import NoticePushForm from './NoticePushForm.vue'
 
 defineOptions({ name: 'SystemNotice' })
 
@@ -201,14 +205,9 @@ const handleDeleteBatch = async () => {
 }
 
 /** 推送按钮操作 */
-const handlePush = async (id: number) => {
-  try {
-    // 推送的二次确认
-    await message.confirm('是否推送所选中通知？')
-    // 发起推送
-    await NoticeApi.pushNotice(id)
-    message.success(t('推送成功'))
-  } catch {}
+const pushFormRef = ref()
+const handlePush = (id: number) => {
+  pushFormRef.value.open(id)
 }
 
 /** 初始化 **/

@@ -41,7 +41,7 @@ export const deleteNoticeList = (ids: number[]) => {
   return request.delete({ url: '/system/notice/delete-list', params: { ids: ids.join(',') } })
 }
 
-// 推送公告
-export const pushNotice = (id: number) => {
-  return request.post({ url: '/system/notice/push?id=' + id })
+// 推送公告，transport 为推送方式：WEBSOCKET、SSE
+export const pushNotice = (id: number, transport: 'WEBSOCKET' | 'SSE' = 'WEBSOCKET') => {
+  return request.post({ url: '/system/notice/push?id=' + id + '&transport=' + transport })
 }
