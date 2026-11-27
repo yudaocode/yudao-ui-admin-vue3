@@ -148,12 +148,13 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <DictTypeForm ref="formRef" @success="getList" />
+  <DictTypeForm ref="formRef" @success="handleFormSuccess" />
 </template>
 
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import { useDictStore } from '@/store/modules/dict'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
 import DictTypeForm from './DictTypeForm.vue'
 import download from '@/utils/download'
@@ -162,6 +163,7 @@ defineOptions({ name: 'SystemDictType' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const dictStore = useDictStore() // 字典缓存
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -201,10 +203,21 @@ const resetQuery = () => {
   handleQuery()
 }
 
+/** 刷新字典缓存：字典变更后，让其它页面（如 BPM 流程表单的字典选择器）读取到最新数据。刷新失败不影响本次操作结果 */
+const refreshDictCache = () => {
+  dictStore.resetDict().catch((error) => console.error('[dict] 刷新字典缓存失败', error))
+}
+
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 添加/修改成功 */
+const handleFormSuccess = () => {
+  refreshDictCache()
+  getList()
 }
 
 /** 删除按钮操作 */
@@ -215,6 +228,7 @@ const handleDelete = async (id: number) => {
     // 发起删除
     await DictTypeApi.deleteDictType(id)
     message.success(t('common.delSuccess'))
+    refreshDictCache()
     // 刷新列表
     await getList()
   } catch {}
@@ -234,6 +248,7 @@ const handleDeleteBatch = async () => {
     await DictTypeApi.deleteDictTypeList(checkedIds.value)
     checkedIds.value = []
     message.success(t('common.delSuccess'))
+    refreshDictCache()
     // 刷新列表
     await getList()
   } catch {}
